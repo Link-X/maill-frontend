@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@maill/shared": ["../../../packages/shared/src"],
+      "@maill/shared/*": ["../../../packages/shared/src/*"],
+      "react-i18next": ["../node_modules/@maill/shared/node_modules/react-i18next/index.d.ts"]
+    }
+  },
+  "include": ["src", "../../packages/shared/src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
