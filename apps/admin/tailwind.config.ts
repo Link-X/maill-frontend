@@ -40,6 +40,34 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        brand: {
+          DEFAULT: 'hsl(var(--brand))',
+          foreground: 'hsl(var(--brand-foreground))',
+          2: 'hsl(var(--brand-2))',
+        },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+        },
+        area: {
+          a: 'hsl(var(--rose))',
+          b: 'hsl(var(--amber))',
+          c: 'hsl(var(--emerald))',
+          d: 'hsl(var(--sky))',
+        },
+      },
+      backgroundImage: {
+        'gradient-brand': 'linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--brand-2)) 100%)',
+        'gradient-brand-soft':
+          'linear-gradient(135deg, hsl(var(--brand) / 0.12) 0%, hsl(var(--brand-2) / 0.12) 100%)',
       },
       borderRadius: {
         lg: 'var(--radius)',

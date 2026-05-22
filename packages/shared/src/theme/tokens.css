@@ -29,6 +29,24 @@
     --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
+
+    --brand: 262 83% 58%;
+    --brand-2: 217 91% 60%;
+    --brand-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --rose: 346 78% 60%;
+    --amber: 38 92% 50%;
+    --emerald: 158 64% 52%;
+    --sky: 199 89% 60%;
+
+    --surface-glass: 0 0% 100% / 0.6;
   }
 
   .dark {
@@ -59,5 +77,23 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+
+    --brand: 262 83% 68%;
+    --brand-2: 217 91% 70%;
+    --brand-foreground: 0 0% 100%;
+
+    --success: 142 76% 46%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 58%;
+    --info-foreground: 0 0% 100%;
+
+    --rose: 346 78% 70%;
+    --amber: 38 92% 60%;
+    --emerald: 158 64% 62%;
+    --sky: 199 89% 70%;
+
+    --surface-glass: 222.2 84% 4.9% / 0.6;
   }
 }
