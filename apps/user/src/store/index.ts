@@ -5,6 +5,7 @@ import { authApi } from '@/features/auth/authApi';
 import { showsApi } from '@/features/shows/showsApi';
 import { sessionsApi } from '@/features/sessions/sessionsApi';
 import { orderApi } from '@/features/order/orderApi';
+import { paymentApi } from '@/features/payment/paymentApi';
 import { cartSlice } from '@/features/sessions/cartSlice';
 
 export const store = configureStore({
@@ -17,6 +18,7 @@ export const store = configureStore({
     [showsApi.reducerPath]: showsApi.reducer,
     [sessionsApi.reducerPath]: sessionsApi.reducer,
     [orderApi.reducerPath]: orderApi.reducer,
+    [paymentApi.reducerPath]: paymentApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -24,6 +26,7 @@ export const store = configureStore({
       showsApi.middleware,
       sessionsApi.middleware,
       orderApi.middleware,
+      paymentApi.middleware,
     ),
 });
 

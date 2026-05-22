@@ -11,6 +11,7 @@ const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
 const ShowDetailPage = lazy(() => import('@/features/shows/ShowDetailPage'));
 const SessionSeatPage = lazy(() => import('@/features/sessions/SessionSeatPage'));
 const OrderConfirmPage = lazy(() => import('@/features/order/OrderConfirmPage'));
+const OrderPayPage = lazy(() => import('@/features/order/OrderPayPage'));
 
 const withSuspense = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-4">Loading...</div>}>{node}</Suspense>
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'show/:id', element: withSuspense(<ShowDetailPage />) },
       { path: 'session/:id', element: withSuspense(<SessionSeatPage />) },
       { path: 'order/confirm', element: withSuspense(<OrderConfirmPage />) },
+      { path: 'order/:orderNo/pay', element: withSuspense(<OrderPayPage />) },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
