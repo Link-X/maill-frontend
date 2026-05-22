@@ -4,12 +4,14 @@ import { authReducer } from '@/features/auth/authSlice';
 import { authApi } from '@/features/auth/authApi';
 import { showsApi } from '@/features/shows/showsApi';
 import { sessionsApi } from '@/features/sessions/sessionsApi';
+import { cartSlice } from '@/features/sessions/cartSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     theme: themeSlice.reducer,
     locale: localeSlice.reducer,
+    cart: cartSlice.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [showsApi.reducerPath]: showsApi.reducer,
     [sessionsApi.reducerPath]: sessionsApi.reducer,
