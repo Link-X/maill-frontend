@@ -65,3 +65,44 @@ export interface PaymentResponse {
   status: 'PAID';
   paymentNo: string;
 }
+
+// 核销响应（VerifyService 返回 Ticket entity）
+export interface VerifyResult {
+  id?: number | string;
+  orderId?: number | string;
+  orderItemId?: number | string;
+  ticketNo: string;
+  qrCode?: string;
+  status: import('./enums').TicketStatus;
+  verifyTime?: string;
+}
+
+// 商家端监控看板响应
+export interface MonitorDashboard {
+  sessionId: number | string;
+  totalSeats: number;
+  availableCount: number;
+  soldCount: number;
+}
+
+// 商家端订单查询响应 — 订单 entity（基本字段）
+export interface AdminOrder {
+  id: number | string;
+  orderNo: string;
+  userId: number | string;
+  sessionId: number | string;
+  totalAmount: string;
+  status: import('./enums').OrderStatus;
+  expireTime?: string;
+  createTime: string;
+  payTime?: string;
+}
+
+// admin /api/admin/order/{id}/items 返回项（OrderItem entity）
+export interface AdminOrderItem {
+  id: number | string;
+  orderId: number | string;
+  seatId: number | string;
+  price: string;
+  seatInfo: string;
+}
