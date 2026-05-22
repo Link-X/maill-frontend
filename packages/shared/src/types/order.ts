@@ -1,38 +1,67 @@
 import type { OrderStatus, TicketStatus } from './enums';
 
-export interface OrderItem {
-  id: number | string;
-  orderId: number | string;
-  rowNo: number;
-  colNo: number;
-  areaId: number;
-  price: number;
-}
-
-export interface Ticket {
-  id: number | string;
-  orderId: number | string;
-  orderItemId?: number | string;
+// 票券（OrderStatusResponse.TicketInfo）
+export interface TicketInfo {
   ticketNo: string;
-  status: TicketStatus;
   qrCode?: string;
-  rowNo?: number;
-  colNo?: number;
+  status: TicketStatus;
+  verifyTime?: string;
 }
 
-export interface Order {
-  id: number | string;
+// 订单状态响应 — /api/order/submit、/api/order/orderDetails 都返这个
+export interface OrderStatusResponse {
+  orderId: number | string;
   orderNo: string;
-  userId: number | string;
-  sessionId: number | string;
-  showName?: string;
-  startTime?: string;
-  venue?: string;
-  totalAmount: number;
   status: OrderStatus;
-  expireTime?: string;
+  totalAmount: string;
   createTime: string;
   payTime?: string;
-  items?: OrderItem[];
-  tickets?: Ticket[];
+  expireTime?: string;
+  /** 座位字符串列表，如 ["1排01座", "1排02座"] */
+  seatInfos: string[];
+  /** 票券列表，支付成功后异步生成 */
+  tickets?: TicketInfo[];
+  showName?: string;
+  showVenue?: string;
+  sessionName?: string;
+  sessionStartTime?: string;
+}
+
+// 兼容 Plan 1 类型名 — Plan 4 订单列表 / 详情仍可用 Order 这个别名
+export type Order = OrderStatusResponse;
+
+// 票券 alias for backward compat
+export type Ticket = TicketInfo;
+
+// 用户端订单列表 / 下单 / 取消请求
+export interface OrderListRequest {
+  page: number;
+  size: number;
+  status?: OrderStatus;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface SubmitOrderRequest {
+  sessionId: number | string;
+  seatIds: Array<number | string>;
+}
+
+export interface CancelOrderRequest {
+  orderNo: string;
+}
+
+export interface RefundTicketRequest {
+  orderNo: string;
+  ticketNo: string;
+}
+
+// 用户端 /api/payment/create
+export interface PaymentRequest {
+  orderNo: string;
+  channel?: string;
+}
+export interface PaymentResponse {
+  status: 'PAID';
+  paymentNo: string;
 }
