@@ -4,6 +4,7 @@ import { adminAuthReducer } from '@/features/auth/adminAuthSlice';
 import { adminAuthApi } from '@/features/auth/adminAuthApi';
 import { showsApi } from '@/features/shows/showsApi';
 import { roomsApi } from '@/features/rooms/roomsApi';
+import { sessionsApi } from '@/features/sessions/sessionsApi';
 
 export const store = configureStore({
   reducer: {
@@ -13,9 +14,15 @@ export const store = configureStore({
     [adminAuthApi.reducerPath]: adminAuthApi.reducer,
     [showsApi.reducerPath]: showsApi.reducer,
     [roomsApi.reducerPath]: roomsApi.reducer,
+    [sessionsApi.reducerPath]: sessionsApi.reducer,
   },
   middleware: (getDefault) =>
-    getDefault().concat(adminAuthApi.middleware, showsApi.middleware, roomsApi.middleware),
+    getDefault().concat(
+      adminAuthApi.middleware,
+      showsApi.middleware,
+      roomsApi.middleware,
+      sessionsApi.middleware,
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
