@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { themeSlice, localeSlice } from '@maill/shared';
 import { adminAuthReducer } from '@/features/auth/adminAuthSlice';
 import { adminAuthApi } from '@/features/auth/adminAuthApi';
+import { showsApi } from '@/features/shows/showsApi';
 
 export const store = configureStore({
   reducer: {
@@ -9,8 +10,10 @@ export const store = configureStore({
     theme: themeSlice.reducer,
     locale: localeSlice.reducer,
     [adminAuthApi.reducerPath]: adminAuthApi.reducer,
+    [showsApi.reducerPath]: showsApi.reducer,
   },
-  middleware: (getDefault) => getDefault().concat(adminAuthApi.middleware),
+  middleware: (getDefault) =>
+    getDefault().concat(adminAuthApi.middleware, showsApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
