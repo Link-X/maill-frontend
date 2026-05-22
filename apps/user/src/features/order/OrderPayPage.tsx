@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CreditCard, Sparkles, QrCode } from 'lucide-react';
+import { ArrowLeft, CreditCard, Sparkles, QrCode, RefreshCcw } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Button,
@@ -14,7 +14,7 @@ import { Countdown } from '@/components/Countdown';
 import { Skeleton } from '@/components/Skeleton';
 import { StickyBottomBar } from '@/components/StickyBottomBar';
 import { formatMoney, formatDateTime } from '@/lib/format';
-import { useGetOrderDetailsQuery, useCancelOrderMutation } from './orderApi';
+import { useGetOrderDetailsQuery, useCancelOrderMutation, useRefundTicketMutation } from './orderApi';
 import { useCreatePaymentMutation } from '@/features/payment/paymentApi';
 
 export default function OrderPayPage() {
@@ -29,6 +29,8 @@ export default function OrderPayPage() {
   });
   const [createPayment, { isLoading: paying }] = useCreatePaymentMutation();
   const [cancelOrder, { isLoading: cancelling }] = useCancelOrderMutation();
+  const [refundTicket, { isLoading: refunding }] = useRefundTicketMutation();
+  const [refundingTicketNo, setRefundingTicketNo] = useState<string | null>(null);
 
   const allTicketsReady = useMemo(
     () => (order?.tickets?.length ?? 0) > 0 && (order?.tickets ?? []).every((t) => !!t.qrCode),
@@ -79,6 +81,28 @@ export default function OrderPayPage() {
       await cancelOrder({ orderNo: id }).unwrap();
       notify.success('订单已取消');
       navigate('/orders', { replace: true });
+    } catch (e) {
+      notify.error(extractErrorMessage(e));
+    }
+  };
+
+  const handleRefundTicket = async (ticketNo: string) => {
+    setRefundingTicketNo(ticketNo);
+    try {
+      await refundTicket({ orderNo: id, ticketNo }).unwrap();
+      notify.success(`已发起退票: ${ticketNo}`);
+    } catch (e) {
+      notify.error(extractErrorMessage(e));
+    } finally {
+      setRefundingTicketNo(null);
+    }
+  };
+
+  const handleRefundAll = async () => {
+    if (!order) return;
+    try {
+      await cancelOrder({ orderNo: id }).unwrap();
+      notify.success('已发起全单退款');
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -155,35 +179,63 @@ export default function OrderPayPage() {
                 )}
               </Card>
             ) : (
-              <div className="grid grid-cols-1 gap-3">
-                {order.tickets.map((t, i) => (
-                  <motion.div
-                    key={t.ticketNo}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.04, type: 'spring', stiffness: 320, damping: 26 }}
-                  >
-                    <Card className="p-4 flex items-center gap-4">
-                      <div className="bg-card p-2 rounded-lg border border-border/60">
-                        {t.qrCode ? (
-                          <QRCodeSVG value={t.qrCode} size={96} level="M" />
-                        ) : (
-                          <div className="h-24 w-24 flex items-center justify-center text-muted-foreground">
-                            <Sparkles className="h-6 w-6 animate-spin" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="text-xs text-muted-foreground">票号</div>
-                        <div className="font-mono text-sm break-all">{t.ticketNo}</div>
-                        <div className="text-xs text-muted-foreground pt-1">
-                          {order.seatInfos[i] ?? `第 ${i + 1} 张`}
+              <>
+                <div className="grid grid-cols-1 gap-3">
+                  {order.tickets.map((t, i) => (
+                    <motion.div
+                      key={t.ticketNo}
+                      initial={{ opacity: 0, scale: 0.92 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.04, type: 'spring', stiffness: 320, damping: 26 }}
+                    >
+                      <Card className="p-4 flex items-center gap-4">
+                        <div className="bg-card p-2 rounded-lg border border-border/60">
+                          {t.qrCode ? (
+                            <QRCodeSVG value={t.qrCode} size={96} level="M" />
+                          ) : (
+                            <div className="h-24 w-24 flex items-center justify-center text-muted-foreground">
+                              <Sparkles className="h-6 w-6 animate-spin" />
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="text-xs text-muted-foreground">票号</div>
+                          <div className="font-mono text-sm break-all">{t.ticketNo}</div>
+                          <div className="text-xs text-muted-foreground pt-1">
+                            {order.seatInfos[i] ?? `第 ${i + 1} 张`}
+                          </div>
+                          {t.status === 0 && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="mt-2"
+                              disabled={refundingTicketNo === t.ticketNo}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRefundTicket(t.ticketNo);
+                              }}
+                            >
+                              <RefreshCcw className="h-3 w-3 mr-1" />
+                              {refundingTicketNo === t.ticketNo ? '退票中...' : '退此票'}
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="pt-2">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={refunding}
+                    onClick={handleRefundAll}
+                  >
+                    <RefreshCcw className="h-4 w-4 mr-1.5" />
+                    {refunding ? '退款中...' : '全单退款'}
+                  </Button>
+                </div>
+              </>
             )}
           </section>
         )}
