@@ -3,3 +3,4 @@ export * from './types';
 export * from './api';
 export * from './notify';
 export * from './auth';
+export * from './theme';
