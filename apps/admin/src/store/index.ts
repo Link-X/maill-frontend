@@ -3,6 +3,7 @@ import { themeSlice, localeSlice } from '@maill/shared';
 import { adminAuthReducer } from '@/features/auth/adminAuthSlice';
 import { adminAuthApi } from '@/features/auth/adminAuthApi';
 import { showsApi } from '@/features/shows/showsApi';
+import { roomsApi } from '@/features/rooms/roomsApi';
 
 export const store = configureStore({
   reducer: {
@@ -11,9 +12,10 @@ export const store = configureStore({
     locale: localeSlice.reducer,
     [adminAuthApi.reducerPath]: adminAuthApi.reducer,
     [showsApi.reducerPath]: showsApi.reducer,
+    [roomsApi.reducerPath]: roomsApi.reducer,
   },
   middleware: (getDefault) =>
-    getDefault().concat(adminAuthApi.middleware, showsApi.middleware),
+    getDefault().concat(adminAuthApi.middleware, showsApi.middleware, roomsApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
