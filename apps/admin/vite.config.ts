@@ -20,11 +20,6 @@ export default defineConfig({
         target: process.env.VITE_API_BASE || 'http://localhost:8081',
         changeOrigin: true,
       },
-      '/auth-api': {
-        target: process.env.VITE_AUTH_BASE || 'http://localhost:8082',
-        changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/auth-api/, ''),
-      },
     },
   },
 });

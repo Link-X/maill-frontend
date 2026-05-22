@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Label, extractErrorMessage, notify } from '@maill/shared';
@@ -61,6 +61,11 @@ export default function AdminLoginPage() {
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? t('common:loading') : t('auth:login')}
         </Button>
+        <p className="text-center text-sm pt-1">
+          <Link to="/register" className="text-primary underline-offset-4 hover:underline">
+            没有管理员账号？去注册
+          </Link>
+        </p>
       </form>
     </div>
   );

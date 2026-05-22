@@ -4,6 +4,7 @@ import { RequireAdminAuth } from './guards';
 import AdminLayout from '@/layouts/AdminLayout';
 
 const LoginPage = lazy(() => import('@/features/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/features/auth/RegisterPage'));
 const ShowsPage = lazy(() => import('@/features/shows/ShowsPage'));
 const RoomsPage = lazy(() => import('@/features/rooms/RoomsPage'));
 const RoomDetailPage = lazy(() => import('@/features/rooms/RoomDetailPage'));
@@ -18,6 +19,7 @@ const withSuspense = (node: React.ReactNode) => (
 
 export const router = createBrowserRouter([
   { path: '/login', element: withSuspense(<LoginPage />) },
+  { path: '/register', element: withSuspense(<RegisterPage />) },
   {
     path: '/',
     element: (
