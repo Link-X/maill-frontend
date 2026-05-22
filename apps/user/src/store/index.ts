@@ -4,6 +4,7 @@ import { authReducer } from '@/features/auth/authSlice';
 import { authApi } from '@/features/auth/authApi';
 import { showsApi } from '@/features/shows/showsApi';
 import { sessionsApi } from '@/features/sessions/sessionsApi';
+import { orderApi } from '@/features/order/orderApi';
 import { cartSlice } from '@/features/sessions/cartSlice';
 
 export const store = configureStore({
@@ -15,9 +16,15 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [showsApi.reducerPath]: showsApi.reducer,
     [sessionsApi.reducerPath]: sessionsApi.reducer,
+    [orderApi.reducerPath]: orderApi.reducer,
   },
   middleware: (getDefault) =>
-    getDefault().concat(authApi.middleware, showsApi.middleware, sessionsApi.middleware),
+    getDefault().concat(
+      authApi.middleware,
+      showsApi.middleware,
+      sessionsApi.middleware,
+      orderApi.middleware,
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
