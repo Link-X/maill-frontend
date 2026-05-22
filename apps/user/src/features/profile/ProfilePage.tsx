@@ -11,6 +11,7 @@ import {
 } from '@maill/shared';
 import { logout, selectUser } from '@/features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { ScanLine } from 'lucide-react';
 
 const themeOptions: { value: ThemeMode; key: string }[] = [
   { value: 'light', key: 'common:theme.light' },
@@ -69,6 +70,11 @@ export default function ProfilePage() {
           ))}
         </div>
       </section>
+
+      <Button variant="outline" className="w-full" onClick={() => navigate('/verify')}>
+        <ScanLine className="h-4 w-4 mr-1.5" />
+        前往核销
+      </Button>
 
       <Button
         variant="destructive"

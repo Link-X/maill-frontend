@@ -6,6 +6,7 @@ import { showsApi } from '@/features/shows/showsApi';
 import { sessionsApi } from '@/features/sessions/sessionsApi';
 import { orderApi } from '@/features/order/orderApi';
 import { paymentApi } from '@/features/payment/paymentApi';
+import { verifyApi } from '@/features/verify/verifyApi';
 import { cartSlice } from '@/features/sessions/cartSlice';
 
 export const store = configureStore({
@@ -19,6 +20,7 @@ export const store = configureStore({
     [sessionsApi.reducerPath]: sessionsApi.reducer,
     [orderApi.reducerPath]: orderApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
+    [verifyApi.reducerPath]: verifyApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -27,6 +29,7 @@ export const store = configureStore({
       sessionsApi.middleware,
       orderApi.middleware,
       paymentApi.middleware,
+      verifyApi.middleware,
     ),
 });
 
