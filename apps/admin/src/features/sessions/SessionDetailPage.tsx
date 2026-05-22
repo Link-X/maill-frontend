@@ -33,6 +33,7 @@ import {
   useWarmupSessionMutation,
 } from './sessionsApi';
 import { useListRoomAreasQuery } from '@/features/rooms/roomsApi';
+import { MonitorPanel } from '@/features/monitor/MonitorPanel';
 
 const AREA_COLORS: Record<string, string> = {
   A: 'bg-area-a text-white',
@@ -181,6 +182,7 @@ export default function SessionDetailPage() {
           </>
         }
       />
+      <MonitorPanel sessionId={sessionId} />
 
       {/* 价格区域 */}
       <section>

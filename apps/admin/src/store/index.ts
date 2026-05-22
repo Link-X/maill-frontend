@@ -5,6 +5,7 @@ import { adminAuthApi } from '@/features/auth/adminAuthApi';
 import { showsApi } from '@/features/shows/showsApi';
 import { roomsApi } from '@/features/rooms/roomsApi';
 import { sessionsApi } from '@/features/sessions/sessionsApi';
+import { monitorApi } from '@/features/monitor/monitorApi';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     [showsApi.reducerPath]: showsApi.reducer,
     [roomsApi.reducerPath]: roomsApi.reducer,
     [sessionsApi.reducerPath]: sessionsApi.reducer,
+    [monitorApi.reducerPath]: monitorApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -22,6 +24,7 @@ export const store = configureStore({
       showsApi.middleware,
       roomsApi.middleware,
       sessionsApi.middleware,
+      monitorApi.middleware,
     ),
 });
 
