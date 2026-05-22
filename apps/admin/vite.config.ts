@@ -5,7 +5,13 @@ import path from 'node:path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      'react-i18next': path.resolve(
+        __dirname,
+        'node_modules/@maill/shared/node_modules/react-i18next',
+      ),
+    },
   },
   server: {
     port: 5174,
