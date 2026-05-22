@@ -7,6 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'react-i18next': path.resolve(
+        __dirname,
+        'node_modules/@maill/shared/node_modules/react-i18next',
+      ),
     },
   },
   server: {
