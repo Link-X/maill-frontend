@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 interface PageHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   icon?: LucideIcon;
   actions?: ReactNode;
 }
@@ -19,7 +19,7 @@ export function PageHeader({ title, subtitle, icon: Icon, actions }: PageHeaderP
         )}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+          {subtitle && <div className="text-sm text-muted-foreground mt-0.5">{subtitle}</div>}
         </div>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
