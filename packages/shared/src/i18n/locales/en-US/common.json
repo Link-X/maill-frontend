@@ -1,0 +1,37 @@
+{
+  "appName": "Maill Tickets",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "save": "Save",
+  "submit": "Submit",
+  "loading": "Loading...",
+  "empty": "No data",
+  "back": "Back",
+  "confirm": "Confirm",
+  "delete": "Delete",
+  "edit": "Edit",
+  "search": "Search",
+  "tabBar": {
+    "home": "Home",
+    "orders": "Orders",
+    "profile": "Me"
+  },
+  "profile": {
+    "title": "Profile",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "locale": {
+    "zh-CN": "中文",
+    "en-US": "English"
+  },
+  "error": {
+    "network": "Network error",
+    "unknown": "Unknown error"
+  }
+}

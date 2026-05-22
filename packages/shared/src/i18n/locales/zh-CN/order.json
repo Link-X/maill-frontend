@@ -1,0 +1,18 @@
+{
+  "title": "订单",
+  "myOrders": "我的订单",
+  "orderNo": "订单号",
+  "totalAmount": "总价",
+  "status": {
+    "pending": "待支付",
+    "paid": "已支付",
+    "cancelled": "已取消",
+    "refunding": "退款中",
+    "refunded": "已退款",
+    "partial": "部分退款"
+  },
+  "pay": "立即支付",
+  "cancelOrder": "取消订单",
+  "refund": "退款",
+  "refundTicket": "退此票"
+}

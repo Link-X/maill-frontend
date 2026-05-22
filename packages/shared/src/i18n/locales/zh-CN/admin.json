@@ -1,0 +1,11 @@
+{
+  "nav": {
+    "shows": "演出管理",
+    "rooms": "场地管理",
+    "orders": "订单查询",
+    "dashboard": "监控看板"
+  },
+  "login": {
+    "title": "管理员登录"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "nav": {
+    "shows": "Shows",
+    "rooms": "Rooms",
+    "orders": "Orders",
+    "dashboard": "Dashboard"
+  },
+  "login": {
+    "title": "Admin sign in"
+  }
+}

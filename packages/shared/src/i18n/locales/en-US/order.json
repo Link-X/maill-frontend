@@ -1,0 +1,18 @@
+{
+  "title": "Orders",
+  "myOrders": "My orders",
+  "orderNo": "Order #",
+  "totalAmount": "Total",
+  "status": {
+    "pending": "Pending payment",
+    "paid": "Paid",
+    "cancelled": "Cancelled",
+    "refunding": "Refunding",
+    "refunded": "Refunded",
+    "partial": "Partial refund"
+  },
+  "pay": "Pay now",
+  "cancelOrder": "Cancel order",
+  "refund": "Refund",
+  "refundTicket": "Refund this ticket"
+}
