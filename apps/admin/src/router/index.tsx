@@ -6,6 +6,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 const LoginPage = lazy(() => import('@/features/auth/LoginPage'));
 const ShowsPage = lazy(() => import('@/features/shows/ShowsPage'));
 const RoomsPage = lazy(() => import('@/features/rooms/RoomsPage'));
+const RoomDetailPage = lazy(() => import('@/features/rooms/RoomDetailPage'));
 const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 
 const withSuspense = (node: React.ReactNode) => (
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/shows" replace /> },
       { path: 'shows', element: withSuspense(<ShowsPage />) },
       { path: 'rooms', element: withSuspense(<RoomsPage />) },
+      { path: 'rooms/:id', element: withSuspense(<RoomDetailPage />) },
       { path: 'orders', element: withSuspense(<OrdersPage />) },
     ],
   },
