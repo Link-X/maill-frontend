@@ -15,11 +15,17 @@ export interface Show {
 export interface ShowSession {
   id: number | string;
   showId: number | string;
-  roomId: number | string;
+  roomId?: number | string;
+  name?: string;
   startTime: string;
   endTime: string;
+  totalSeats?: number;
   limitPerUser: number;
   status: SessionStatus;
+  rowCount?: number;
+  colCount?: number;
+  createTime?: string;
+  updateTime?: string;
   showName?: string;
   venue?: string;
 }

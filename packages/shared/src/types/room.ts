@@ -1,26 +1,40 @@
 import type { SeatType } from './enums';
 
+// 场地（座位模板的载体）
 export interface Room {
   id: number | string;
   name: string;
   venue?: string;
-  rows: number;
-  cols: number;
+  rowCount: number;
+  colCount: number;
+  description?: string;
   createTime?: string;
+  updateTime?: string;
 }
 
-export interface SeatTemplate {
+// 后端 RoomSeat（场地座位模板）
+export interface RoomSeat {
+  id?: number | string;
   roomId: number | string;
   rowNo: number;
   colNo: number;
-  seatType: SeatType;
-  areaId: number;
+  type: SeatType;
+  areaId: string;
+  seatName?: string;
+  pairSeatId?: number | string;
 }
 
-export interface AreaPrice {
+// 兼容 Plan 1 类型名（前端代码仍用 SeatTemplate 引用座位模板）
+export type SeatTemplate = RoomSeat;
+
+// 场地默认价格区域
+export interface RoomArea {
+  id?: number | string;
   roomId: number | string;
-  areaId: number;
-  areaName?: string;
-  defaultPrice: number;
-  defaultOriginPrice?: number;
+  areaId: string;
+  defaultPrice: string; // 后端 BigDecimal，前端用 string 承载（避免精度丢失）
+  defaultOriginPrice?: string;
 }
+
+// 兼容 Plan 1 类型名
+export type AreaPrice = RoomArea;
