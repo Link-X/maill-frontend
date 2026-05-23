@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
 import {
   Button,
@@ -20,15 +21,6 @@ import { Drawer } from '@/components/Drawer';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from './categoriesApi';
 
-const schema = z.object({
-  name: z.string().min(1, '请输入分类名'),
-  sort: z.coerce.number().int().min(0).default(0),
-  icon: z.string().url('图标需为合法 URL').optional().or(z.literal('')),
-  status: z.coerce.number().int().min(0).max(1),
-});
-
-type FormValues = z.infer<typeof schema>;
-
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -36,10 +28,23 @@ interface Props {
 }
 
 export function CategoryFormDrawer({ open, onClose, initial }: Props) {
+  const { t } = useTranslation(['category', 'common']);
   const [createCategory, { isLoading: creating }] = useCreateCategoryMutation();
   const [updateCategory, { isLoading: updating }] = useUpdateCategoryMutation();
   const isEdit = !!initial;
   const isLoading = creating || updating;
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, t('category:form.nameRequired')),
+        sort: z.coerce.number().int().min(0).default(0),
+        icon: z.string().url(t('category:form.iconInvalid')).optional().or(z.literal('')),
+        status: z.coerce.number().int().min(0).max(1),
+      }),
+    [t],
+  );
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -73,10 +78,10 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
     try {
       if (isEdit && initial) {
         await updateCategory({ ...initial, ...payload }).unwrap();
-        notify.success('分类已更新');
+        notify.success(t('category:form.savedToast'));
       } else {
         await createCategory(payload).unwrap();
-        notify.success('分类已创建');
+        notify.success(t('category:form.createdToast'));
       }
       onClose();
     } catch (e) {
@@ -88,11 +93,11 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
     <Drawer
       open={open}
       onClose={onClose}
-      title={isEdit ? '编辑分类' : '新建分类'}
+      title={isEdit ? t('category:form.titleEdit') : t('category:form.titleNew')}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose} disabled={isLoading}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button
             size="sm"
@@ -101,24 +106,24 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
             className="bg-gradient-brand hover:opacity-90"
           >
             <Save className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? '保存中...' : '保存'}
+            {isLoading ? t('common:actions.saving') : t('common:actions.save')}
           </Button>
         </>
       }
     >
       <form className="space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="name">名称 *</Label>
-          <Input id="name" {...register('name')} placeholder="演唱会 / 话剧 / 脱口秀..." />
+          <Label htmlFor="name">{t('category:form.name')} *</Label>
+          <Input id="name" {...register('name')} placeholder={t('category:form.namePlaceholder')} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="sort">排序</Label>
-          <Input id="sort" type="number" {...register('sort')} placeholder="数字小的靠前" />
+          <Label htmlFor="sort">{t('category:form.sort')}</Label>
+          <Input id="sort" type="number" {...register('sort')} placeholder={t('category:form.sortPlaceholder')} />
           {errors.sort && <p className="text-xs text-destructive">{errors.sort.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>图标</Label>
+          <Label>{t('category:form.icon')}</Label>
           <Controller
             control={control}
             name="icon"
@@ -129,7 +134,7 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
           {errors.icon && <p className="text-xs text-destructive">{errors.icon.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>状态</Label>
+          <Label>{t('category:form.status')}</Label>
           <Controller
             control={control}
             name="status"
@@ -142,8 +147,8 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">启用</SelectItem>
-                  <SelectItem value="0">禁用</SelectItem>
+                  <SelectItem value="1">{t('category:status.enabled')}</SelectItem>
+                  <SelectItem value="0">{t('category:status.disabled')}</SelectItem>
                 </SelectContent>
               </Select>
             )}

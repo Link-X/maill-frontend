@@ -1,0 +1,106 @@
+{
+  "page": {
+    "title": "Sessions",
+    "subtitle": "Manage individual sessions of a show",
+    "titleWithShow": "{{showName}} - Sessions",
+    "showFallback": "Show",
+    "forShowSubtitle": "A show can have multiple sessions"
+  },
+  "list": {
+    "empty": "No sessions yet. Click \"New session\"."
+  },
+  "form": {
+    "titleNew": "New session",
+    "titleEdit": "Edit session",
+    "showId": "Show ID *",
+    "showIdPlaceholder": "Copy ID from /shows list",
+    "room": "Room *",
+    "roomPlaceholder": "Select a room",
+    "roomLabelExtra": "{{name}} ({{rows}}×{{cols}})",
+    "name": "Session name (optional)",
+    "namePlaceholder": "2026 Shanghai · Evening",
+    "startTime": "Start *",
+    "endTime": "End *",
+    "limitPerUser": "Limit per user *",
+    "limitMin": "Min 1",
+    "limitMax": "Max 20",
+    "extend": "Extend fields (JSON)",
+    "extendHint": "Known keys: preSaleLeadMinutes (min) / notice.",
+    "extendInvalid": "Must be a valid JSON object (e.g. {\"notice\":\"Notice\"})",
+    "showRequired": "Please select a show",
+    "roomRequired": "Please select a room",
+    "startRequired": "Please fill in start time",
+    "endRequired": "Please fill in end time",
+    "createdToast": "Session created",
+    "savedToast": "Session updated"
+  },
+  "status": {
+    "draft": "Draft",
+    "published": "On sale",
+    "ended": "Ended"
+  },
+  "action": {
+    "createBtn": "New session",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "createdSuccess": "Session created",
+    "createSubmit": "Create",
+    "backToShows": "Back to shows",
+    "warmup": "Warm up inventory",
+    "warmingUp": "Warming up...",
+    "warmupDone": "Warm-up done",
+    "publishLong": "Publish & open sale",
+    "publishing": "Publishing...",
+    "publishedToast": "Session published"
+  },
+  "table": {
+    "id": "ID",
+    "name": "Name",
+    "startTime": "Start",
+    "limitPerUser": "Limit",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "userSeat": {
+    "stage": "STAGE",
+    "rowsCols": "{{rows}} rows × {{cols}} cols",
+    "rowsColsScale": "{{rows}} rows × {{cols}} cols · zoom {{pct}}%",
+    "legendSelected": "Selected",
+    "legendSold": "Sold",
+    "limitToast": "Up to {{n}} seats per user",
+    "loadFailed": "Failed to load session",
+    "leadMinutes": "Entry opens {{n}} min before start",
+    "tooltipZoomIn": "Zoom in",
+    "tooltipZoomOut": "Zoom out",
+    "tooltipReset": "Reset"
+  },
+  "selectionBar": {
+    "selectedCount": "{{n}} seats selected",
+    "moreSeats": "+{{n}}",
+    "total": "Total",
+    "submit": "Place order"
+  },
+  "detail": {
+    "title": "Session detail",
+    "loading": "Loading...",
+    "monitor": "Live monitor",
+    "titleFallback": "Session #{{id}}",
+    "statusLabel": "Status: ",
+    "notFound": "Session not found",
+    "priceArea": "Price areas",
+    "noSeatsHint": "No seats yet. Make sure the <b>Room</b> has a seat template configured, then wait for backend to copy.",
+    "noSeatsDataHint": "No seat data. Make sure a room was selected when creating the session, and the room has a seat template.",
+    "priceLabel": "Price *",
+    "originPriceLabel": "Origin price",
+    "savePrices": "Save prices",
+    "pricesSavedToast": "Prices saved",
+    "priceInvalid": "Price of area {{id}} is invalid",
+    "seatsPreviewTitle": "Seats preview ({{n}} seats · {{areas}} areas)"
+  },
+  "monitor": {
+    "title": "Live monitor (refreshes every 5s)",
+    "totalSeats": "Total seats",
+    "sold": "Sold",
+    "available": "Available"
+  }
+}

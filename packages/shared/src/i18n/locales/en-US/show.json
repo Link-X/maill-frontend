@@ -1,9 +1,86 @@
 {
   "title": "Shows",
-  "list": "Shows",
-  "detail": "Show detail",
-  "category": "Category",
-  "venue": "Venue",
-  "sessions": "Sessions",
-  "noSessions": "No sessions"
+  "list": {
+    "title": "Shows",
+    "searchPlaceholder": "Search shows...",
+    "empty": "No shows",
+    "emptyHint": "Try a different keyword",
+    "allCategories": "All"
+  },
+  "detail": {
+    "availableSessions": "Sessions",
+    "noSessions": "No sessions available",
+    "noSessionsHint": "Stay tuned, the operator is preparing",
+    "limitPerUserSuffix": "Limit {{n}} per user",
+    "selectSeats": "Choose seats",
+    "duration": "Duration",
+    "durationValue": "{{n}} min",
+    "ageLimit": "Age",
+    "refundRule": "Refund"
+  },
+  "card": {
+    "sessionFallback": "{{date}} session"
+  },
+  "form": {
+    "titleNew": "New show",
+    "titleEdit": "Edit show",
+    "name": "Name",
+    "nameRequired": "Please enter the show name",
+    "category": "Category",
+    "categoryUnspecified": "Uncategorized",
+    "city": "City",
+    "cityUnspecified": "Unspecified",
+    "venue": "Venue",
+    "venuePlaceholder": "National Stadium",
+    "address": "Address",
+    "addressPlaceholder": "Chaoyang District, Olympic Park...",
+    "poster": "Poster",
+    "posterInvalid": "Poster URL must be valid",
+    "description": "Description",
+    "extend": "Extend fields (JSON)",
+    "extendHint": "Known keys: duration (min) / ageLimit / refundRule. Other keys are accepted.",
+    "extendInvalid": "Must be a valid JSON object (e.g. {\"duration\":120})",
+    "savedToast": "Show updated",
+    "createdToast": "Show created"
+  },
+  "status": {
+    "draft": "Draft",
+    "onSale": "On sale",
+    "offShelf": "Off shelf"
+  },
+  "action": {
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "sessions": "Sessions",
+    "createBtn": "New show"
+  },
+  "table": {
+    "poster": "Poster",
+    "name": "Name",
+    "category": "Category",
+    "cityVenue": "City · Venue",
+    "status": "Status",
+    "createTime": "Created",
+    "actions": "Actions",
+    "allStatus": "All"
+  },
+  "page": {
+    "title": "Shows",
+    "subtitle": "Manage shows on sale",
+    "notFound": "Show not found"
+  },
+  "toggleConfirm": {
+    "title": {
+      "publish": "Publish show",
+      "unpublish": "Unpublish show"
+    },
+    "desc": {
+      "publish": "Publish {{name}}?",
+      "unpublish": "Unpublish {{name}}?"
+    }
+  },
+  "toggleSuccess": {
+    "publish": "Published: {{name}}",
+    "unpublish": "Unpublished: {{name}}"
+  }
 }

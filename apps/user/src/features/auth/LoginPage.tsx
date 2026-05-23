@@ -59,7 +59,7 @@ export default function LoginPage() {
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? t('common:loading') : t('auth:login')}
+          {isLoading ? t('common:states.loading') : t('auth:login')}
         </Button>
         <p className="text-center text-sm">
           <Link to="/register" className="text-primary underline-offset-4 hover:underline">

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
 import {
   Button,
@@ -23,38 +24,6 @@ import { useCreateShowMutation, useUpdateShowMutation } from './showsApi';
 import { useListCategoriesQuery } from '@/features/categories/categoriesApi';
 import { useListCitiesQuery } from '@/features/cities/citiesApi';
 
-const schema = z.object({
-  name: z.string().min(1, '请输入演出名称'),
-  // categoryId 可为空（草稿允许不挑分类）；空串 → undefined
-  categoryId: z
-    .union([z.coerce.number().int().positive(), z.literal('')])
-    .optional()
-    .transform((v) => (v === '' || v == null ? undefined : Number(v))),
-  cityCode: z.string().optional(),
-  venue: z.string().optional(),
-  address: z.string().optional(),
-  posterUrl: z.string().url('海报链接需为合法 URL').optional().or(z.literal('')),
-  description: z.string().optional(),
-  // extend：原 JSON 字符串。空串通过；非空时必须能 JSON.parse 出一个对象
-  extend: z
-    .string()
-    .optional()
-    .refine(
-      (v) => {
-        if (!v || !v.trim()) return true;
-        try {
-          const parsed = JSON.parse(v);
-          return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
-        } catch {
-          return false;
-        }
-      },
-      { message: '需要合法的 JSON 对象（如 {"duration":120}）' },
-    ),
-});
-
-type FormValues = z.infer<typeof schema>;
-
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -62,6 +31,7 @@ interface Props {
 }
 
 export function ShowFormDrawer({ open, onClose, initial }: Props) {
+  const { t } = useTranslation(['show', 'common']);
   const [createShow, { isLoading: creating }] = useCreateShowMutation();
   const [updateShow, { isLoading: updating }] = useUpdateShowMutation();
   // 仅启用的分类/城市供下拉
@@ -69,6 +39,40 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
   const { data: cities = [] } = useListCitiesQuery({ status: 1 });
   const isEdit = !!initial;
   const isLoading = creating || updating;
+
+  // schema 依赖 t（错误文案需本地化），随语言变化重建
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, t('show:form.nameRequired')),
+        categoryId: z
+          .union([z.coerce.number().int().positive(), z.literal('')])
+          .optional()
+          .transform((v) => (v === '' || v == null ? undefined : Number(v))),
+        cityCode: z.string().optional(),
+        venue: z.string().optional(),
+        address: z.string().optional(),
+        posterUrl: z.string().url(t('show:form.posterInvalid')).optional().or(z.literal('')),
+        description: z.string().optional(),
+        extend: z
+          .string()
+          .optional()
+          .refine(
+            (v) => {
+              if (!v || !v.trim()) return true;
+              try {
+                const parsed = JSON.parse(v);
+                return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+              } catch {
+                return false;
+              }
+            },
+            { message: t('show:form.extendInvalid') },
+          ),
+      }),
+    [t],
+  );
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -106,7 +110,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
   }, [open, initial, reset]);
 
   const onSubmit = handleSubmit(async (values) => {
-    // 空串字段 → undefined，避免后端把 "" 当作"已设置该字段"
     const payload = {
       ...values,
       cityCode: values.cityCode || undefined,
@@ -118,10 +121,10 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
     try {
       if (isEdit && initial) {
         await updateShow({ ...initial, ...payload }).unwrap();
-        notify.success('演出已更新');
+        notify.success(t('show:form.savedToast'));
       } else {
         await createShow({ ...payload, status: ShowStatus.Draft }).unwrap();
-        notify.success('演出已创建');
+        notify.success(t('show:form.createdToast'));
       }
       onClose();
     } catch (e) {
@@ -133,11 +136,11 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
     <Drawer
       open={open}
       onClose={onClose}
-      title={isEdit ? '编辑演出' : '新建演出'}
+      title={isEdit ? t('show:form.titleEdit') : t('show:form.titleNew')}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose} disabled={isLoading}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button
             size="sm"
@@ -146,33 +149,32 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
             className="bg-gradient-brand hover:opacity-90"
           >
             <Save className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? '保存中...' : '保存'}
+            {isLoading ? t('common:actions.saving') : t('common:actions.save')}
           </Button>
         </>
       }
     >
       <form className="space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="name">名称 *</Label>
+          <Label htmlFor="name">{t('show:form.name')} *</Label>
           <Input id="name" {...register('name')} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>分类</Label>
+          <Label>{t('show:form.category')}</Label>
           <Controller
             control={control}
             name="categoryId"
             render={({ field }) => (
               <Select
-                // radix Select 不允许空字符串 value，用 __none__ 作 sentinel
                 value={field.value == null ? '__none__' : String(field.value)}
                 onValueChange={(v) => field.onChange(v === '__none__' ? undefined : Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="未分类" />
+                  <SelectValue placeholder={t('show:form.categoryUnspecified')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">未分类</SelectItem>
+                  <SelectItem value="__none__">{t('show:form.categoryUnspecified')}</SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>
                       {c.name}
@@ -188,7 +190,7 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label>城市</Label>
+            <Label>{t('show:form.city')}</Label>
             <Controller
               control={control}
               name="cityCode"
@@ -198,10 +200,10 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
                   onValueChange={(v) => field.onChange(v === '__none__' ? '' : v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="未指定" />
+                    <SelectValue placeholder={t('show:form.cityUnspecified')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">未指定</SelectItem>
+                    <SelectItem value="__none__">{t('show:form.cityUnspecified')}</SelectItem>
                     {cities.map((c) => (
                       <SelectItem key={c.code} value={c.code}>
                         {c.name}
@@ -213,16 +215,16 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="venue">场地</Label>
-            <Input id="venue" placeholder="国家体育场" {...register('venue')} />
+            <Label htmlFor="venue">{t('show:form.venue')}</Label>
+            <Input id="venue" placeholder={t('show:form.venuePlaceholder')} {...register('venue')} />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="address">详细地址</Label>
-          <Input id="address" placeholder="朝阳区奥林匹克公园..." {...register('address')} />
+          <Label htmlFor="address">{t('show:form.address')}</Label>
+          <Input id="address" placeholder={t('show:form.addressPlaceholder')} {...register('address')} />
         </div>
         <div className="space-y-2">
-          <Label>海报</Label>
+          <Label>{t('show:form.poster')}</Label>
           <Controller
             control={control}
             name="posterUrl"
@@ -235,7 +237,7 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">描述</Label>
+          <Label htmlFor="description">{t('show:form.description')}</Label>
           <textarea
             id="description"
             rows={4}
@@ -244,11 +246,11 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="extend">扩展字段（JSON）</Label>
+          <Label htmlFor="extend">{t('show:form.extend')}</Label>
           <textarea
             id="extend"
             rows={4}
-            placeholder={'{\n  "duration": 120,\n  "ageLimit": "6+",\n  "refundRule": "开演前24小时可退"\n}'}
+            placeholder={'{\n  "duration": 120,\n  "ageLimit": "6+",\n  "refundRule": "..."\n}'}
             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             {...register('extend')}
           />
@@ -256,7 +258,7 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
             <p className="text-xs text-destructive">{errors.extend.message as string}</p>
           )}
           <p className="text-[11px] text-muted-foreground">
-            约定字段：duration（分钟）/ ageLimit / refundRule。其他键也支持，前端会按需要展示。
+            {t('show:form.extendHint')}
           </p>
         </div>
       </form>

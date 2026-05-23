@@ -8,6 +8,14 @@
     "dashboard": "监控看板"
   },
   "login": {
-    "title": "管理员登录"
+    "title": "管理员登录",
+    "switchToRegister": "没有管理员账号？去注册"
+  },
+  "register": {
+    "title": "管理员注册",
+    "inviteCodeLabel": "邀请码 *",
+    "inviteCodePlaceholder": "向系统管理员索取",
+    "inviteCodeMin": "邀请码至少 16 位",
+    "successToast": "注册成功，欢迎使用"
   }
 }

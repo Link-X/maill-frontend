@@ -1,0 +1,91 @@
+{
+  "page": {
+    "title": "Reports",
+    "subtitle": "Revenue / Orders / Shows / Users dashboard"
+  },
+  "range": {
+    "today": "Today",
+    "7d": "Last 7d",
+    "30d": "Last 30d",
+    "90d": "Last 90d",
+    "custom": "Custom",
+    "to": "to"
+  },
+  "kpi": {
+    "revenue": "Revenue",
+    "paidOrders": "Paid orders",
+    "pending": "Pending",
+    "refundAmount": "Refunds",
+    "refundCountSuffix": "{{n}} orders",
+    "ticketsSold": "Tickets sold",
+    "verifyRate": "Verify rate",
+    "verifyDetail": "{{verified}} / {{sold}}",
+    "deltaFlat": "Flat"
+  },
+  "trend": {
+    "title": "Revenue / Orders trend",
+    "points": "{{n}} points",
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "refund": "Refunds"
+  },
+  "byShow": {
+    "title": "Top 10 shows",
+    "sort": {
+      "revenue": "Revenue",
+      "tickets": "Tickets",
+      "orderCount": "Orders"
+    },
+    "colShow": "Show",
+    "colOrders": "Orders",
+    "colTickets": "Tickets",
+    "colRevenue": "Revenue",
+    "empty": "No data"
+  },
+  "byCategory": {
+    "title": "Revenue by category",
+    "uncategorized": "Uncategorized"
+  },
+  "byCity": {
+    "title": "Revenue by city",
+    "unspecified": "Unspecified"
+  },
+  "statusDistribution": {
+    "title": "Order status"
+  },
+  "hourDistribution": {
+    "title": "24h order distribution",
+    "hourSuffix": "h"
+  },
+  "bySession": {
+    "title": "Session fill rate",
+    "colShow": "Show · Session",
+    "colFill": "Fill rate",
+    "colRevenue": "Revenue",
+    "empty": "No data"
+  },
+  "userStats": {
+    "title": "User behavior",
+    "totalBuyers": "Buyers",
+    "repeatBuyers": "Repeat buyers",
+    "avgOrderValue": "AOV",
+    "avgSeats": "Avg seats",
+    "avgSeatsUnit": "/order"
+  },
+  "refundStats": {
+    "title": "Refunds",
+    "refundAmount": "Refund amount",
+    "refundRate": "Refund rate",
+    "ofRevenue": "of revenue",
+    "fullRefund": "Full refund",
+    "partialRefund": "Partial refund",
+    "processing": "{{n}} processing"
+  },
+  "cancellationStats": {
+    "title": "Cancellation",
+    "createdCount": "Created",
+    "cancelRate": "Cancel rate",
+    "expired": "Expired",
+    "userCancelled": "By user"
+  }
+}

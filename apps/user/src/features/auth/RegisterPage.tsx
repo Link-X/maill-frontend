@@ -72,7 +72,7 @@ export default function RegisterPage() {
           <Input id="email" type="email" {...register('email')} />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? t('common:loading') : t('auth:register')}
+          {isLoading ? t('common:states.loading') : t('auth:register')}
         </Button>
         <p className="text-center text-sm">
           <Link to="/login" className="text-primary underline-offset-4 hover:underline">

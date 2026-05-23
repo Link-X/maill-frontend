@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@maill/shared';
 
 export interface Column<T> {
@@ -19,17 +20,18 @@ interface DataTableProps<T> {
 }
 
 export function DataTable<T>({ columns, data, rowKey, loading, empty }: DataTableProps<T>) {
+  const { t } = useTranslation('common');
   if (loading) {
     return (
       <div className="p-12 text-center text-muted-foreground animate-pulse">
-        加载中...
+        {t('common:states.loading')}
       </div>
     );
   }
   if (data.length === 0) {
     return (
       <div className="p-12 text-center text-muted-foreground border border-dashed border-border rounded-xl">
-        {empty ?? '暂无数据'}
+        {empty ?? t('common:states.empty')}
       </div>
     );
   }

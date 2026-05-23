@@ -1,0 +1,91 @@
+{
+  "page": {
+    "title": "数据报表",
+    "subtitle": "营收 / 订单 / 演出 / 用户多维度看板"
+  },
+  "range": {
+    "today": "今日",
+    "7d": "近 7 天",
+    "30d": "近 30 天",
+    "90d": "近 90 天",
+    "custom": "自定义",
+    "to": "至"
+  },
+  "kpi": {
+    "revenue": "营收",
+    "paidOrders": "已支付订单",
+    "pending": "待支付",
+    "refundAmount": "退款金额",
+    "refundCountSuffix": "{{n}} 笔",
+    "ticketsSold": "已售票数",
+    "verifyRate": "核销率",
+    "verifyDetail": "{{verified}} / {{sold}}",
+    "deltaFlat": "持平"
+  },
+  "trend": {
+    "title": "营收 / 订单趋势",
+    "points": "{{n}} 个数据点",
+    "orders": "订单数",
+    "revenue": "营收",
+    "refund": "退款"
+  },
+  "byShow": {
+    "title": "演出销售榜 Top 10",
+    "sort": {
+      "revenue": "营收",
+      "tickets": "票数",
+      "orderCount": "订单"
+    },
+    "colShow": "演出",
+    "colOrders": "订单",
+    "colTickets": "票数",
+    "colRevenue": "营收",
+    "empty": "暂无演出销售数据"
+  },
+  "byCategory": {
+    "title": "分类营收占比",
+    "uncategorized": "未分类"
+  },
+  "byCity": {
+    "title": "城市营收",
+    "unspecified": "未指定"
+  },
+  "statusDistribution": {
+    "title": "订单状态分布"
+  },
+  "hourDistribution": {
+    "title": "24h 下单时段",
+    "hourSuffix": "时"
+  },
+  "bySession": {
+    "title": "场次售罄率排行",
+    "colShow": "演出 · 场次",
+    "colFill": "售罄率",
+    "colRevenue": "营收",
+    "empty": "暂无场次数据"
+  },
+  "userStats": {
+    "title": "用户行为",
+    "totalBuyers": "购买用户",
+    "repeatBuyers": "复购用户",
+    "avgOrderValue": "客单价",
+    "avgSeats": "平均座位",
+    "avgSeatsUnit": "个/单"
+  },
+  "refundStats": {
+    "title": "退款指标",
+    "refundAmount": "退款金额",
+    "refundRate": "退款率",
+    "ofRevenue": "占营收",
+    "fullRefund": "全额退款",
+    "partialRefund": "部分退款",
+    "processing": "{{n}} 处理中"
+  },
+  "cancellationStats": {
+    "title": "取消率",
+    "createdCount": "新建订单",
+    "cancelRate": "取消率",
+    "expired": "超时取消",
+    "userCancelled": "用户取消"
+  }
+}

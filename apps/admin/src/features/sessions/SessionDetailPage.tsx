@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
   Flame,
@@ -23,7 +24,7 @@ import {
 import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
-import { formatDateTime, sessionStatusLabel } from '@/lib/format';
+import { formatDateTime, sessionStatusKey } from '@/lib/format';
 import {
   useGetSessionQuery,
   useListSessionAreasQuery,
@@ -55,6 +56,7 @@ interface PriceDraftRow {
 }
 
 export default function SessionDetailPage() {
+  const { t } = useTranslation(['session', 'common', 'room']);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const sessionId = id ?? '';
@@ -101,7 +103,7 @@ export default function SessionDetailPage() {
   const handleSavePrices = async () => {
     for (const row of priceDraft) {
       if (!row.price || Number.isNaN(Number(row.price))) {
-        notify.error(`区域 ${row.areaId} 的价格无效`);
+        notify.error(t('session:detail.priceInvalid', { id: row.areaId }));
         return;
       }
     }
@@ -113,7 +115,7 @@ export default function SessionDetailPage() {
     }));
     try {
       await saveAreas({ sessionId, areas: payload }).unwrap();
-      notify.success('价格已保存');
+      notify.success(t('session:detail.pricesSavedToast'));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -122,7 +124,7 @@ export default function SessionDetailPage() {
   const handleWarmup = async () => {
     try {
       const res = (await warmup(sessionId).unwrap()) as string;
-      notify.success(typeof res === 'string' ? res : '预热完成');
+      notify.success(typeof res === 'string' ? res : t('session:action.warmupDone'));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -131,14 +133,14 @@ export default function SessionDetailPage() {
   const handlePublish = async () => {
     try {
       await publish(sessionId).unwrap();
-      notify.success('场次已发布开售');
+      notify.success(t('session:action.publishedToast'));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
   };
 
-  if (loadingSession) return <div className="p-6 text-muted-foreground">加载中...</div>;
-  if (!session) return <div className="p-6 text-muted-foreground">场次不存在</div>;
+  if (loadingSession) return <div className="p-6 text-muted-foreground">{t('common:states.loading')}</div>;
+  if (!session) return <div className="p-6 text-muted-foreground">{t('session:detail.notFound')}</div>;
 
   const canWarmup =
     session.status === SessionStatus.Draft && seats.length > 0 && areas.length > 0;
@@ -147,12 +149,12 @@ export default function SessionDetailPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title={session.name || `场次 #${session.id}`}
+        title={session.name || t('session:detail.titleFallback', { id: session.id })}
         subtitle={
           <span className="inline-flex items-center gap-2">
-            {formatDateTime(session.startTime)} - {formatDateTime(session.endTime)} · 状态：
+            {formatDateTime(session.startTime)} - {formatDateTime(session.endTime)} · {t('session:detail.statusLabel')}
             <Badge variant={STATUS_VARIANT[session.status] ?? 'default'}>
-              {sessionStatusLabel(session.status)}
+              {t(`session:status.${sessionStatusKey(session.status)}`)}
             </Badge>
           </span>
         }
@@ -161,15 +163,15 @@ export default function SessionDetailPage() {
           <>
             <Button variant="outline" onClick={() => navigate(`/shows/${session.showId}/sessions`)}>
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-              返回
+              {t('common:actions.back')}
             </Button>
             <Button variant="outline" onClick={() => navigate(`/sessions/${session.id}/edit`)}>
               <Edit2 className="h-3.5 w-3.5 mr-1" />
-              编辑
+              {t('common:actions.edit')}
             </Button>
             <Button variant="outline" disabled={!canWarmup || warmingUp} onClick={handleWarmup}>
               <Flame className="h-3.5 w-3.5 mr-1" />
-              {warmingUp ? '预热中...' : '预热库存'}
+              {warmingUp ? t('session:action.warmingUp') : t('session:action.warmup')}
             </Button>
             <Button
               disabled={!canPublish || publishing}
@@ -177,7 +179,7 @@ export default function SessionDetailPage() {
               className="bg-gradient-brand hover:opacity-90"
             >
               <Rocket className="h-3.5 w-3.5 mr-1.5" />
-              {publishing ? '发布中...' : '发布开售'}
+              {publishing ? t('session:action.publishing') : t('session:action.publishLong')}
             </Button>
           </>
         }
@@ -186,10 +188,10 @@ export default function SessionDetailPage() {
 
       {/* 价格区域 */}
       <section>
-        <h2 className="font-semibold mb-3">价格区域</h2>
+        <h2 className="font-semibold mb-3">{t('session:detail.priceArea')}</h2>
         {priceDraft.length === 0 ? (
           <Card variant="glass" className="p-5 text-sm text-muted-foreground">
-            该场次还没有座位。请先确认 <b>场地</b> 已配置座位模板，并在创建场次后等待后端复制。
+            <Trans i18nKey="session:detail.noSeatsHint" components={{ b: <b /> }} />
           </Card>
         ) : (
           <Card variant="glass" className="p-5 space-y-3">
@@ -206,7 +208,7 @@ export default function SessionDetailPage() {
                   {row.areaId}
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor={`p-${row.areaId}`}>价格 *</Label>
+                  <Label htmlFor={`p-${row.areaId}`}>{t('session:detail.priceLabel')}</Label>
                   <Input
                     id={`p-${row.areaId}`}
                     value={row.price}
@@ -214,7 +216,7 @@ export default function SessionDetailPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor={`o-${row.areaId}`}>折扣前价格</Label>
+                  <Label htmlFor={`o-${row.areaId}`}>{t('session:detail.originPriceLabel')}</Label>
                   <Input
                     id={`o-${row.areaId}`}
                     value={row.originPrice}
@@ -226,7 +228,7 @@ export default function SessionDetailPage() {
             <div className="flex justify-end pt-3 border-t border-border/60">
               <Button onClick={handleSavePrices} disabled={savingAreas} size="sm">
                 <Save className="h-3.5 w-3.5 mr-1.5" />
-                {savingAreas ? '保存中...' : '保存价格'}
+                {savingAreas ? t('common:actions.saving') : t('session:detail.savePrices')}
               </Button>
             </div>
           </Card>
@@ -236,11 +238,14 @@ export default function SessionDetailPage() {
       {/* 座位预览 */}
       <section>
         <h2 className="font-semibold mb-3">
-          座位预览（{seats.length} 个 · {usedAreaIds.length} 个区域）
+          {t('session:detail.seatsPreviewTitle', {
+            n: seats.length,
+            areas: usedAreaIds.length,
+          })}
         </h2>
         {seats.length === 0 ? (
           <Card variant="glass" className="p-5 text-sm text-muted-foreground">
-            该场次暂无座位数据。请确认创建场次时正确选择了场地，并且场地已配置座位模板。
+            {t('session:detail.noSeatsDataHint')}
           </Card>
         ) : (
           <SeatPreview
@@ -263,6 +268,7 @@ function SeatPreview({
   rowCount: number;
   colCount: number;
 }) {
+  const { t } = useTranslation('room');
   const seatMap = useMemo(() => {
     const m = new Map<string, AdminSeat>();
     seats.forEach((s) => m.set(`${s.rowNo}-${s.colNo}`, s));
@@ -293,6 +299,13 @@ function SeatPreview({
               colCount={effCol}
               seatMap={seatMap}
               baseIndex={ri * effCol}
+              seatTitleFor={(seat) =>
+                t('room:seatEditor.seatLabel', {
+                  row: rowNo,
+                  col: seat.colNo,
+                  areaId: seat.areaId,
+                })
+              }
             />
           );
         })}
@@ -306,11 +319,13 @@ function PreviewRow({
   colCount,
   seatMap,
   baseIndex,
+  seatTitleFor,
 }: {
   rowNo: number;
   colCount: number;
   seatMap: Map<string, AdminSeat>;
   baseIndex: number;
+  seatTitleFor: (seat: AdminSeat) => string;
 }) {
   return (
     <>
@@ -332,7 +347,7 @@ function PreviewRow({
               'h-7 w-7 rounded text-[10px] font-medium flex items-center justify-center',
               AREA_COLORS[seat.areaId] ?? 'bg-muted',
             )}
-            title={`${rowNo}排${colNo}座 (区域${seat.areaId})`}
+            title={seatTitleFor(seat)}
           >
             {seat.areaId}
           </motion.div>

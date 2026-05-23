@@ -1,32 +1,11 @@
-// ============================================================
-// ⚠️ 报表接口目前使用 mock 数据（reportsApi.mock.ts）
-// 后端接口上线后回滚步骤：
-//   1) 删 reportsApi.mock.ts
-//   2) 把每个 endpoint 的 `queryFn: ...` 改回下面注释里的 `query: ...` 形式
-//   3) 移除文件顶部对 mock 的 import
-// ============================================================
-
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { adminBaseQuery } from '@/api/adminBase';
-import {
-  mockOverview,
-  mockTimeseries,
-  mockByShow,
-  mockByCategory,
-  mockByCity,
-  mockStatusDistribution,
-  mockHourDistribution,
-  mockBySession,
-  mockUserStats,
-  mockRefundStats,
-  mockCancellationStats,
-  mockDelay,
-} from './reportsApi.mock';
 
 export type RangePreset = '1d' | '7d' | '30d' | '90d';
 
 export interface RangeArg {
   range?: RangePreset;
+  /** ISO 8601，例 "2026-05-01T00:00:00" */
   startTime?: string;
   endTime?: string;
 }
@@ -48,6 +27,7 @@ export interface OverviewResp {
 }
 
 export interface TimeseriesPoint {
+  /** dim=day:"YYYY-MM-DD"  dim=hour:"YYYY-MM-DDTHH"  dim=month:"YYYY-MM" */
   date: string;
   orderCount: number;
   revenue: number;
@@ -91,7 +71,7 @@ export interface StatusDistributionItem {
 }
 
 export interface HourDistributionItem {
-  hour: number;
+  hour: number; // 0..23
   orderCount: number;
 }
 
@@ -133,72 +113,54 @@ export interface CancellationStatsResp {
   cancelRate: number;
 }
 
-// 真实接口回滚时用到，先保留 helper
-// const toParams = (arg: object): Record<string, unknown> => {
-//   const out: Record<string, unknown> = {};
-//   for (const [k, v] of Object.entries(arg)) {
-//     if (v !== undefined && v !== null && v !== '') out[k] = v;
-//   }
-//   return out;
-// };
+// 把入参转 fetchBaseQuery 的 params（去掉 undefined / 空串字段）
+const toParams = (arg: object): Record<string, unknown> => {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(arg)) {
+    if (v !== undefined && v !== null && v !== '') out[k] = v;
+  }
+  return out;
+};
 
 export const reportsApi = createApi({
   reducerPath: 'reportsApi',
   baseQuery: adminBaseQuery,
   endpoints: (build) => ({
-    // 真实：query: (arg) => ({ url: '/api/admin/report/overview', params: toParams(arg) }),
     overview: build.query<OverviewResp, RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockOverview) }),
+      query: (arg) => ({ url: '/api/admin/report/overview', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/timeseries', params: toParams(arg) }),
     timeseries: build.query<TimeseriesPoint[], RangeArg & { dim?: TimeseriesDim }>({
-      queryFn: async () => ({ data: await mockDelay(mockTimeseries) }),
+      query: (arg) => ({ url: '/api/admin/report/timeseries', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/by-show', params: toParams(arg) }),
     byShow: build.query<ByShowItem[], RangeArg & { limit?: number; sort?: SortByShow }>({
-      queryFn: async (arg) => {
-        const sorted = [...mockByShow].sort((a, b) => {
-          if (arg.sort === 'tickets') return b.ticketCount - a.ticketCount;
-          if (arg.sort === 'orderCount') return b.orderCount - a.orderCount;
-          return b.revenue - a.revenue;
-        });
-        return { data: await mockDelay(sorted.slice(0, arg.limit ?? 10)) };
-      },
+      query: (arg) => ({ url: '/api/admin/report/by-show', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/by-category', params: toParams(arg) }),
     byCategory: build.query<ByCategoryItem[], RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockByCategory) }),
+      query: (arg) => ({ url: '/api/admin/report/by-category', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/by-city', params: toParams(arg) }),
     byCity: build.query<ByCityItem[], RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockByCity) }),
+      query: (arg) => ({ url: '/api/admin/report/by-city', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/status-distribution', params: toParams(arg) }),
     statusDistribution: build.query<StatusDistributionItem[], RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockStatusDistribution) }),
+      query: (arg) => ({ url: '/api/admin/report/status-distribution', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/hour-distribution', params: toParams(arg) }),
     hourDistribution: build.query<HourDistributionItem[], RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockHourDistribution) }),
+      query: (arg) => ({ url: '/api/admin/report/hour-distribution', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/by-session', params: toParams(arg) }),
     bySession: build.query<
       BySessionItem[],
       RangeArg & { showId?: number; limit?: number; sort?: SortBySession }
     >({
-      queryFn: async (arg) => ({ data: await mockDelay(mockBySession.slice(0, arg.limit ?? 20)) }),
+      query: (arg) => ({ url: '/api/admin/report/by-session', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/user-stats', params: toParams(arg) }),
     userStats: build.query<UserStatsResp, RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockUserStats) }),
+      query: (arg) => ({ url: '/api/admin/report/user-stats', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/refund-stats', params: toParams(arg) }),
     refundStats: build.query<RefundStatsResp, RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockRefundStats) }),
+      query: (arg) => ({ url: '/api/admin/report/refund-stats', params: toParams(arg) }),
     }),
-    // 真实：query: (arg) => ({ url: '/api/admin/report/cancellation-stats', params: toParams(arg) }),
     cancellationStats: build.query<CancellationStatsResp, RangeArg>({
-      queryFn: async () => ({ data: await mockDelay(mockCancellationStats) }),
+      query: (arg) => ({ url: '/api/admin/report/cancellation-stats', params: toParams(arg) }),
     }),
   }),
 });

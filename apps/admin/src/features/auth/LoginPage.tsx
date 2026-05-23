@@ -59,11 +59,11 @@ export default function AdminLoginPage() {
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? t('common:loading') : t('auth:login')}
+          {isLoading ? t('common:states.loading') : t('auth:login')}
         </Button>
         <p className="text-center text-sm pt-1">
           <Link to="/register" className="text-primary underline-offset-4 hover:underline">
-            没有管理员账号？去注册
+            {t('admin:login.switchToRegister')}
           </Link>
         </p>
       </form>

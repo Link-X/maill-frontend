@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Grid3x3, Save, DollarSign, ArrowLeft } from 'lucide-react';
 import {
   Button,
@@ -16,6 +17,7 @@ import { SeatGridEditor } from './SeatGridEditor';
 import { AreaPriceDrawer } from './AreaPriceDrawer';
 
 export default function RoomDetailPage() {
+  const { t } = useTranslation(['room', 'common']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const roomId = id ?? '';
@@ -39,34 +41,38 @@ export default function RoomDetailPage() {
     if (!room) return;
     try {
       await saveSeats({ roomId: room.id, seats: draftSeats }).unwrap();
-      notify.success(`座位模板已保存（${draftSeats.length} 个座位）`);
+      notify.success(t('room:detail.saveSeatsToast', { n: draftSeats.length }));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
   };
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">加载中...</div>;
+    return <div className="p-6 text-muted-foreground">{t('common:states.loading')}</div>;
   }
   if (!room) {
-    return <div className="p-6 text-muted-foreground">场地不存在</div>;
+    return <div className="p-6 text-muted-foreground">{t('room:detail.notFound')}</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <PageHeader
         title={room.name}
-        subtitle={`${room.venue ?? '-'} · ${room.rowCount} 行 × ${room.colCount} 列`}
+        subtitle={t('room:detail.subtitle', {
+          venue: room.venue ?? '-',
+          rows: room.rowCount,
+          cols: room.colCount,
+        })}
         icon={Grid3x3}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate('/rooms')}>
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-              返回列表
+              {t('room:detail.backToList')}
             </Button>
             <Button variant="outline" onClick={() => setPriceDrawerOpen(true)}>
               <DollarSign className="h-3.5 w-3.5 mr-1" />
-              价格区域
+              {t('room:detail.priceArea')}
             </Button>
             <Button
               onClick={handleSaveSeats}
@@ -74,7 +80,9 @@ export default function RoomDetailPage() {
               className="bg-gradient-brand hover:opacity-90"
             >
               <Save className="h-3.5 w-3.5 mr-1.5" />
-              {savingSeats ? '保存中...' : `保存座位模板（${draftSeats.length}）`}
+              {savingSeats
+                ? t('room:detail.savingSeats')
+                : t('room:detail.saveSeats', { n: draftSeats.length })}
             </Button>
           </>
         }

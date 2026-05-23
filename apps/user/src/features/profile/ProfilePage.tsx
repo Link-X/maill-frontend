@@ -25,7 +25,7 @@ const localeOptions: { value: AppLocale; key: string }[] = [
 ];
 
 export default function ProfilePage() {
-  const { t } = useTranslation(['common', 'auth']);
+  const { t } = useTranslation(['common', 'auth', 'order']);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectUser);
@@ -73,7 +73,7 @@ export default function ProfilePage() {
 
       <Button variant="outline" className="w-full" onClick={() => navigate('/verify')}>
         <ScanLine className="h-4 w-4 mr-1.5" />
-        前往核销
+        {t('order:verify.title')}
       </Button>
 
       <Button

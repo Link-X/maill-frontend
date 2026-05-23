@@ -10,7 +10,7 @@ import { useRegisterMutation } from './adminAuthApi';
 import { setCredentials } from './adminAuthSlice';
 
 export default function AdminRegisterPage() {
-  const { t } = useTranslation(['auth', 'common']);
+  const { t } = useTranslation(['auth', 'common', 'admin']);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [registerMutation, { isLoading }] = useRegisterMutation();
@@ -20,7 +20,7 @@ export default function AdminRegisterPage() {
     password: z.string().min(6, t('auth:validation.passwordMin')),
     phone: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
-    inviteCode: z.string().min(16, '邀请码至少 16 位'),
+    inviteCode: z.string().min(16, t('admin:register.inviteCodeMin')),
   });
   type FormValues = z.infer<typeof schema>;
 
@@ -50,7 +50,7 @@ export default function AdminRegisterPage() {
           user: { userId: String(result.userId), username: values.username },
         }),
       );
-      notify.success('注册成功，欢迎使用');
+      notify.success(t('admin:register.successToast'));
       navigate('/', { replace: true });
     } catch (e) {
       notify.error(extractErrorMessage(e));
@@ -68,7 +68,7 @@ export default function AdminRegisterPage() {
             <UserPlus className="h-5 w-5" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-center">管理员注册</h1>
+        <h1 className="text-2xl font-bold text-center">{t('admin:register.title')}</h1>
 
         <div className="space-y-2">
           <Label htmlFor="username">{t('auth:username')} *</Label>
@@ -93,12 +93,12 @@ export default function AdminRegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="inviteCode">邀请码 *</Label>
+          <Label htmlFor="inviteCode">{t('admin:register.inviteCodeLabel')}</Label>
           <Input
             id="inviteCode"
             type="password"
             autoComplete="off"
-            placeholder="向系统管理员索取"
+            placeholder={t('admin:register.inviteCodePlaceholder')}
             {...register('inviteCode')}
           />
           {errors.inviteCode && (
@@ -112,12 +112,12 @@ export default function AdminRegisterPage() {
           disabled={isLoading}
         >
           <Save className="h-4 w-4 mr-1.5" />
-          {isLoading ? t('common:loading') : '注册'}
+          {isLoading ? t('common:states.loading') : t('auth:register')}
         </Button>
 
         <p className="text-center text-sm pt-1">
           <Link to="/login" className="text-primary underline-offset-4 hover:underline">
-            已有账号？去登录
+            {t('auth:switchToLogin')}
           </Link>
         </p>
       </form>

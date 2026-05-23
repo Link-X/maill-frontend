@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, CreditCard, Sparkles, QrCode, RefreshCcw } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -18,6 +19,7 @@ import { useGetOrderDetailsQuery, useCancelOrderMutation, useRefundTicketMutatio
 import { useCreatePaymentMutation } from '@/features/payment/paymentApi';
 
 export default function OrderPayPage() {
+  const { t } = useTranslation(['order']);
   const navigate = useNavigate();
   const { orderNo } = useParams<{ orderNo: string }>();
   const id = orderNo ?? '';
@@ -40,18 +42,18 @@ export default function OrderPayPage() {
   useEffect(() => {
     if (polling && allTicketsReady) {
       setPolling(false);
-      notify.success('票券已生成');
+      notify.success(t('order:pay.ticketsReady'));
     }
-  }, [polling, allTicketsReady]);
+  }, [polling, allTicketsReady, t]);
 
   useEffect(() => {
     if (!polling) return;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       setPolling(false);
-      notify.warn('票券生成稍慢，可下拉刷新订单详情');
+      notify.warn(t('order:pay.ticketsSlowHint'));
     }, 30000);
-    return () => clearTimeout(t);
-  }, [polling]);
+    return () => clearTimeout(timer);
+  }, [polling, t]);
 
   if (isLoading) {
     return (
@@ -62,13 +64,13 @@ export default function OrderPayPage() {
     );
   }
   if (!order) {
-    return <div className="p-6 text-center text-muted-foreground">订单不存在</div>;
+    return <div className="p-6 text-center text-muted-foreground">{t('order:pay.notFound')}</div>;
   }
 
   const handlePay = async () => {
     try {
       await createPayment({ orderNo: id, channel: 'mock' }).unwrap();
-      notify.success('支付成功，正在生成票券...');
+      notify.success(t('order:pay.paidGenerating'));
       setPolling(true);
       refetch();
     } catch (e) {
@@ -79,7 +81,7 @@ export default function OrderPayPage() {
   const handleCancel = async () => {
     try {
       await cancelOrder({ orderNo: id }).unwrap();
-      notify.success('订单已取消');
+      notify.success(t('order:pay.cancelledToast'));
       navigate('/orders', { replace: true });
     } catch (e) {
       notify.error(extractErrorMessage(e));
@@ -90,7 +92,7 @@ export default function OrderPayPage() {
     setRefundingTicketNo(ticketNo);
     try {
       await refundTicket({ orderNo: id, ticketNo }).unwrap();
-      notify.success(`已发起退票: ${ticketNo}`);
+      notify.success(t('order:refund.ticketSubmittedToast', { ticketNo }));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     } finally {
@@ -102,7 +104,7 @@ export default function OrderPayPage() {
     if (!order) return;
     try {
       await cancelOrder({ orderNo: id }).unwrap();
-      notify.success('已发起全单退款');
+      notify.success(t('order:refund.allSubmittedToast'));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -118,25 +120,25 @@ export default function OrderPayPage() {
         <button
           type="button"
           onClick={() => navigate('/orders')}
-          aria-label="返回订单列表"
+          aria-label={t('order:pay.backToList')}
           className="h-9 w-9 rounded-full bg-card flex items-center justify-center border border-border/60"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="font-semibold">订单详情</div>
+        <div className="font-semibold">{t('order:pay.title')}</div>
       </div>
 
       <div className="px-4 space-y-4">
         <Card variant="gradient" className="p-4 space-y-2">
-          <div className="text-xs text-muted-foreground">订单号</div>
+          <div className="text-xs text-muted-foreground">{t('order:orderNo')}</div>
           <div className="font-mono text-sm">{order.orderNo}</div>
           <div className="flex items-center justify-between pt-2 border-t border-brand/20">
-            <span className="text-sm text-muted-foreground">总价</span>
+            <span className="text-sm text-muted-foreground">{t('order:detail.totalLabel')}</span>
             <span className="text-2xl font-semibold text-brand">{formatMoney(order.totalAmount)}</span>
           </div>
           {isPending && order.expireTime && (
             <div className="flex items-center justify-between pt-1">
-              <span className="text-sm text-muted-foreground">支付剩余</span>
+              <span className="text-sm text-muted-foreground">{t('order:detail.payRemaining')}</span>
               <Countdown expireTime={order.expireTime} onExpire={refetch} />
             </div>
           )}
@@ -153,7 +155,7 @@ export default function OrderPayPage() {
             </div>
           )}
           <div className="pt-2 border-t border-border/60">
-            <div className="text-xs text-muted-foreground mb-1">座位</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('order:detail.seatsLabel')}</div>
             <div className="flex flex-wrap gap-1.5">
               {order.seatInfos.map((s, i) => (
                 <span
@@ -171,31 +173,31 @@ export default function OrderPayPage() {
           <section className="space-y-3">
             <h3 className="font-medium inline-flex items-center gap-1.5">
               <QrCode className="h-4 w-4 text-brand" />
-              入场二维码
+              {t('order:detail.qrCode')}
             </h3>
             {(!order.tickets || order.tickets.length === 0) ? (
               <Card className="p-6 text-center text-sm text-muted-foreground">
-                票券正在生成中...
+                {t('order:pay.generating')}
                 {!polling && (
                   <Button size="sm" variant="outline" className="mt-3" onClick={() => setPolling(true)}>
-                    手动刷新
+                    {t('order:pay.refreshNow')}
                   </Button>
                 )}
               </Card>
             ) : (
               <>
                 <div className="grid grid-cols-1 gap-3">
-                  {order.tickets.map((t, i) => (
+                  {order.tickets.map((tk, i) => (
                     <motion.div
-                      key={t.ticketNo}
+                      key={tk.ticketNo}
                       initial={{ opacity: 0, scale: 0.92 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.04, type: 'spring', stiffness: 320, damping: 26 }}
                     >
                       <Card className="p-4 flex items-center gap-4">
                         <div className="bg-card p-2 rounded-lg border border-border/60">
-                          {t.qrCode ? (
-                            <QRCodeSVG value={t.qrCode} size={96} level="M" />
+                          {tk.qrCode ? (
+                            <QRCodeSVG value={tk.qrCode} size={96} level="M" />
                           ) : (
                             <div className="h-24 w-24 flex items-center justify-center text-muted-foreground">
                               <Sparkles className="h-6 w-6 animate-spin" />
@@ -203,24 +205,26 @@ export default function OrderPayPage() {
                           )}
                         </div>
                         <div className="min-w-0 flex-1 space-y-1">
-                          <div className="text-xs text-muted-foreground">票号</div>
-                          <div className="font-mono text-sm break-all">{t.ticketNo}</div>
+                          <div className="text-xs text-muted-foreground">{t('order:pay.ticketNo')}</div>
+                          <div className="font-mono text-sm break-all">{tk.ticketNo}</div>
                           <div className="text-xs text-muted-foreground pt-1">
-                            {order.seatInfos[i] ?? `第 ${i + 1} 张`}
+                            {order.seatInfos[i] ?? t('order:pay.ticketIndex', { n: i + 1 })}
                           </div>
-                          {t.status === 0 && (
+                          {tk.status === 0 && (
                             <Button
                               size="sm"
                               variant="outline"
                               className="mt-2"
-                              disabled={refundingTicketNo === t.ticketNo}
+                              disabled={refundingTicketNo === tk.ticketNo}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRefundTicket(t.ticketNo);
+                                handleRefundTicket(tk.ticketNo);
                               }}
                             >
                               <RefreshCcw className="h-3 w-3 mr-1" />
-                              {refundingTicketNo === t.ticketNo ? '退票中...' : '退此票'}
+                              {refundingTicketNo === tk.ticketNo
+                                ? t('order:refund.ticketing')
+                                : t('order:refund.ticket')}
                             </Button>
                           )}
                         </div>
@@ -236,7 +240,7 @@ export default function OrderPayPage() {
                     onClick={handleRefundAll}
                   >
                     <RefreshCcw className="h-4 w-4 mr-1.5" />
-                    {refunding ? '退款中...' : '全单退款'}
+                    {refunding ? t('order:refund.refundingAll') : t('order:refund.all')}
                   </Button>
                 </div>
               </>
@@ -246,7 +250,7 @@ export default function OrderPayPage() {
 
         {isCancelled && (
           <Card className="p-4 text-center text-sm text-muted-foreground">
-            订单已取消
+            {t('order:pay.cancelledStatus')}
           </Card>
         )}
       </div>
@@ -260,7 +264,7 @@ export default function OrderPayPage() {
               disabled={cancelling}
               onClick={handleCancel}
             >
-              取消订单
+              {cancelling ? t('order:cancelling') : t('order:cancelOrder')}
             </Button>
             <Button
               className="flex-[2] bg-gradient-brand hover:opacity-90"
@@ -268,7 +272,9 @@ export default function OrderPayPage() {
               onClick={handlePay}
             >
               <CreditCard className="h-4 w-4 mr-1.5" />
-              {paying ? '支付中...' : `立即支付 ${formatMoney(order.totalAmount)}`}
+              {paying
+                ? t('order:pay.paying')
+                : t('order:pay.payNowAmount', { amount: formatMoney(order.totalAmount) })}
             </Button>
           </div>
         </StickyBottomBar>

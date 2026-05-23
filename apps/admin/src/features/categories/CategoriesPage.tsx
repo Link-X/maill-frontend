@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tag, Plus, Edit2, Trash2, Power } from 'lucide-react';
 import {
   Button,
@@ -19,6 +20,7 @@ import {
 import { CategoryFormDrawer } from './CategoryFormDrawer';
 
 export default function CategoriesPage() {
+  const { t } = useTranslation(['category', 'common']);
   const { data: categories = [], isLoading } = useListCategoriesQuery();
   const [updateCategory] = useUpdateCategoryMutation();
   const [deleteCategory, { isLoading: deleting }] = useDeleteCategoryMutation();
@@ -37,9 +39,14 @@ export default function CategoriesPage() {
   };
 
   const toggleStatus = async (c: Category) => {
+    const willEnable = c.status !== 1;
     try {
-      await updateCategory({ ...c, status: c.status === 1 ? 0 : 1 }).unwrap();
-      notify.success(`已${c.status === 1 ? '禁用' : '启用'}：${c.name}`);
+      await updateCategory({ ...c, status: willEnable ? 1 : 0 }).unwrap();
+      notify.success(
+        t(willEnable ? 'category:toggle.enabledToast' : 'category:toggle.disabledToast', {
+          name: c.name,
+        }),
+      );
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -49,7 +56,7 @@ export default function CategoriesPage() {
     if (!pendingDelete) return;
     try {
       await deleteCategory(pendingDelete.id).unwrap();
-      notify.success(`已删除：${pendingDelete.name}`);
+      notify.success(t('category:delete.successToast', { name: pendingDelete.name }));
       setPendingDelete(null);
     } catch (e) {
       notify.error(extractErrorMessage(e));
@@ -59,7 +66,7 @@ export default function CategoriesPage() {
   const columns: Column<Category>[] = [
     {
       key: 'icon',
-      title: '图标',
+      title: t('category:table.icon'),
       width: '64px',
       render: (c) =>
         c.icon ? (
@@ -70,28 +77,28 @@ export default function CategoriesPage() {
           </div>
         ),
     },
-    { key: 'name', title: '名称', render: (c) => <span className="font-medium">{c.name}</span> },
-    { key: 'sort', title: '排序', width: '80px', render: (c) => c.sort ?? 0 },
+    { key: 'name', title: t('category:table.name'), render: (c) => <span className="font-medium">{c.name}</span> },
+    { key: 'sort', title: t('category:table.sort'), width: '80px', render: (c) => c.sort ?? 0 },
     {
       key: 'status',
-      title: '状态',
+      title: t('category:table.status'),
       width: '80px',
       render: (c) => (
         <Badge variant={c.status === 1 ? 'success' : 'muted'}>
-          {c.status === 1 ? '启用' : '禁用'}
+          {t(c.status === 1 ? 'category:status.enabled' : 'category:status.disabled')}
         </Badge>
       ),
     },
-    { key: 'createTime', title: '创建时间', render: (c) => formatDateTime(c.createTime) },
+    { key: 'createTime', title: t('category:table.createTime'), render: (c) => formatDateTime(c.createTime) },
     {
       key: 'actions',
-      title: '操作',
+      title: t('category:table.actions'),
       width: '260px',
       render: (c) => (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => openEdit(c)}>
             <Edit2 className="h-3.5 w-3.5 mr-1" />
-            编辑
+            {t('common:actions.edit')}
           </Button>
           <Button
             size="sm"
@@ -99,11 +106,11 @@ export default function CategoriesPage() {
             onClick={() => toggleStatus(c)}
           >
             <Power className="h-3.5 w-3.5 mr-1" />
-            {c.status === 1 ? '禁用' : '启用'}
+            {t(c.status === 1 ? 'category:action.disableShort' : 'category:action.enableShort')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setPendingDelete(c)}>
             <Trash2 className="h-3.5 w-3.5 mr-1" />
-            删除
+            {t('common:actions.delete')}
           </Button>
         </div>
       ),
@@ -113,13 +120,13 @@ export default function CategoriesPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="分类管理"
-        subtitle="维护演出分类，用户端首页 tabs 与演出表单下拉的来源"
+        title={t('category:page.title')}
+        subtitle={t('category:page.subtitle')}
         icon={Tag}
         actions={
           <Button onClick={openCreate} className="bg-gradient-brand hover:opacity-90">
             <Plus className="h-4 w-4 mr-1.5" />
-            新建分类
+            {t('category:action.createBtn')}
           </Button>
         }
       />
@@ -138,16 +145,12 @@ export default function CategoriesPage() {
 
       <ConfirmDialog
         open={!!pendingDelete}
-        title="删除分类"
+        title={t('category:delete.title')}
         description={
-          pendingDelete && (
-            <span>
-              确定要删除 <b>{pendingDelete.name}</b> 吗？被演出引用的分类无法删除。
-            </span>
-          )
+          pendingDelete && t('category:delete.desc', { name: pendingDelete.name })
         }
         destructive
-        confirmText={deleting ? '删除中...' : '删除'}
+        confirmText={deleting ? t('category:delete.btnDeleting') : t('category:delete.btn')}
         onConfirm={handleDelete}
         onCancel={() => setPendingDelete(null)}
       />

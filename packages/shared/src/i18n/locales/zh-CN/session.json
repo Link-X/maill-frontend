@@ -1,0 +1,106 @@
+{
+  "page": {
+    "title": "场次管理",
+    "subtitle": "维护演出的具体场次",
+    "titleWithShow": "{{showName}} - 场次列表",
+    "showFallback": "演出",
+    "forShowSubtitle": "一个演出可对应多个场次"
+  },
+  "list": {
+    "empty": "该演出还没有场次，点击右上角新建"
+  },
+  "form": {
+    "titleNew": "新建场次",
+    "titleEdit": "编辑场次",
+    "showId": "演出 ID *",
+    "showIdPlaceholder": "从 /shows 列表复制 ID",
+    "room": "场地 *",
+    "roomPlaceholder": "请选择场地",
+    "roomLabelExtra": "{{name}}（{{rows}}×{{cols}}）",
+    "name": "场次名称（可选）",
+    "namePlaceholder": "2026 上海站 晚场",
+    "startTime": "开始时间 *",
+    "endTime": "结束时间 *",
+    "limitPerUser": "每人限购 *",
+    "limitMin": "最少 1",
+    "limitMax": "最多 20",
+    "extend": "扩展字段（JSON）",
+    "extendHint": "约定字段：preSaleLeadMinutes（分钟）/ notice。",
+    "extendInvalid": "需要合法的 JSON 对象（如 {\"notice\":\"现场须知\"}）",
+    "showRequired": "请选择演出",
+    "roomRequired": "请选择场地",
+    "startRequired": "请填写开始时间",
+    "endRequired": "请填写结束时间",
+    "createdToast": "场次已创建",
+    "savedToast": "场次已更新"
+  },
+  "status": {
+    "draft": "草稿",
+    "published": "已开售",
+    "ended": "已结束"
+  },
+  "action": {
+    "createBtn": "新建场次",
+    "publish": "上架开售",
+    "unpublish": "下架",
+    "createdSuccess": "场次创建成功",
+    "createSubmit": "创建",
+    "backToShows": "返回演出列表",
+    "warmup": "预热库存",
+    "warmingUp": "预热中...",
+    "warmupDone": "预热完成",
+    "publishLong": "发布开售",
+    "publishing": "发布中...",
+    "publishedToast": "场次已发布开售"
+  },
+  "table": {
+    "id": "ID",
+    "name": "场次名称",
+    "startTime": "开始时间",
+    "limitPerUser": "每人限购",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "userSeat": {
+    "stage": "舞台 / STAGE",
+    "rowsCols": "{{rows}} 行 × {{cols}} 列",
+    "rowsColsScale": "{{rows}} 行 × {{cols}} 列 · 缩放 {{pct}}%",
+    "legendSelected": "已选",
+    "legendSold": "已售",
+    "limitToast": "每人最多选 {{n}} 个座位",
+    "loadFailed": "场次数据加载失败",
+    "leadMinutes": "开演前 {{n}} 分钟可入场",
+    "tooltipZoomIn": "放大",
+    "tooltipZoomOut": "缩小",
+    "tooltipReset": "复位"
+  },
+  "selectionBar": {
+    "selectedCount": "已选 {{n}} 个座位",
+    "moreSeats": "+{{n}}",
+    "total": "合计",
+    "submit": "立即下单"
+  },
+  "detail": {
+    "title": "场次详情",
+    "loading": "加载中...",
+    "monitor": "实时监控",
+    "titleFallback": "场次 #{{id}}",
+    "statusLabel": "状态：",
+    "notFound": "场次不存在",
+    "priceArea": "价格区域",
+    "noSeatsHint": "该场次还没有座位。请先确认 <b>场地</b> 已配置座位模板，并在创建场次后等待后端复制。",
+    "noSeatsDataHint": "该场次暂无座位数据。请确认创建场次时正确选择了场地，并且场地已配置座位模板。",
+    "priceLabel": "价格 *",
+    "originPriceLabel": "折扣前价格",
+    "savePrices": "保存价格",
+    "pricesSavedToast": "价格已保存",
+    "priceInvalid": "区域 {{id}} 的价格无效",
+    "seatsPreviewTitle": "座位预览（{{n}} 个 · {{areas}} 个区域）"
+  },
+  "monitor": {
+    "title": "实时监控（每 5 秒刷新）",
+    "totalSeats": "总座位",
+    "sold": "已售",
+    "available": "可售"
+  }
+}

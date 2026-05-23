@@ -14,7 +14,7 @@ const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function HomePage() {
-  const { t } = useTranslation(['show']);
+  const { t } = useTranslation(['show', 'common', 'city']);
   const [name, setName] = useState('');
   const [debouncedName, setDebouncedName] = useState('');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
@@ -39,13 +39,13 @@ export default function HomePage() {
   });
 
   const list = data?.list ?? [];
-  const currentCityName = cities.find((c) => c.code === cityCode)?.name ?? '全部城市';
+  const currentCityName = cities.find((c) => c.code === cityCode)?.name ?? t('city:picker.allCities');
 
   return (
     <div className="px-4 py-3 space-y-4">
       <header className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('show:list')}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('show:list.title')}</h1>
           <CityPicker
             cities={cities}
             value={cityCode}
@@ -58,7 +58,7 @@ export default function HomePage() {
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('show:detail')}
+            placeholder={t('show:list.searchPlaceholder')}
             className="pl-9 h-11 rounded-xl"
           />
         </div>
@@ -70,7 +70,7 @@ export default function HomePage() {
               active={categoryId === undefined}
               onClick={() => setCategoryId(undefined)}
             >
-              全部
+              {t('show:list.allCategories')}
             </CategoryChip>
             {categories.map((c) => (
               <CategoryChip
@@ -92,7 +92,11 @@ export default function HomePage() {
           ))}
         </div>
       ) : list.length === 0 ? (
-        <EmptyState icon={Sparkles} title="暂无演出" description="换个关键词试试看" />
+        <EmptyState
+          icon={Sparkles}
+          title={t('show:list.empty')}
+          description={t('show:list.emptyHint')}
+        />
       ) : (
         <motion.div
           className="grid grid-cols-2 gap-3"
@@ -107,7 +111,7 @@ export default function HomePage() {
       )}
 
       {isFetching && !isLoading && (
-        <p className="text-center text-xs text-muted-foreground">加载中...</p>
+        <p className="text-center text-xs text-muted-foreground">{t('common:states.loading')}</p>
       )}
     </div>
   );
@@ -149,6 +153,7 @@ function CityPicker({
   label: string;
   onChange: (cityCode: string | undefined) => void;
 }) {
+  const { t } = useTranslation(['city']);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -188,7 +193,7 @@ function CityPicker({
                 setOpen(false);
               }}
             >
-              全部城市
+              {t('city:picker.allCities')}
             </CityOption>
             {cities.map((c) => (
               <CityOption
@@ -203,7 +208,7 @@ function CityPicker({
               </CityOption>
             ))}
             {cities.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-3">暂无城市</p>
+              <p className="text-xs text-muted-foreground text-center py-3">{t('city:picker.empty')}</p>
             )}
           </motion.div>
         )}

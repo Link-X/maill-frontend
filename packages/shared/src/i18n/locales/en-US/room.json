@@ -1,0 +1,87 @@
+{
+  "page": {
+    "title": "Rooms",
+    "subtitle": "Rooms hold seat templates and can be reused across sessions"
+  },
+  "list": {
+    "rowsCols": "{{rows}} rows × {{cols}} cols"
+  },
+  "table": {
+    "name": "Room",
+    "venue": "Venue",
+    "size": "Rows × Cols",
+    "createTime": "Created",
+    "actions": "Actions",
+    "seatsAndPrice": "Seats & price"
+  },
+  "form": {
+    "titleNew": "New room",
+    "titleEdit": "Edit room",
+    "name": "Name",
+    "nameRequired": "Please enter the room name",
+    "venue": "Venue",
+    "venuePlaceholder": "National Stadium",
+    "description": "Description",
+    "rowCount": "Rows",
+    "colCount": "Columns",
+    "rowsMin": "At least 1 row",
+    "rowsMax": "At most 200 rows",
+    "colsMin": "At least 1 column",
+    "colsMax": "At most 200 columns",
+    "savedToast": "Room updated",
+    "createdToast": "Room created"
+  },
+  "detail": {
+    "subtitle": "{{venue}} · {{rows}} rows × {{cols}} cols",
+    "backToList": "Back to list",
+    "priceArea": "Price areas",
+    "saveSeats": "Save seat template ({{n}})",
+    "savingSeats": "Saving...",
+    "saveSeatsToast": "Seat template saved ({{n}} seats)",
+    "loading": "Loading...",
+    "notFound": "Room not found"
+  },
+  "action": {
+    "createBtn": "New room",
+    "enterDetail": "Edit"
+  },
+  "seatEditor": {
+    "noAreas": "Please add at least one area in \"Price areas\" before placing seats.",
+    "noAreasDisabledHint": "No available area, cells are disabled.",
+    "fillAllPrefix": "Fill all:",
+    "fillAllBtn": "All {{areaId}}",
+    "fillAllTooltip": "Set all {{rows}} × {{cols}} cells as normal seats in area {{areaId}}",
+    "clearBtn": "Clear",
+    "selectedCount": "<b>{{n}}</b> selected · apply as",
+    "applyBtn": "Apply",
+    "removeSeatsBtn": "Remove",
+    "clearSelectionBtn": "Clear selection",
+    "hint": "Click to cycle: empty → {{cycle}} → empty; drag to box-select; click row/col number to select whole row/col (Shift to extend); Esc to clear selection.",
+    "selectColTip": "Select column {{n}} (Shift to extend)",
+    "selectRowTip": "Select row {{n}} (Shift to extend)",
+    "selectArea": "Select area",
+    "areaPrefix": "Area {{areaId}}",
+    "seatLabel": "Row {{row}} Seat {{col}} (Area {{areaId}})",
+    "cellEnableHint": "Click to enable"
+  },
+  "priceDrawer": {
+    "title": "Price areas",
+    "hint": "Independently manage price areas with custom areaId (e.g. VIP / A / Balcony). Areas referenced by seats cannot be deleted or renamed.",
+    "empty": "No areas yet. Click below to add one.",
+    "areaIdLabel": "Area ID",
+    "areaIdPlaceholder": "Area ID, e.g. VIP / A / Balcony",
+    "defaultPrice": "Default price *",
+    "defaultPricePlaceholder": "380",
+    "originPrice": "Origin price",
+    "originPricePlaceholder": "Optional",
+    "addBtn": "Add area",
+    "delTooltipReferenced": "Referenced by seats, cannot delete",
+    "delTooltipDefault": "Delete area",
+    "errEmptyId": "An area has empty areaId",
+    "errDuplicateId": "areaId \"{{id}}\" is duplicated",
+    "errInvalidPrice": "Default price of area {{id}} is invalid",
+    "errInvalidOriginPrice": "Origin price of area {{id}} is invalid",
+    "errReferenced": "Seats still reference area \"{{id}}\". Remove those seats first.",
+    "savedToast": "Price areas saved"
+  }
+}

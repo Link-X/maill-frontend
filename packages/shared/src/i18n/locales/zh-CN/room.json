@@ -1,0 +1,87 @@
+{
+  "page": {
+    "title": "场地管理",
+    "subtitle": "场地是座位模板的载体，可被多个场次复用"
+  },
+  "list": {
+    "rowsCols": "{{rows}} 行 × {{cols}} 列"
+  },
+  "table": {
+    "name": "场地名",
+    "venue": "所属场馆",
+    "size": "行x列",
+    "createTime": "创建时间",
+    "actions": "操作",
+    "seatsAndPrice": "座位与价格"
+  },
+  "form": {
+    "titleNew": "新建场地",
+    "titleEdit": "编辑场地",
+    "name": "名称",
+    "nameRequired": "请输入场地名称",
+    "venue": "所属场馆",
+    "venuePlaceholder": "国家体育场",
+    "description": "描述",
+    "rowCount": "行数",
+    "colCount": "列数",
+    "rowsMin": "至少 1 行",
+    "rowsMax": "最多 200 行",
+    "colsMin": "至少 1 列",
+    "colsMax": "最多 200 列",
+    "savedToast": "场地已更新",
+    "createdToast": "场地已创建"
+  },
+  "detail": {
+    "subtitle": "{{venue}} · {{rows}} 行 × {{cols}} 列",
+    "backToList": "返回列表",
+    "priceArea": "价格区域",
+    "saveSeats": "保存座位模板（{{n}}）",
+    "savingSeats": "保存中...",
+    "saveSeatsToast": "座位模板已保存（{{n}} 个座位）",
+    "loading": "加载中...",
+    "notFound": "场地不存在"
+  },
+  "action": {
+    "createBtn": "新建场地",
+    "enterDetail": "编辑"
+  },
+  "seatEditor": {
+    "noAreas": "请先在右上角「价格区域」中新增至少一个区域，再来放置座位。",
+    "noAreasDisabledHint": "当前没有可用区域，单元格已禁用。",
+    "fillAllPrefix": "一键填充：",
+    "fillAllBtn": "全部 {{areaId}}",
+    "fillAllTooltip": "将所有 {{rows}} × {{cols}} 个单元格批量设为 {{areaId}} 区域的普通座",
+    "clearBtn": "清空",
+    "selectedCount": "已选 <b>{{n}}</b> 个 · 应用为",
+    "applyBtn": "应用",
+    "removeSeatsBtn": "删除座位",
+    "clearSelectionBtn": "清空选区",
+    "hint": "单击切换：未占 → {{cycle}} → 未占；按住拖动可框选；点行号/列号选中整行/整列（Shift 追加）；Esc 清空选区。",
+    "selectColTip": "选中第 {{n}} 列（Shift 追加）",
+    "selectRowTip": "选中第 {{n}} 排（Shift 追加）",
+    "selectArea": "选择区域",
+    "areaPrefix": "区域 {{areaId}}",
+    "seatLabel": "{{row}}排{{col}}座 (区域{{areaId}})",
+    "cellEnableHint": "点击启用"
+  },
+  "priceDrawer": {
+    "title": "价格区域配置",
+    "hint": "独立管理价格区域：可自由命名 areaId（如 VIP/A/楼座）；被座位引用的区域不能删除或改名。",
+    "empty": "还没有任何区域，点击下方按钮新增。",
+    "areaIdLabel": "区域 ID",
+    "areaIdPlaceholder": "区域 ID，如 VIP / A / 楼座",
+    "defaultPrice": "默认价格 *",
+    "defaultPricePlaceholder": "380",
+    "originPrice": "折扣前价格",
+    "originPricePlaceholder": "可选",
+    "addBtn": "新增区域",
+    "delTooltipReferenced": "该区域有座位引用，无法删除",
+    "delTooltipDefault": "删除区域",
+    "errEmptyId": "存在 areaId 为空的区域",
+    "errDuplicateId": "areaId \"{{id}}\" 重复",
+    "errInvalidPrice": "区域 {{id}} 的默认价格无效",
+    "errInvalidOriginPrice": "区域 {{id}} 的折扣前价格无效",
+    "errReferenced": "座位仍在使用区域 \"{{id}}\"，请先在座位模板中移除该区域的座位",
+    "savedToast": "价格区域已保存"
+  }
+}

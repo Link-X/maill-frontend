@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Save, Tag, DollarSign, Plus, Trash2 } from 'lucide-react';
 import {
   Button,
@@ -29,11 +30,12 @@ interface DraftRow {
   areaId: string;
   defaultPrice: string;
   defaultOriginPrice: string;
-  // 服务器已存在的行（用于在被座位引用时锁定 areaId，防止误改导致 seats 指向丢失）
+  // 服务器已存在的行（用于在被座位引用时锁定 areaId）
   persisted: boolean;
 }
 
 export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) {
+  const { t } = useTranslation(['room', 'common']);
   const [saveAreas, { isLoading }] = useSaveRoomAreasMutation();
   const [draft, setDraft] = useState<DraftRow[]>([]);
 
@@ -49,7 +51,6 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
     );
   }, [open, areas]);
 
-  // 哪些 areaId 当前被座位引用 — 用于禁用删除/锁定 areaId 编辑
   const usedAreaIds = useMemo(() => new Set(seats.map((s) => s.areaId)), [seats]);
 
   const addRow = () =>
@@ -67,27 +68,26 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
     for (const row of draft) {
       const id = row.areaId.trim();
       if (!id) {
-        notify.error('存在 areaId 为空的区域');
+        notify.error(t('room:priceDrawer.errEmptyId'));
         return;
       }
       if (ids.has(id)) {
-        notify.error(`areaId "${id}" 重复`);
+        notify.error(t('room:priceDrawer.errDuplicateId', { id }));
         return;
       }
       ids.add(id);
       if (!row.defaultPrice || Number.isNaN(Number(row.defaultPrice))) {
-        notify.error(`区域 ${id} 的默认价格无效`);
+        notify.error(t('room:priceDrawer.errInvalidPrice', { id }));
         return;
       }
       if (row.defaultOriginPrice && Number.isNaN(Number(row.defaultOriginPrice))) {
-        notify.error(`区域 ${id} 的折扣前价格无效`);
+        notify.error(t('room:priceDrawer.errInvalidOriginPrice', { id }));
         return;
       }
     }
-    // 座位仍引用的区域不能被删除
     for (const seatAreaId of usedAreaIds) {
       if (!ids.has(seatAreaId)) {
-        notify.error(`座位仍在使用区域 "${seatAreaId}"，请先在座位模板中移除该区域的座位`);
+        notify.error(t('room:priceDrawer.errReferenced', { id: seatAreaId }));
         return;
       }
     }
@@ -99,7 +99,7 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
     }));
     try {
       await saveAreas({ roomId, areas: payload }).unwrap();
-      notify.success('价格区域已保存');
+      notify.success(t('room:priceDrawer.savedToast'));
       onClose();
     } catch (e) {
       notify.error(extractErrorMessage(e));
@@ -110,12 +110,12 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
     <Drawer
       open={open}
       onClose={onClose}
-      title="价格区域配置"
+      title={t('room:priceDrawer.title')}
       width={520}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose} disabled={isLoading}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button
             size="sm"
@@ -124,7 +124,7 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
             className="bg-gradient-brand hover:opacity-90"
           >
             <Save className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? '保存中...' : '保存'}
+            {isLoading ? t('common:actions.saving') : t('common:actions.save')}
           </Button>
         </>
       }
@@ -132,12 +132,12 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
       <div className="space-y-4">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Tag className="h-3.5 w-3.5" />
-          独立管理价格区域：可自由命名 areaId（如 VIP/A/楼座）；被座位引用的区域不能删除或改名。
+          {t('room:priceDrawer.hint')}
         </p>
 
         {draft.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">
-            还没有任何区域，点击下方按钮新增。
+            {t('room:priceDrawer.empty')}
           </p>
         )}
 
@@ -153,7 +153,7 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
                 <Input
                   value={row.areaId}
                   onChange={(e) => updateRow(idx, { areaId: e.target.value })}
-                  placeholder="区域 ID，如 VIP / A / 楼座"
+                  placeholder={t('room:priceDrawer.areaIdPlaceholder')}
                   disabled={lockId}
                   className="flex-1"
                 />
@@ -162,7 +162,11 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
                   size="sm"
                   onClick={() => removeRow(idx)}
                   disabled={isReferenced}
-                  title={isReferenced ? '该区域有座位引用，无法删除' : '删除区域'}
+                  title={
+                    isReferenced
+                      ? t('room:priceDrawer.delTooltipReferenced')
+                      : t('room:priceDrawer.delTooltipDefault')
+                  }
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -171,20 +175,20 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
                 <div className="space-y-1">
                   <Label className="flex items-center gap-1">
                     <DollarSign className="h-3.5 w-3.5" />
-                    默认价格 *
+                    {t('room:priceDrawer.defaultPrice')}
                   </Label>
                   <Input
                     value={row.defaultPrice}
                     onChange={(e) => updateRow(idx, { defaultPrice: e.target.value })}
-                    placeholder="380"
+                    placeholder={t('room:priceDrawer.defaultPricePlaceholder')}
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>折扣前价格</Label>
+                  <Label>{t('room:priceDrawer.originPrice')}</Label>
                   <Input
                     value={row.defaultOriginPrice}
                     onChange={(e) => updateRow(idx, { defaultOriginPrice: e.target.value })}
-                    placeholder="可选"
+                    placeholder={t('room:priceDrawer.originPricePlaceholder')}
                   />
                 </div>
               </div>
@@ -194,7 +198,7 @@ export function AreaPriceDrawer({ open, onClose, roomId, seats, areas }: Props) 
 
         <Button variant="outline" size="sm" onClick={addRow} className="w-full">
           <Plus className="h-3.5 w-3.5 mr-1.5" />
-          新增区域
+          {t('room:priceDrawer.addBtn')}
         </Button>
       </div>
     </Drawer>

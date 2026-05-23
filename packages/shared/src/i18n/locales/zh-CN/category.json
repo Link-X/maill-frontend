@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "分类管理",
+    "subtitle": "维护演出分类，用户端首页 tabs 与演出表单下拉的来源"
+  },
+  "form": {
+    "titleNew": "新建分类",
+    "titleEdit": "编辑分类",
+    "name": "名称",
+    "namePlaceholder": "演唱会 / 话剧 / 脱口秀...",
+    "nameRequired": "请输入分类名",
+    "sort": "排序",
+    "sortPlaceholder": "数字小的靠前",
+    "icon": "图标",
+    "iconInvalid": "图标需为合法 URL",
+    "status": "状态",
+    "savedToast": "分类已更新",
+    "createdToast": "分类已创建"
+  },
+  "table": {
+    "icon": "图标",
+    "name": "名称",
+    "sort": "排序",
+    "status": "状态",
+    "createTime": "创建时间",
+    "actions": "操作"
+  },
+  "action": {
+    "createBtn": "新建分类",
+    "enableShort": "启用",
+    "disableShort": "禁用"
+  },
+  "status": {
+    "enabled": "启用",
+    "disabled": "禁用"
+  },
+  "toggle": {
+    "enabledToast": "已启用：{{name}}",
+    "disabledToast": "已禁用：{{name}}"
+  },
+  "delete": {
+    "title": "删除分类",
+    "desc": "确定要删除 {{name}} 吗？被演出引用的分类无法删除。",
+    "btn": "删除",
+    "btnDeleting": "删除中...",
+    "successToast": "已删除：{{name}}",
+    "inUseError": "分类已被演出引用，无法删除"
+  }
+}

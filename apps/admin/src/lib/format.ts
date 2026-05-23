@@ -18,27 +18,28 @@ export const formatMoney = (raw?: string | number) => {
   return `¥${num.toFixed(2)}`;
 };
 
-export const showStatusLabel = (status: ShowStatus): string => {
+// 仅返回 i18n key segment（draft / onSale / offShelf），由调用方拼成 t('show:status.xxx')
+export const showStatusKey = (status: ShowStatus): string => {
   switch (status) {
     case SS.Draft:
-      return '草稿';
+      return 'draft';
     case SS.OnSale:
-      return '已上架';
+      return 'onSale';
     case SS.OffShelf:
-      return '已下架';
+      return 'offShelf';
     default:
       return String(status);
   }
 };
 
-export const sessionStatusLabel = (status: SessionStatus): string => {
+export const sessionStatusKey = (status: SessionStatus): string => {
   switch (status) {
     case SSS.Draft:
-      return '草稿';
+      return 'draft';
     case SSS.Published:
-      return '已开售';
+      return 'published';
     case SSS.Ended:
-      return '已结束';
+      return 'ended';
     default:
       return String(status);
   }

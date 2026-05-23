@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 interface DrawerProps {
@@ -12,6 +13,7 @@ interface DrawerProps {
 }
 
 export function Drawer({ open, onClose, title, children, footer, width = 480 }: DrawerProps) {
+  const { t } = useTranslation('common');
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -47,7 +49,7 @@ export function Drawer({ open, onClose, title, children, footer, width = 480 }: 
                 type="button"
                 onClick={onClose}
                 className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-1 hover:bg-accent"
-                aria-label="关闭"
+                aria-label={t('common:drawer.closeAria')}
               >
                 <X className="h-4 w-4" />
               </button>

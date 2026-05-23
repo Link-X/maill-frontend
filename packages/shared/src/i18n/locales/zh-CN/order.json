@@ -11,8 +11,126 @@
     "refunded": "已退款",
     "partial": "部分退款"
   },
-  "pay": "立即支付",
+  "ticketStatus": {
+    "unverified": "未核销",
+    "verified": "已核销",
+    "voided": "已作废"
+  },
+  "list": {
+    "empty": "暂无订单",
+    "emptyHint": "去首页看看演出吧",
+    "seatsSuffix": "+{{n}}"
+  },
+  "detail": {
+    "totalLabel": "总价",
+    "payRemaining": "支付剩余",
+    "seatsLabel": "座位",
+    "seatsLabelWithCount": "座位（{{n}}）",
+    "ticketsLabel": "票券",
+    "ticketsLabelWithCount": "票券（{{n}}）",
+    "qrCode": "入场二维码",
+    "createdAt": "创建时间",
+    "paidAt": "支付时间",
+    "expireAt": "过期时间"
+  },
+  "pay": {
+    "title": "订单详情",
+    "backToList": "返回订单列表",
+    "now": "立即支付",
+    "payNowAmount": "立即支付 {{amount}}",
+    "paying": "支付中...",
+    "paidSuccess": "支付成功",
+    "paidGenerating": "支付成功，正在生成票券...",
+    "ticketsReady": "票券已生成",
+    "ticketsSlowHint": "票券生成稍慢，可下拉刷新订单详情",
+    "generating": "票券正在生成中...",
+    "refreshNow": "手动刷新",
+    "ticketNo": "票号",
+    "ticketIndex": "第 {{n}} 张",
+    "expired": "订单已过期",
+    "cancelConfirm": "确定取消订单？",
+    "notFound": "订单不存在",
+    "cancelledToast": "订单已取消",
+    "cancelledStatus": "订单已取消"
+  },
   "cancelOrder": "取消订单",
-  "refund": "退款",
-  "refundTicket": "退此票"
+  "cancelling": "取消中...",
+  "refund": {
+    "all": "全单退款",
+    "ticket": "退此票",
+    "ticketing": "退票中...",
+    "refundingAll": "退款中...",
+    "confirmTitle": "确认退款",
+    "confirmAll": "确认对整单发起退款？",
+    "confirmTicket": "确认退此票？退款后该票将作废，不可入场。",
+    "submittedToast": "退款已提交",
+    "ticketSubmittedToast": "已发起退票: {{ticketNo}}",
+    "allSubmittedToast": "已发起全单退款"
+  },
+  "submit": {
+    "creating": "创建订单中...",
+    "createdToast": "订单已创建，请尽快完成支付"
+  },
+  "confirm": {
+    "title": "确认订单",
+    "empty": "还没有选中座位",
+    "backHome": "回到首页",
+    "selectedSeats": "已选座位（{{n}}）",
+    "totalLabel": "订单总价",
+    "lockHint": "点击\"提交订单\"后系统会立即锁定座位（5 分钟有效），未支付订单到期自动取消。",
+    "totalShort": "合计",
+    "submitBtn": "提交订单",
+    "submittingBtn": "提交中...",
+    "submittedToast": "下单成功，即将跳转支付"
+  },
+  "verify": {
+    "title": "票券核销",
+    "tabManual": "手动输入",
+    "tabScan": "扫码（暂不支持）",
+    "placeholder": "请扫码或手动输入票号",
+    "btn": "核销",
+    "verifying": "核销中...",
+    "needTicketNo": "请输入票号",
+    "successTitle": "核销成功",
+    "successToast": "核销成功",
+    "failedTitle": "核销失败",
+    "failedToast": "核销失败",
+    "ticketNoLabel": "票号：",
+    "verifyTimeLabel": "核销时间：",
+    "scanHint1": "摄像头扫码功能将在后续版本支持。",
+    "scanHint2": "当前请切换到\"手动输入\"。"
+  },
+  "admin": {
+    "page": {
+      "title": "订单管理",
+      "subtitle": "共 {{total}} 条订单",
+      "totalSuffix": "条"
+    },
+    "filter": {
+      "orderNoLabel": "订单号（精确）",
+      "orderNoPlaceholder": "完整订单号",
+      "showLabel": "演出",
+      "showAll": "全部演出",
+      "sessionLabel": "场次 ID",
+      "sessionPlaceholder": "可选，数字",
+      "statusLabel": "状态",
+      "statusAll": "全部状态",
+      "startLabel": "创建起",
+      "endLabel": "创建止"
+    },
+    "table": {
+      "orderNo": "订单号",
+      "show": "演出 / 场次",
+      "seats": "座位",
+      "seatsValue": "{{n}} 个",
+      "totalAmount": "总金额",
+      "status": "状态",
+      "createTime": "创建时间",
+      "actions": "操作"
+    },
+    "detailDrawer": {
+      "titlePrefix": "订单",
+      "orderId": "订单 ID"
+    }
+  }
 }

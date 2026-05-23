@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Upload, X, Loader2, ImagePlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button, cn, extractErrorMessage, notify } from '@maill/shared';
 import { useUploadImageMutation, type UploadDir } from '@/features/upload/uploadApi';
 
@@ -23,6 +24,7 @@ export function ImageUploader({
   accept = 'image/*',
   className,
 }: Props) {
+  const { t } = useTranslation('common');
   const [uploadImage, { isLoading }] = useUploadImageMutation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -31,11 +33,11 @@ export function ImageUploader({
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      notify.error('请选择图片文件');
+      notify.error(t('common:imageUploader.errFormat'));
       return;
     }
     if (file.size > maxSizeMB * 1024 * 1024) {
-      notify.error(`图片大小不能超过 ${maxSizeMB}MB`);
+      notify.error(t('common:imageUploader.errSizeOverflow', { n: maxSizeMB }));
       return;
     }
     try {
@@ -69,14 +71,14 @@ export function ImageUploader({
         <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
           <Button type="button" size="sm" variant="outline" onClick={pickFile} disabled={isLoading}>
             <Upload className="h-3.5 w-3.5 mr-1" />
-            替换
+            {t('common:actions.replace')}
           </Button>
         </div>
         <button
           type="button"
           onClick={clear}
           disabled={isLoading}
-          aria-label="移除图片"
+          aria-label={t('common:imageUploader.removeAria')}
           className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 disabled:opacity-50"
         >
           <X className="h-3.5 w-3.5" />
@@ -107,12 +109,12 @@ export function ImageUploader({
       {isLoading ? (
         <>
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>上传中...</span>
+          <span>{t('common:actions.uploading')}</span>
         </>
       ) : (
         <>
           <ImagePlus className="h-5 w-5" />
-          <span>点击或拖拽上传</span>
+          <span>{t('common:imageUploader.placeholder')}</span>
           <span className="text-[10px] text-muted-foreground/70">≤ {maxSizeMB}MB</span>
         </>
       )}

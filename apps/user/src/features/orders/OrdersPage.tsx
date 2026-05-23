@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Receipt, MapPin, Calendar } from 'lucide-react';
 import { OrderStatus, type OrderStatusResponse } from '@maill/shared';
 import { Card } from '@/components/Card';
@@ -9,14 +10,6 @@ import { SkeletonCard } from '@/components/Skeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { formatDateTime, formatMoney, orderStatusLabel } from '@/lib/format';
 import { useListOrdersQuery } from '@/features/order/orderApi';
-
-const TABS: Array<{ label: string; value: OrderStatus | undefined }> = [
-  { label: '全部', value: undefined },
-  { label: '待支付', value: OrderStatus.PendingPayment },
-  { label: '已支付', value: OrderStatus.Paid },
-  { label: '已取消', value: OrderStatus.Cancelled },
-  { label: '已退款', value: OrderStatus.Refunded },
-];
 
 const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'info' | 'muted'> = {
   [OrderStatus.PendingPayment]: 'warning',
@@ -28,8 +21,20 @@ const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'info' | 'muted'> =
 };
 
 export default function OrdersPage() {
+  const { t } = useTranslation(['order', 'show']);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<OrderStatus | undefined>(undefined);
+  // tabs 文案随 locale 变化时重建
+  const tabs = useMemo<Array<{ label: string; value: OrderStatus | undefined }>>(
+    () => [
+      { label: t('show:list.allCategories'), value: undefined },
+      { label: t('order:status.pending'), value: OrderStatus.PendingPayment },
+      { label: t('order:status.paid'), value: OrderStatus.Paid },
+      { label: t('order:status.cancelled'), value: OrderStatus.Cancelled },
+      { label: t('order:status.refunded'), value: OrderStatus.Refunded },
+    ],
+    [t],
+  );
   const { data, isLoading } = useListOrdersQuery({
     page: 1,
     size: 50,
@@ -40,9 +45,9 @@ export default function OrdersPage() {
   return (
     <div className="px-4 py-3 space-y-4">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight mb-3">我的订单</h1>
+        <h1 className="text-2xl font-semibold tracking-tight mb-3">{t('order:myOrders')}</h1>
         <div className="flex gap-1 overflow-x-auto -mx-4 px-4 pb-1">
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const active = activeTab === tab.value;
             return (
               <button
@@ -74,7 +79,11 @@ export default function OrdersPage() {
           ))}
         </div>
       ) : list.length === 0 ? (
-        <EmptyState icon={Receipt} title="暂无订单" description="去首页选一场喜欢的演出吧" />
+        <EmptyState
+          icon={Receipt}
+          title={t('order:list.empty')}
+          description={t('order:list.emptyHint')}
+        />
       ) : (
         <motion.div
           className="space-y-3"
@@ -92,6 +101,7 @@ export default function OrdersPage() {
 }
 
 function OrderCard({ order, onClick }: { order: OrderStatusResponse; onClick: () => void }) {
+  const { t } = useTranslation(['show']);
   return (
     <motion.div
       variants={{
@@ -103,7 +113,7 @@ function OrderCard({ order, onClick }: { order: OrderStatusResponse; onClick: ()
       <Card interactive onClick={onClick} className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-medium leading-snug">{order.showName ?? '演出'}</div>
+            <div className="font-medium leading-snug">{order.showName ?? t('show:title')}</div>
             <div className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-3 flex-wrap">
               {order.sessionStartTime && (
                 <span className="inline-flex items-center gap-1">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, Plus, Edit2, CalendarRange, Power } from 'lucide-react';
 import {
   Button,
@@ -22,8 +23,8 @@ import {
   useUpdateShowMutation,
 } from './showsApi';
 import { ShowFormDrawer } from './ShowFormDrawer';
-import { nextToggleStatus, toggleLabel } from './statusUtils';
-import { formatDateTime, showStatusLabel } from '@/lib/format';
+import { nextToggleStatus, toggleActionKey } from './statusUtils';
+import { formatDateTime, showStatusKey } from '@/lib/format';
 
 const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'muted'> = {
   [ShowStatus.OnSale]: 'success',
@@ -32,6 +33,7 @@ const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'muted'> = {
 };
 
 export default function ShowsPage() {
+  const { t } = useTranslation(['show', 'common']);
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<number | undefined>(undefined);
   const { data: shows = [], isLoading } = useListShowsQuery(
@@ -55,7 +57,7 @@ export default function ShowsPage() {
   const toggleStatus = async (show: Show) => {
     try {
       await updateShow({ ...show, status: nextToggleStatus(show.status) }).unwrap();
-      notify.success(`已${toggleLabel(show.status)}：${show.name}`);
+      notify.success(t(`show:toggleSuccess.${toggleActionKey(show.status)}`, { name: show.name }));
     } catch (e) {
       notify.error(extractErrorMessage(e));
     }
@@ -65,7 +67,7 @@ export default function ShowsPage() {
   const columns: Column<Show>[] = [
     {
       key: 'posterUrl',
-      title: '海报',
+      title: t('show:table.poster'),
       width: '72px',
       render: (s) =>
         s.posterUrl ? (
@@ -76,11 +78,11 @@ export default function ShowsPage() {
           </div>
         ),
     },
-    { key: 'name', title: '名称', render: (s) => <span className="font-medium">{s.name}</span> },
-    { key: 'category', title: '分类', render: (s) => s.categoryName ?? '-' },
+    { key: 'name', title: t('show:table.name'), render: (s) => <span className="font-medium">{s.name}</span> },
+    { key: 'category', title: t('show:table.category'), render: (s) => s.categoryName ?? '-' },
     {
       key: 'venue',
-      title: '城市 · 场地',
+      title: t('show:table.cityVenue'),
       render: (s) => {
         const parts = [s.cityName, s.venue].filter(Boolean);
         return parts.length ? parts.join(' · ') : '-';
@@ -88,22 +90,24 @@ export default function ShowsPage() {
     },
     {
       key: 'status',
-      title: '状态',
+      title: t('show:table.status'),
       width: '88px',
       render: (s) => (
-        <Badge variant={STATUS_VARIANT[s.status] ?? 'default'}>{showStatusLabel(s.status)}</Badge>
+        <Badge variant={STATUS_VARIANT[s.status] ?? 'default'}>
+          {t(`show:status.${showStatusKey(s.status)}`)}
+        </Badge>
       ),
     },
-    { key: 'createTime', title: '创建时间', render: (s) => formatDateTime(s.createTime) },
+    { key: 'createTime', title: t('show:table.createTime'), render: (s) => formatDateTime(s.createTime) },
     {
       key: 'actions',
-      title: '操作',
+      title: t('show:table.actions'),
       width: '260px',
       render: (s) => (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
             <Edit2 className="h-3.5 w-3.5 mr-1" />
-            编辑
+            {t('common:actions.edit')}
           </Button>
           <Button
             size="sm"
@@ -111,7 +115,7 @@ export default function ShowsPage() {
             onClick={() => navigate(`/shows/${s.id}/sessions`)}
           >
             <CalendarRange className="h-3.5 w-3.5 mr-1" />
-            场次
+            {t('show:action.sessions')}
           </Button>
           <Button
             size="sm"
@@ -119,18 +123,20 @@ export default function ShowsPage() {
             onClick={() => setPendingToggle(s)}
           >
             <Power className="h-3.5 w-3.5 mr-1" />
-            {toggleLabel(s.status)}
+            {t(`show:action.${toggleActionKey(s.status)}`)}
           </Button>
         </div>
       ),
     },
   ];
 
+  const pendingActionKey = pendingToggle ? toggleActionKey(pendingToggle.status) : 'publish';
+
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="演出管理"
-        subtitle="维护可售演出列表"
+        title={t('show:page.title')}
+        subtitle={t('show:page.subtitle')}
         icon={Sparkles}
         actions={
           <>
@@ -144,15 +150,15 @@ export default function ShowsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__all__">全部状态</SelectItem>
-                <SelectItem value={String(ShowStatus.Draft)}>草稿</SelectItem>
-                <SelectItem value={String(ShowStatus.OnSale)}>已上架</SelectItem>
-                <SelectItem value={String(ShowStatus.OffShelf)}>已下架</SelectItem>
+                <SelectItem value="__all__">{t('show:table.allStatus')}</SelectItem>
+                <SelectItem value={String(ShowStatus.Draft)}>{t('show:status.draft')}</SelectItem>
+                <SelectItem value={String(ShowStatus.OnSale)}>{t('show:status.onSale')}</SelectItem>
+                <SelectItem value={String(ShowStatus.OffShelf)}>{t('show:status.offShelf')}</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={openCreate} className="bg-gradient-brand hover:opacity-90">
               <Plus className="h-4 w-4 mr-1.5" />
-              新建演出
+              {t('show:action.createBtn')}
             </Button>
           </>
         }
@@ -172,13 +178,10 @@ export default function ShowsPage() {
 
       <ConfirmDialog
         open={!!pendingToggle}
-        title={`${pendingToggle ? toggleLabel(pendingToggle.status) : ''}演出`}
+        title={t(`show:toggleConfirm.title.${pendingActionKey}`)}
         description={
-          pendingToggle && (
-            <span>
-              确定要{toggleLabel(pendingToggle.status)} <b>{pendingToggle.name}</b> 吗？
-            </span>
-          )
+          pendingToggle &&
+          t(`show:toggleConfirm.desc.${pendingActionKey}`, { name: pendingToggle.name })
         }
         destructive={pendingToggle?.status === ShowStatus.OnSale}
         onConfirm={() => pendingToggle && toggleStatus(pendingToggle)}

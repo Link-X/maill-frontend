@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Building2, Plus, Edit2, Grid3x3 } from 'lucide-react';
 import { Button, type Room } from '@maill/shared';
 import { PageHeader } from '@/components/PageHeader';
@@ -9,6 +10,7 @@ import { useListRoomsQuery } from './roomsApi';
 import { RoomFormDrawer } from './RoomFormDrawer';
 
 export default function RoomsPage() {
+  const { t } = useTranslation(['room', 'common']);
   const navigate = useNavigate();
   const { data: rooms = [], isLoading } = useListRoomsQuery();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -24,11 +26,11 @@ export default function RoomsPage() {
   };
 
   const columns: Column<Room>[] = [
-    { key: 'name', title: '场地名', render: (r) => <span className="font-medium">{r.name}</span> },
-    { key: 'venue', title: '所属场馆', render: (r) => r.venue ?? '-' },
+    { key: 'name', title: t('room:table.name'), render: (r) => <span className="font-medium">{r.name}</span> },
+    { key: 'venue', title: t('room:table.venue'), render: (r) => r.venue ?? '-' },
     {
       key: 'size',
-      title: '行x列',
+      title: t('room:table.size'),
       width: '120px',
       render: (r) => (
         <span className="font-mono text-xs">
@@ -36,20 +38,20 @@ export default function RoomsPage() {
         </span>
       ),
     },
-    { key: 'createTime', title: '创建时间', render: (r) => formatDateTime(r.createTime) },
+    { key: 'createTime', title: t('room:table.createTime'), render: (r) => formatDateTime(r.createTime) },
     {
       key: 'actions',
-      title: '操作',
+      title: t('room:table.actions'),
       width: '220px',
       render: (r) => (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => openEdit(r)}>
             <Edit2 className="h-3.5 w-3.5 mr-1" />
-            编辑
+            {t('common:actions.edit')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => navigate(`/rooms/${r.id}`)}>
             <Grid3x3 className="h-3.5 w-3.5 mr-1" />
-            座位与价格
+            {t('room:table.seatsAndPrice')}
           </Button>
         </div>
       ),
@@ -59,13 +61,13 @@ export default function RoomsPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="场地管理"
-        subtitle="场地是座位模板的载体，可被多个场次复用"
+        title={t('room:page.title')}
+        subtitle={t('room:page.subtitle')}
         icon={Building2}
         actions={
           <Button onClick={openCreate} className="bg-gradient-brand hover:opacity-90">
             <Plus className="h-4 w-4 mr-1.5" />
-            新建场地
+            {t('room:action.createBtn')}
           </Button>
         }
       />

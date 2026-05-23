@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CalendarPlus, Save, ArrowLeft, CalendarRange, Building2 } from 'lucide-react';
 import {
   Button,
@@ -26,37 +27,13 @@ import {
   useUpdateSessionMutation,
 } from './sessionsApi';
 
-const schema = z.object({
-  name: z.string().optional(),
-  showId: z.coerce.number().int().positive('请选择演出'),
-  roomId: z.coerce.number().int().positive('请选择场地'),
-  startTime: z.string().min(1, '请填写开始时间'),
-  endTime: z.string().min(1, '请填写结束时间'),
-  limitPerUser: z.coerce.number().int().min(1, '最少 1').max(20, '最多 20'),
-  extend: z
-    .string()
-    .optional()
-    .refine(
-      (v) => {
-        if (!v || !v.trim()) return true;
-        try {
-          const parsed = JSON.parse(v);
-          return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
-        } catch {
-          return false;
-        }
-      },
-      { message: '需要合法的 JSON 对象（如 {"notice":"现场须知"}）' },
-    ),
-});
-type FormValues = z.infer<typeof schema>;
-
 const toInputDateTime = (iso?: string) => {
   if (!iso) return '';
   return iso.slice(0, 16);
 };
 
 export default function SessionFormPage() {
+  const { t } = useTranslation(['session', 'common']);
   const navigate = useNavigate();
   const params = useParams<{ id: string }>();
   const [search] = useSearchParams();
@@ -69,6 +46,39 @@ export default function SessionFormPage() {
   const [createSession, { isLoading: creating }] = useCreateSessionMutation();
   const [updateSession, { isLoading: updating }] = useUpdateSessionMutation();
   const isLoading = creating || updating;
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().optional(),
+        showId: z.coerce.number().int().positive(t('session:form.showRequired')),
+        roomId: z.coerce.number().int().positive(t('session:form.roomRequired')),
+        startTime: z.string().min(1, t('session:form.startRequired')),
+        endTime: z.string().min(1, t('session:form.endRequired')),
+        limitPerUser: z.coerce
+          .number()
+          .int()
+          .min(1, t('session:form.limitMin'))
+          .max(20, t('session:form.limitMax')),
+        extend: z
+          .string()
+          .optional()
+          .refine(
+            (v) => {
+              if (!v || !v.trim()) return true;
+              try {
+                const parsed = JSON.parse(v);
+                return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+              } catch {
+                return false;
+              }
+            },
+            { message: t('session:form.extendInvalid') },
+          ),
+      }),
+    [t],
+  );
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -116,11 +126,11 @@ export default function SessionFormPage() {
     try {
       if (isEdit && existing) {
         await updateSession({ ...existing, ...payload }).unwrap();
-        notify.success('场次已更新');
+        notify.success(t('session:form.savedToast'));
         navigate(`/shows/${existing.showId}/sessions`);
       } else {
         const created = await createSession({ ...payload, status: SessionStatus.Draft }).unwrap();
-        notify.success('场次已创建');
+        notify.success(t('session:form.createdToast'));
         navigate(`/sessions/${created.id}`);
       }
     } catch (e) {
@@ -131,12 +141,12 @@ export default function SessionFormPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title={isEdit ? '编辑场次' : '新建场次'}
+        title={isEdit ? t('session:form.titleEdit') : t('session:form.titleNew')}
         icon={CalendarPlus}
         actions={
           <Button variant="outline" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-            取消
+            {t('common:actions.cancel')}
           </Button>
         }
       />
@@ -144,12 +154,12 @@ export default function SessionFormPage() {
         <div className="space-y-2">
           <Label htmlFor="showId" className="flex items-center gap-1">
             <CalendarRange className="h-3.5 w-3.5" />
-            演出 ID *
+            {t('session:form.showId')}
           </Label>
           <Input
             id="showId"
             type="number"
-            placeholder="从 /shows 列表复制 ID"
+            placeholder={t('session:form.showIdPlaceholder')}
             readOnly={!!presetShowId && !isEdit}
             {...register('showId')}
           />
@@ -159,7 +169,7 @@ export default function SessionFormPage() {
         <div className="space-y-2">
           <Label className="flex items-center gap-1">
             <Building2 className="h-3.5 w-3.5" />
-            场地 *
+            {t('session:form.room')}
           </Label>
           <Controller
             control={control}
@@ -170,12 +180,16 @@ export default function SessionFormPage() {
                 onValueChange={(v) => field.onChange(Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择场地" />
+                  <SelectValue placeholder={t('session:form.roomPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {rooms.map((r) => (
                     <SelectItem key={String(r.id)} value={String(r.id)}>
-                      {r.name}（{r.rowCount}×{r.colCount}）
+                      {t('session:form.roomLabelExtra', {
+                        name: r.name,
+                        rows: r.rowCount,
+                        cols: r.colCount,
+                      })}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -186,27 +200,27 @@ export default function SessionFormPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">场次名称（可选）</Label>
-          <Input id="name" placeholder="2026 上海站 晚场" {...register('name')} />
+          <Label htmlFor="name">{t('session:form.name')}</Label>
+          <Input id="name" placeholder={t('session:form.namePlaceholder')} {...register('name')} />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-2">
-            <Label htmlFor="startTime">开始时间 *</Label>
+            <Label htmlFor="startTime">{t('session:form.startTime')}</Label>
             <Input id="startTime" type="datetime-local" {...register('startTime')} />
             {errors.startTime && (
               <p className="text-xs text-destructive">{errors.startTime.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endTime">结束时间 *</Label>
+            <Label htmlFor="endTime">{t('session:form.endTime')}</Label>
             <Input id="endTime" type="datetime-local" {...register('endTime')} />
             {errors.endTime && <p className="text-xs text-destructive">{errors.endTime.message}</p>}
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="limitPerUser">每人限购 *</Label>
+          <Label htmlFor="limitPerUser">{t('session:form.limitPerUser')}</Label>
           <Input id="limitPerUser" type="number" min={1} max={20} {...register('limitPerUser')} />
           {errors.limitPerUser && (
             <p className="text-xs text-destructive">{errors.limitPerUser.message}</p>
@@ -214,11 +228,11 @@ export default function SessionFormPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="extend">扩展字段（JSON）</Label>
+          <Label htmlFor="extend">{t('session:form.extend')}</Label>
           <textarea
             id="extend"
             rows={4}
-            placeholder={'{\n  "preSaleLeadMinutes": 30,\n  "notice": "现场禁止携带食物"\n}'}
+            placeholder={'{\n  "preSaleLeadMinutes": 30,\n  "notice": "..."\n}'}
             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             {...register('extend')}
           />
@@ -226,14 +240,18 @@ export default function SessionFormPage() {
             <p className="text-xs text-destructive">{errors.extend.message as string}</p>
           )}
           <p className="text-[11px] text-muted-foreground">
-            约定字段：preSaleLeadMinutes（分钟）/ notice。
+            {t('session:form.extendHint')}
           </p>
         </div>
 
         <div className="pt-2">
           <Button type="submit" disabled={isLoading} className="bg-gradient-brand hover:opacity-90">
             <Save className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? '保存中...' : isEdit ? '保存' : '创建'}
+            {isLoading
+              ? t('common:actions.saving')
+              : isEdit
+                ? t('common:actions.save')
+                : t('session:action.createSubmit')}
           </Button>
         </div>
       </form>

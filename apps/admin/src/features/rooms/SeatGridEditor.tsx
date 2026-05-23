@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Trans, useTranslation } from 'react-i18next';
 import { Square, MousePointer, X, Trash2 } from 'lucide-react';
 import {
   cn,
@@ -45,6 +46,7 @@ function rectKeys(a: Cell, b: Cell): string[] {
 }
 
 export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roomId }: Props) {
+  const { t } = useTranslation(['room', 'common']);
   const seatMap = useMemo(() => {
     const m = new Map<string, RoomSeat>();
     seats.forEach((s) => m.set(cellKey(s.rowNo, s.colNo), s));
@@ -61,14 +63,11 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
   const noAreas = areas.length === 0;
 
   // ---------- 选区 ----------
-  // 已确认的选区（拖拽/行列号点击后落定的部分）
   const [committed, setCommitted] = useState<Set<string>>(new Set());
-  // 当前正在拖拽的起止点（实时矩形高亮）
   const dragRef = useRef<{ start: Cell; current: Cell; moved: boolean } | null>(null);
   const [, forceTick] = useState(0);
   const tick = () => forceTick((t) => t + 1);
 
-  // 当前展示用的选区 = committed ∪ rectKeys(dragStart, dragCurrent)
   const liveSelection = useMemo(() => {
     const next = new Set(committed);
     if (dragRef.current) {
@@ -76,11 +75,9 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
       rectKeys(start, current).forEach((k) => next.add(k));
     }
     return next;
-    // 依赖 committed 和 dragTick；dragTick 通过 tick() 触发重渲
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [committed, dragRef.current?.start, dragRef.current?.current]);
 
-  // 目标区域 (默认第一个)
   const [targetAreaId, setTargetAreaId] = useState<string>('');
   useEffect(() => {
     if (!targetAreaId && areaIdList.length > 0) setTargetAreaId(areaIdList[0]);
@@ -89,7 +86,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     }
   }, [areaIdList, targetAreaId]);
 
-  // 全局 pointerup：拖拽结束时落定选区或视作单击
   useEffect(() => {
     const onUp = () => {
       const d = dragRef.current;
@@ -102,7 +98,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           return next;
         });
       } else {
-        // 单击：循环切换该格子（与之前点击行为一致）
         singleClick(d.start.rowNo, d.start.colNo);
       }
       dragRef.current = null;
@@ -113,7 +108,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seatMap, areaIdList, seats]);
 
-  // Esc 键清空选区
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -125,8 +119,8 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
   }, [committed.size]);
 
   // ---------- 写入操作 ----------
+  // seatName 作为后端数据字段保留中文，确保跨语言切换不影响 DB 一致性
   const writeCells = (entries: Array<{ rowNo: number; colNo: number; areaId: string | null }>) => {
-    // 一次性合并到 nextSeats，避免多次 onChange
     const next = new Map(seatMap);
     for (const { rowNo, colNo, areaId } of entries) {
       const key = cellKey(rowNo, colNo);
@@ -166,7 +160,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     writeCells([{ rowNo, colNo, areaId: next }]);
   };
 
-  // 批量：把选区应用为 targetAreaId
   const applySelection = () => {
     if (!targetAreaId || liveSelection.size === 0) return;
     const entries = Array.from(liveSelection).map((k) => {
@@ -177,7 +170,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     setCommitted(new Set());
   };
 
-  // 批量：删除选区内的座位（变回"未占"）
   const removeSelection = () => {
     if (liveSelection.size === 0) return;
     const entries = Array.from(liveSelection).map((k) => {
@@ -202,7 +194,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
 
   const clearAll = () => onChange([]);
 
-  // 选择整行/整列
   const selectRow = (rowNo: number, additive: boolean) => {
     setCommitted((prev) => {
       const next = additive ? new Set(prev) : new Set<string>();
@@ -223,11 +214,13 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     <div className="space-y-3">
       {noAreas ? (
         <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground bg-muted/30">
-          请先在右上角「价格区域」中新增至少一个区域，再来放置座位。
+          {t('room:seatEditor.noAreas')}
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground mr-2">一键填充：</span>
+          <span className="text-sm text-muted-foreground mr-2">
+            {t('room:seatEditor.fillAllPrefix')}
+          </span>
           {areas.map((a, i) => (
             <button
               key={a.areaId}
@@ -237,10 +230,14 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
                 'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-white',
                 AREA_PALETTE[i % AREA_PALETTE.length],
               )}
-              title={`将所有 ${rowCount} × ${colCount} 个单元格批量设为 ${a.areaId} 区域的普通座`}
+              title={t('room:seatEditor.fillAllTooltip', {
+                rows: rowCount,
+                cols: colCount,
+                areaId: a.areaId,
+              })}
             >
               <Square className="h-3 w-3" />
-              全部 {a.areaId}
+              {t('room:seatEditor.fillAllBtn', { areaId: a.areaId })}
             </button>
           ))}
           <button
@@ -248,12 +245,12 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
             onClick={clearAll}
             className="px-2.5 py-1 rounded-md text-xs border border-input hover:bg-accent"
           >
-            清空
+            {t('room:seatEditor.clearBtn')}
           </button>
         </div>
       )}
 
-      {/* 批量应用工具栏：常驻显示，避免出现/消失导致下方网格高度抖动打断拖选 */}
+      {/* 批量应用工具栏 */}
       <div
         className={cn(
           'flex flex-wrap items-center gap-2 p-2.5 rounded-lg border transition-colors',
@@ -269,20 +266,24 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           )}
         />
         <span className="text-sm text-muted-foreground">
-          已选{' '}
-          <b className={liveSelection.size > 0 ? 'text-brand' : 'text-foreground/70'}>
-            {liveSelection.size}
-          </b>{' '}
-          个 · 应用为
+          <Trans
+            i18nKey="room:seatEditor.selectedCount"
+            values={{ n: liveSelection.size }}
+            components={{
+              b: (
+                <b className={liveSelection.size > 0 ? 'text-brand' : 'text-foreground/70'} />
+              ),
+            }}
+          />
         </span>
         <Select value={targetAreaId} onValueChange={setTargetAreaId} disabled={noAreas}>
           <SelectTrigger className="h-7 w-28 text-xs">
-            <SelectValue placeholder="选择区域" />
+            <SelectValue placeholder={t('room:seatEditor.selectArea')} />
           </SelectTrigger>
           <SelectContent>
             {areas.map((a) => (
               <SelectItem key={a.areaId} value={a.areaId}>
-                区域 {a.areaId}
+                {t('room:seatEditor.areaPrefix', { areaId: a.areaId })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -293,7 +294,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           disabled={!targetAreaId || noAreas || liveSelection.size === 0}
           className="px-3 h-7 rounded-md text-xs font-medium bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          应用
+          {t('room:seatEditor.applyBtn')}
         </button>
         <button
           type="button"
@@ -302,7 +303,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current disabled:hover:border-input"
         >
           <Trash2 className="h-3 w-3" />
-          删除座位
+          {t('room:seatEditor.removeSeatsBtn')}
         </button>
         <button
           type="button"
@@ -311,7 +312,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-accent inline-flex items-center gap-1 ml-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
         >
           <X className="h-3 w-3" />
-          清空选区
+          {t('room:seatEditor.clearSelectionBtn')}
         </button>
       </div>
 
@@ -320,9 +321,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           className="inline-grid gap-1"
           style={{ gridTemplateColumns: `repeat(${colCount + 1}, minmax(28px, 28px))` }}
         >
-          {/* 左上角 */}
           <div />
-          {/* 列号（可点击全选当前列） */}
           {Array.from({ length: colCount }).map((_, ci) => {
             const colNo = ci + 1;
             return (
@@ -331,7 +330,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
                 type="button"
                 onClick={(e) => selectCol(colNo, e.shiftKey)}
                 className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
-                title={`选中第 ${colNo} 列（Shift 追加）`}
+                title={t('room:seatEditor.selectColTip', { n: colNo })}
               >
                 {colNo}
               </button>
@@ -348,6 +347,15 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
                 colorMap={colorMap}
                 liveSelection={liveSelection}
                 disabled={noAreas}
+                rowTitle={t('room:seatEditor.selectRowTip', { n: rowNo })}
+                seatTitleFor={(seat) =>
+                  t('room:seatEditor.seatLabel', {
+                    row: rowNo,
+                    col: seat ? seat.colNo : 0,
+                    areaId: seat?.areaId ?? '',
+                  })
+                }
+                emptyTitle={t('room:seatEditor.cellEnableHint')}
                 onRowLabelClick={(additive) => selectRow(rowNo, additive)}
                 onCellPointerDown={(colNo, e) => {
                   if (noAreas) return;
@@ -371,10 +379,8 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
 
       <p className="text-xs text-muted-foreground">
         {noAreas
-          ? '当前没有可用区域，单元格已禁用。'
-          : '单击切换：未占 → ' +
-            areaIdList.join(' → ') +
-            ' → 未占；按住拖动可框选；点行号/列号选中整行/整列（Shift 追加）；Esc 清空选区。'}
+          ? t('room:seatEditor.noAreasDisabledHint')
+          : t('room:seatEditor.hint', { cycle: areaIdList.join(' → ') })}
       </p>
     </div>
   );
@@ -387,6 +393,9 @@ function Row({
   colorMap,
   liveSelection,
   disabled,
+  rowTitle,
+  seatTitleFor,
+  emptyTitle,
   onRowLabelClick,
   onCellPointerDown,
   onCellPointerEnter,
@@ -397,6 +406,9 @@ function Row({
   colorMap: Map<string, string>;
   liveSelection: Set<string>;
   disabled: boolean;
+  rowTitle: string;
+  seatTitleFor: (seat: RoomSeat | undefined) => string;
+  emptyTitle: string;
   onRowLabelClick: (additive: boolean) => void;
   onCellPointerDown: (colNo: number, e: React.PointerEvent) => void;
   onCellPointerEnter: (colNo: number) => void;
@@ -407,7 +419,7 @@ function Row({
         type="button"
         onClick={(e) => onRowLabelClick(e.shiftKey)}
         className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
-        title={`选中第 ${rowNo} 排（Shift 追加）`}
+        title={rowTitle}
       >
         {rowNo}
       </button>
@@ -435,7 +447,7 @@ function Row({
                   : 'bg-muted text-muted-foreground hover:bg-accent',
               isSelected && 'ring-2 ring-brand ring-offset-1 ring-offset-card z-10',
             )}
-            title={seat ? `${rowNo}排${colNo}座 (区域${seat.areaId})` : '点击启用'}
+            title={seat ? seatTitleFor(seat) : emptyTitle}
           >
             {seat?.areaId ?? ''}
           </motion.button>

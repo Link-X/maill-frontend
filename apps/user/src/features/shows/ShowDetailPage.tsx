@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, MapPin, Calendar, Users, Ticket, Clock, Shield } from 'lucide-react';
 import { Button, SessionStatus, parseExtend, type ShowExtend } from '@maill/shared';
 import { Card } from '@/components/Card';
@@ -10,6 +11,7 @@ import { useGetShowQuery } from './showsApi';
 import { useListSessionsQuery } from '@/features/sessions/sessionsApi';
 
 export default function ShowDetailPage() {
+  const { t } = useTranslation(['show', 'common']);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const showId = id ?? '';
@@ -30,7 +32,7 @@ export default function ShowDetailPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          aria-label="返回"
+          aria-label={t('common:actions.back')}
           className="absolute top-3 left-3 h-9 w-9 rounded-full bg-card/80 backdrop-blur flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -67,7 +69,7 @@ export default function ShowDetailPage() {
         <section>
           <h2 className="font-semibold mb-3 inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4 text-brand" />
-            可选场次
+            {t('show:detail.availableSessions')}
           </h2>
           {loadingSessions ? (
             <div className="space-y-2">
@@ -77,15 +79,17 @@ export default function ShowDetailPage() {
           ) : sessionList.length === 0 ? (
             <EmptyState
               icon={Ticket}
-              title="暂无可售场次"
-              description="商家正在准备中，敬请期待"
+              title={t('show:detail.noSessions')}
+              description={t('show:detail.noSessionsHint')}
             />
           ) : (
             <div className="space-y-2">
               {sessionList.map((s) => (
                 <Card key={String(s.id)} className="p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1 space-y-1">
-                    <div className="font-medium">{s.name || `${formatDateTime(s.startTime)} 场`}</div>
+                    <div className="font-medium">
+                      {s.name || t('show:card.sessionFallback', { date: formatDateTime(s.startTime) })}
+                    </div>
                     <div className="text-xs text-muted-foreground inline-flex items-center gap-3">
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
@@ -93,7 +97,7 @@ export default function ShowDetailPage() {
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        限 {s.limitPerUser ?? '-'} 张
+                        {t('show:detail.limitPerUserSuffix', { n: s.limitPerUser ?? '-' })}
                       </span>
                     </div>
                   </div>
@@ -102,7 +106,7 @@ export default function ShowDetailPage() {
                     className="bg-gradient-brand hover:opacity-90 shrink-0"
                     onClick={() => navigate(`/session/${s.id}`)}
                   >
-                    选座购票
+                    {t('show:detail.selectSeats')}
                   </Button>
                 </Card>
               ))}
@@ -115,17 +119,22 @@ export default function ShowDetailPage() {
 }
 
 function ShowExtendInfo({ extend }: { extend?: string }) {
+  const { t } = useTranslation(['show']);
   const data = parseExtend<ShowExtend>(extend);
   if (!data) return null;
   const items: { icon: typeof Clock; label: string; value: string }[] = [];
   if (typeof data.duration === 'number') {
-    items.push({ icon: Clock, label: '时长', value: `${data.duration} 分钟` });
+    items.push({
+      icon: Clock,
+      label: t('show:detail.duration'),
+      value: t('show:detail.durationValue', { n: data.duration }),
+    });
   }
   if (data.ageLimit) {
-    items.push({ icon: Users, label: '年龄', value: String(data.ageLimit) });
+    items.push({ icon: Users, label: t('show:detail.ageLimit'), value: String(data.ageLimit) });
   }
   if (data.refundRule) {
-    items.push({ icon: Shield, label: '退票', value: String(data.refundRule) });
+    items.push({ icon: Shield, label: t('show:detail.refundRule'), value: String(data.refundRule) });
   }
   if (items.length === 0) return null;
   return (

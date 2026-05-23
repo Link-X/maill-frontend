@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bar,
   BarChart,
@@ -66,13 +67,14 @@ const CHART_COLORS = [
 const COLOR_BRAND = 'hsl(var(--brand))';
 const COLOR_MUTED = 'hsl(var(--muted-foreground))';
 
-const ORDER_STATUS_LABEL: Record<number, string> = {
-  0: '待支付',
-  1: '已支付',
-  2: '已取消',
-  3: '退款中',
-  4: '已退款',
-  5: '部分退款',
+// order status enum → order:status.* key 后缀，供 i18n 查询
+const ORDER_STATUS_KEY: Record<number, string> = {
+  0: 'pending',
+  1: 'paid',
+  2: 'cancelled',
+  3: 'refunding',
+  4: 'refunded',
+  5: 'partial',
 };
 const ORDER_STATUS_COLOR: Record<number, string> = {
   0: 'hsl(var(--warning))',
@@ -87,7 +89,7 @@ const fmtPct = (v: number | undefined | null) =>
   v == null || Number.isNaN(v) ? '-' : `${(v * 100).toFixed(1)}%`;
 
 export default function ReportsPage() {
-  // 时间窗口：preset 或自定义；toQueryArg 把它转成接口入参
+  const { t } = useTranslation(['report', 'common']);
   const [preset, setPreset] = useState<RangePreset | 'custom'>('30d');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
@@ -105,8 +107,8 @@ export default function ReportsPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="数据报表"
-        subtitle="营收 / 订单 / 演出 / 用户多维度看板"
+        title={t('report:page.title')}
+        subtitle={t('report:page.subtitle')}
         icon={BarChart3}
       />
 
@@ -160,12 +162,14 @@ function RangePicker({
   customEnd: string;
   onCustomChange: (s: string, e: string) => void;
 }) {
+  const { t } = useTranslation('report');
+  // 1d 复用现有 range.today key
   const presets: Array<{ key: RangePreset | 'custom'; label: string }> = [
-    { key: '1d', label: '今日' },
-    { key: '7d', label: '近 7 天' },
-    { key: '30d', label: '近 30 天' },
-    { key: '90d', label: '近 90 天' },
-    { key: 'custom', label: '自定义' },
+    { key: '1d', label: t('report:range.today') },
+    { key: '7d', label: t('report:range.7d') },
+    { key: '30d', label: t('report:range.30d') },
+    { key: '90d', label: t('report:range.90d') },
+    { key: 'custom', label: t('report:range.custom') },
   ];
   return (
     <Card className="p-3 flex flex-wrap items-center gap-2">
@@ -193,7 +197,7 @@ function RangePicker({
             onChange={(e) => onCustomChange(e.target.value, customEnd)}
             className="h-8 px-2 text-xs border border-input bg-background rounded-md"
           />
-          <span className="text-xs text-muted-foreground">至</span>
+          <span className="text-xs text-muted-foreground">{t('report:range.to')}</span>
           <input
             type="datetime-local"
             value={customEnd}
@@ -208,41 +212,45 @@ function RangePicker({
 
 // ===================== 顶部 KPI =====================
 function OverviewKpis({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data, isFetching } = useOverviewQuery(arg);
   const kpis = [
     {
       icon: Wallet,
-      label: '营收',
+      label: t('report:kpi.revenue'),
       value: formatMoney(data?.revenue ?? 0),
       delta: data?.revenueDeltaPct,
     },
     {
       icon: ShoppingCart,
-      label: '已支付订单',
+      label: t('report:kpi.paidOrders'),
       value: String(data?.orderCount ?? 0),
       delta: data?.orderCountDeltaPct,
     },
     {
       icon: Hourglass,
-      label: '待支付',
+      label: t('report:kpi.pending'),
       value: String(data?.pendingOrderCount ?? 0),
     },
     {
       icon: Undo2,
-      label: '退款金额',
+      label: t('report:kpi.refundAmount'),
       value: formatMoney(data?.refundAmount ?? 0),
-      sub: `${data?.refundCount ?? 0} 笔`,
+      sub: t('report:kpi.refundCountSuffix', { n: data?.refundCount ?? 0 }),
     },
     {
       icon: Ticket,
-      label: '已售票数',
+      label: t('report:kpi.ticketsSold'),
       value: String(data?.ticketSoldCount ?? 0),
     },
     {
       icon: CheckCircle2,
-      label: '核销率',
+      label: t('report:kpi.verifyRate'),
       value: fmtPct(data?.verifyRate),
-      sub: `${data?.ticketVerifiedCount ?? 0} / ${data?.ticketSoldCount ?? 0}`,
+      sub: t('report:kpi.verifyDetail', {
+        verified: data?.ticketVerifiedCount ?? 0,
+        sold: data?.ticketSoldCount ?? 0,
+      }),
     },
   ];
   return (
@@ -264,7 +272,8 @@ function OverviewKpis({ arg }: { arg: RangeArg }) {
 }
 
 function DeltaBadge({ value }: { value: number }) {
-  if (value === 0) return <span className="text-muted-foreground">持平</span>;
+  const { t } = useTranslation('report');
+  if (value === 0) return <span className="text-muted-foreground">{t('report:kpi.deltaFlat')}</span>;
   const positive = value > 0;
   const Icon = positive ? TrendingUp : TrendingDown;
   return (
@@ -283,15 +292,18 @@ function DeltaBadge({ value }: { value: number }) {
 
 // ===================== 趋势 =====================
 function TrendSection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data = [] } = useTimeseriesQuery({ ...arg, dim: 'day' });
   return (
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="font-medium inline-flex items-center gap-1.5">
           <TrendingUp className="h-4 w-4 text-brand" />
-          营收 / 订单趋势
+          {t('report:trend.title')}
         </div>
-        <span className="text-xs text-muted-foreground">{data.length} 个数据点</span>
+        <span className="text-xs text-muted-foreground">
+          {t('report:trend.points', { n: data.length })}
+        </span>
       </div>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -309,11 +321,11 @@ function TrendSection({ arg }: { arg: RangeArg }) {
               }}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar yAxisId="left" dataKey="orderCount" name="订单数" fill={COLOR_BRAND} radius={[4, 4, 0, 0]} />
+            <Bar yAxisId="left" dataKey="orderCount" name={t('report:trend.orders')} fill={COLOR_BRAND} radius={[4, 4, 0, 0]} />
             <Line
               yAxisId="right"
               dataKey="revenue"
-              name="营收"
+              name={t('report:trend.revenue')}
               stroke="hsl(var(--rose))"
               strokeWidth={2}
               dot={false}
@@ -321,7 +333,7 @@ function TrendSection({ arg }: { arg: RangeArg }) {
             <Line
               yAxisId="right"
               dataKey="refundAmount"
-              name="退款"
+              name={t('report:trend.refund')}
               stroke="hsl(var(--muted-foreground))"
               strokeDasharray="4 4"
               strokeWidth={1.5}
@@ -336,13 +348,14 @@ function TrendSection({ arg }: { arg: RangeArg }) {
 
 // ===================== 演出 Top10 =====================
 function ByShowSection({ arg, className }: { arg: RangeArg; className?: string }) {
+  const { t } = useTranslation('report');
   const [sort, setSort] = useState<'revenue' | 'tickets' | 'orderCount'>('revenue');
   const { data = [], isFetching } = useByShowQuery({ ...arg, limit: 10, sort });
 
   const columns: Column<ByShowItem>[] = [
     {
       key: 'name',
-      title: '演出',
+      title: t('report:byShow.colShow'),
       render: (s) => (
         <div className="min-w-0">
           <div className="font-medium truncate">{s.showName}</div>
@@ -352,11 +365,11 @@ function ByShowSection({ arg, className }: { arg: RangeArg; className?: string }
         </div>
       ),
     },
-    { key: 'orderCount', title: '订单', width: '70px', render: (s) => s.orderCount },
-    { key: 'ticketCount', title: '票数', width: '70px', render: (s) => s.ticketCount },
+    { key: 'orderCount', title: t('report:byShow.colOrders'), width: '70px', render: (s) => s.orderCount },
+    { key: 'ticketCount', title: t('report:byShow.colTickets'), width: '70px', render: (s) => s.ticketCount },
     {
       key: 'revenue',
-      title: '营收',
+      title: t('report:byShow.colRevenue'),
       width: '110px',
       render: (s) => <span className="font-semibold">{formatMoney(s.revenue)}</span>,
     },
@@ -367,13 +380,13 @@ function ByShowSection({ arg, className }: { arg: RangeArg; className?: string }
       <div className="flex items-center justify-between">
         <div className="font-medium inline-flex items-center gap-1.5">
           <BarChart3 className="h-4 w-4 text-brand" />
-          演出销售榜 Top 10
+          {t('report:byShow.title')}
         </div>
         <div className="flex gap-1">
           {([
-            ['revenue', '营收'],
-            ['tickets', '票数'],
-            ['orderCount', '订单'],
+            ['revenue', t('report:byShow.sort.revenue')],
+            ['tickets', t('report:byShow.sort.tickets')],
+            ['orderCount', t('report:byShow.sort.orderCount')],
           ] as const).map(([k, label]) => (
             <button
               key={k}
@@ -396,7 +409,7 @@ function ByShowSection({ arg, className }: { arg: RangeArg; className?: string }
         data={data}
         rowKey={(s) => String(s.showId)}
         loading={isFetching}
-        empty="暂无演出销售数据"
+        empty={t('report:byShow.empty')}
       />
     </Card>
   );
@@ -404,16 +417,17 @@ function ByShowSection({ arg, className }: { arg: RangeArg; className?: string }
 
 // ===================== 分类饼图 =====================
 function ByCategorySection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data = [] } = useByCategoryQuery(arg);
   const chartData = data.map((d) => ({
-    name: d.categoryName ?? '未分类',
+    name: d.categoryName ?? t('report:byCategory.uncategorized'),
     value: d.revenue,
   }));
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <PieIcon className="h-4 w-4 text-brand" />
-        分类营收占比
+        {t('report:byCategory.title')}
       </div>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -441,16 +455,17 @@ function ByCategorySection({ arg }: { arg: RangeArg }) {
 
 // ===================== 城市柱状 =====================
 function ByCitySection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data = [] } = useByCityQuery(arg);
   const chartData = data
     .slice()
     .sort((a, b) => b.revenue - a.revenue)
-    .map((d) => ({ name: d.cityName ?? '未指定', value: d.revenue }));
+    .map((d) => ({ name: d.cityName ?? t('report:byCity.unspecified'), value: d.revenue }));
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <BarChart3 className="h-4 w-4 text-brand" />
-        城市营收
+        {t('report:byCity.title')}
       </div>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -477,9 +492,12 @@ function ByCitySection({ arg }: { arg: RangeArg }) {
 
 // ===================== 状态分布饼图 =====================
 function StatusDistributionSection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation(['report', 'order']);
   const { data = [] } = useStatusDistributionQuery(arg);
   const chartData = data.map((d: StatusDistributionItem) => ({
-    name: ORDER_STATUS_LABEL[d.status] ?? String(d.status),
+    name: ORDER_STATUS_KEY[d.status]
+      ? t(`order:status.${ORDER_STATUS_KEY[d.status]}`)
+      : String(d.status),
     value: d.count,
     color: ORDER_STATUS_COLOR[d.status] ?? COLOR_MUTED,
   }));
@@ -487,7 +505,7 @@ function StatusDistributionSection({ arg }: { arg: RangeArg }) {
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <PieIcon className="h-4 w-4 text-brand" />
-        订单状态分布
+        {t('report:statusDistribution.title')}
       </div>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -515,13 +533,17 @@ function StatusDistributionSection({ arg }: { arg: RangeArg }) {
 
 // ===================== 24h 时段柱状 =====================
 function HourDistributionSection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data = [] } = useHourDistributionQuery(arg);
-  const chartData = data.map((d) => ({ name: `${d.hour}时`, value: d.orderCount }));
+  const chartData = data.map((d) => ({
+    name: `${d.hour}${t('report:hourDistribution.hourSuffix')}`,
+    value: d.orderCount,
+  }));
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <Clock className="h-4 w-4 text-brand" />
-        24h 下单时段
+        {t('report:hourDistribution.title')}
       </div>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
@@ -547,12 +569,13 @@ function HourDistributionSection({ arg }: { arg: RangeArg }) {
 
 // ===================== 场次售罄率 =====================
 function BySessionSection({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data = [], isFetching } = useBySessionQuery({ ...arg, limit: 20, sort: 'fillRate' });
 
   const columns: Column<BySessionItem>[] = [
     {
       key: 'show',
-      title: '演出 · 场次',
+      title: t('report:bySession.colShow'),
       render: (s) => (
         <div className="min-w-0">
           <div className="font-medium truncate">{s.showName}</div>
@@ -564,13 +587,13 @@ function BySessionSection({ arg }: { arg: RangeArg }) {
     },
     {
       key: 'fill',
-      title: '售罄率',
+      title: t('report:bySession.colFill'),
       width: '180px',
       render: (s) => <FillBar rate={s.fillRate} sold={s.soldSeats} total={s.totalSeats} />,
     },
     {
       key: 'revenue',
-      title: '营收',
+      title: t('report:bySession.colRevenue'),
       width: '110px',
       render: (s) => <span className="font-semibold">{formatMoney(s.revenue)}</span>,
     },
@@ -580,14 +603,14 @@ function BySessionSection({ arg }: { arg: RangeArg }) {
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <BarChart3 className="h-4 w-4 text-brand" />
-        场次售罄率排行
+        {t('report:bySession.title')}
       </div>
       <DataTable<BySessionItem>
         columns={columns}
         data={data}
         rowKey={(s) => String(s.sessionId)}
         loading={isFetching}
-        empty="暂无场次数据"
+        empty={t('report:bySession.empty')}
       />
     </Card>
   );
@@ -611,25 +634,26 @@ function FillBar({ rate, sold, total }: { rate: number; sold: number; total: num
 
 // ===================== 用户行为 =====================
 function UserStatsCard({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data } = useUserStatsQuery(arg);
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <Users className="h-4 w-4 text-brand" />
-        用户行为
+        {t('report:userStats.title')}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <StatItem label="购买用户" value={String(data?.totalBuyers ?? 0)} />
+        <StatItem label={t('report:userStats.totalBuyers')} value={String(data?.totalBuyers ?? 0)} />
         <StatItem
-          label="复购用户"
+          label={t('report:userStats.repeatBuyers')}
           value={String(data?.repeatBuyers ?? 0)}
           sub={fmtPct(data?.repeatRate)}
         />
-        <StatItem label="客单价" value={formatMoney(data?.avgOrderValue ?? 0)} />
+        <StatItem label={t('report:userStats.avgOrderValue')} value={formatMoney(data?.avgOrderValue ?? 0)} />
         <StatItem
-          label="平均座位"
+          label={t('report:userStats.avgSeats')}
           value={data?.avgSeatsPerOrder?.toFixed(2) ?? '0'}
-          sub="个/单"
+          sub={t('report:userStats.avgSeatsUnit')}
         />
       </div>
     </Card>
@@ -637,23 +661,30 @@ function UserStatsCard({ arg }: { arg: RangeArg }) {
 }
 
 function RefundStatsCard({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data } = useRefundStatsQuery(arg);
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <Undo2 className="h-4 w-4 text-brand" />
-        退款指标
+        {t('report:refundStats.title')}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <StatItem label="退款金额" value={formatMoney(data?.refundAmount ?? 0)} />
-        <StatItem label="退款率" value={fmtPct(data?.refundRate)} sub="占营收" />
-        <StatItem label="全额退款" value={String(data?.fullRefundCount ?? 0)} />
+        <StatItem label={t('report:refundStats.refundAmount')} value={formatMoney(data?.refundAmount ?? 0)} />
         <StatItem
-          label="部分退款"
+          label={t('report:refundStats.refundRate')}
+          value={fmtPct(data?.refundRate)}
+          sub={t('report:refundStats.ofRevenue')}
+        />
+        <StatItem label={t('report:refundStats.fullRefund')} value={String(data?.fullRefundCount ?? 0)} />
+        <StatItem
+          label={t('report:refundStats.partialRefund')}
           value={String(data?.partialRefundCount ?? 0)}
           sub={
             data?.refundingCount ? (
-              <Badge variant="info">{data.refundingCount} 处理中</Badge>
+              <Badge variant="info">
+                {t('report:refundStats.processing', { n: data.refundingCount })}
+              </Badge>
             ) : undefined
           }
         />
@@ -663,18 +694,19 @@ function RefundStatsCard({ arg }: { arg: RangeArg }) {
 }
 
 function CancellationStatsCard({ arg }: { arg: RangeArg }) {
+  const { t } = useTranslation('report');
   const { data } = useCancellationStatsQuery(arg);
   return (
     <Card className="p-4 space-y-3">
       <div className="font-medium inline-flex items-center gap-1.5">
         <Hourglass className="h-4 w-4 text-brand" />
-        取消率
+        {t('report:cancellationStats.title')}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <StatItem label="新建订单" value={String(data?.createdCount ?? 0)} />
-        <StatItem label="取消率" value={fmtPct(data?.cancelRate)} />
-        <StatItem label="超时取消" value={String(data?.expiredCancelledCount ?? 0)} />
-        <StatItem label="用户取消" value={String(data?.userCancelledCount ?? 0)} />
+        <StatItem label={t('report:cancellationStats.createdCount')} value={String(data?.createdCount ?? 0)} />
+        <StatItem label={t('report:cancellationStats.cancelRate')} value={fmtPct(data?.cancelRate)} />
+        <StatItem label={t('report:cancellationStats.expired')} value={String(data?.expiredCancelledCount ?? 0)} />
+        <StatItem label={t('report:cancellationStats.userCancelled')} value={String(data?.userCancelledCount ?? 0)} />
       </div>
     </Card>
   );

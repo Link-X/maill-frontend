@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ScanLine, KeyRound, CheckCircle2, XCircle, Camera } from 'lucide-react';
 import { Button, Input, Label, extractErrorMessage, notify, type VerifyResult } from '@maill/shared';
 import { Card } from '@/components/Card';
@@ -11,6 +12,7 @@ import { useVerifyByTicketNoMutation } from './verifyApi';
 type Tab = 'manual' | 'scan';
 
 export default function VerifyPage() {
+  const { t } = useTranslation(['order', 'common']);
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('manual');
   const [ticketNo, setTicketNo] = useState('');
@@ -20,7 +22,7 @@ export default function VerifyPage() {
 
   const handleVerify = async () => {
     if (!ticketNo.trim()) {
-      notify.warn('请输入票号');
+      notify.warn(t('order:verify.needTicketNo'));
       return;
     }
     setErrorMsg(null);
@@ -28,7 +30,7 @@ export default function VerifyPage() {
     try {
       const res = await verifyByTicketNo({ ticketNo: ticketNo.trim() }).unwrap();
       setResult(res);
-      notify.success('核销成功');
+      notify.success(t('order:verify.successToast'));
     } catch (e) {
       const msg = extractErrorMessage(e);
       setErrorMsg(msg);
@@ -42,29 +44,29 @@ export default function VerifyPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          aria-label="返回"
+          aria-label={t('common:actions.back')}
           className="h-9 w-9 rounded-full bg-card flex items-center justify-center border border-border/60"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="font-semibold">票券核销</div>
+        <div className="font-semibold">{t('order:verify.title')}</div>
       </div>
 
       <div className="px-4 space-y-4">
         <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg w-full">
-          <TabBtn label="手动输入" active={tab === 'manual'} icon={KeyRound} onClick={() => setTab('manual')} />
-          <TabBtn label="扫码（暂不支持）" active={tab === 'scan'} icon={ScanLine} onClick={() => setTab('scan')} disabled />
+          <TabBtn label={t('order:verify.tabManual')} active={tab === 'manual'} icon={KeyRound} onClick={() => setTab('manual')} />
+          <TabBtn label={t('order:verify.tabScan')} active={tab === 'scan'} icon={ScanLine} onClick={() => setTab('scan')} disabled />
         </div>
 
         {tab === 'manual' ? (
           <Card className="p-4 space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="ticketNo">票号</Label>
+              <Label htmlFor="ticketNo">{t('order:pay.ticketNo')}</Label>
               <Input
                 id="ticketNo"
                 value={ticketNo}
                 onChange={(e) => setTicketNo(e.target.value)}
-                placeholder="请扫码或手动输入票号"
+                placeholder={t('order:verify.placeholder')}
                 autoComplete="off"
                 onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
               />
@@ -74,14 +76,14 @@ export default function VerifyPage() {
               disabled={isLoading || !ticketNo.trim()}
               onClick={handleVerify}
             >
-              {isLoading ? '核销中...' : '核销'}
+              {isLoading ? t('order:verify.verifying') : t('order:verify.btn')}
             </Button>
           </Card>
         ) : (
           <Card className="p-6 text-center text-sm text-muted-foreground space-y-2">
             <Camera className="h-10 w-10 text-muted-foreground/60 mx-auto" />
-            <p>摄像头扫码功能将在后续版本支持。</p>
-            <p>当前请切换到"手动输入"。</p>
+            <p>{t('order:verify.scanHint1')}</p>
+            <p>{t('order:verify.scanHint2')}</p>
           </Card>
         )}
 
@@ -96,17 +98,17 @@ export default function VerifyPage() {
               <Card className="p-4 space-y-2 border-success/30">
                 <div className="flex items-center gap-2 text-success">
                   <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">核销成功</span>
+                  <span className="font-medium">{t('order:verify.successTitle')}</span>
                   <Badge variant="success" className="ml-auto">
                     {ticketStatusLabel(result.status)}
                   </Badge>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  票号：<span className="font-mono">{result.ticketNo}</span>
+                  {t('order:verify.ticketNoLabel')}<span className="font-mono">{result.ticketNo}</span>
                 </div>
                 {result.verifyTime && (
                   <div className="text-xs text-muted-foreground">
-                    核销时间：{formatDateTime(result.verifyTime)}
+                    {t('order:verify.verifyTimeLabel')}{formatDateTime(result.verifyTime)}
                   </div>
                 )}
               </Card>
@@ -122,7 +124,7 @@ export default function VerifyPage() {
               <Card className="p-4 space-y-1 border-destructive/30">
                 <div className="flex items-center gap-2 text-destructive">
                   <XCircle className="h-5 w-5" />
-                  <span className="font-medium">核销失败</span>
+                  <span className="font-medium">{t('order:verify.failedTitle')}</span>
                 </div>
                 <div className="text-sm text-muted-foreground">{errorMsg}</div>
               </Card>

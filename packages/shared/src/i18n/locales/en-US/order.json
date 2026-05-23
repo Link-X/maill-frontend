@@ -11,8 +11,126 @@
     "refunded": "Refunded",
     "partial": "Partial refund"
   },
-  "pay": "Pay now",
+  "ticketStatus": {
+    "unverified": "Unused",
+    "verified": "Verified",
+    "voided": "Voided"
+  },
+  "list": {
+    "empty": "No orders yet",
+    "emptyHint": "Browse shows on the home page",
+    "seatsSuffix": "+{{n}}"
+  },
+  "detail": {
+    "totalLabel": "Total",
+    "payRemaining": "Time left to pay",
+    "seatsLabel": "Seats",
+    "seatsLabelWithCount": "Seats ({{n}})",
+    "ticketsLabel": "Tickets",
+    "ticketsLabelWithCount": "Tickets ({{n}})",
+    "qrCode": "Entry QR code",
+    "createdAt": "Created",
+    "paidAt": "Paid",
+    "expireAt": "Expires"
+  },
+  "pay": {
+    "title": "Order detail",
+    "backToList": "Back to orders",
+    "now": "Pay now",
+    "payNowAmount": "Pay {{amount}}",
+    "paying": "Paying...",
+    "paidSuccess": "Payment succeeded",
+    "paidGenerating": "Paid, generating tickets...",
+    "ticketsReady": "Tickets ready",
+    "ticketsSlowHint": "Tickets are taking a bit longer; pull to refresh",
+    "generating": "Generating tickets...",
+    "refreshNow": "Refresh",
+    "ticketNo": "Ticket #",
+    "ticketIndex": "Ticket {{n}}",
+    "expired": "Order expired",
+    "cancelConfirm": "Cancel this order?",
+    "notFound": "Order not found",
+    "cancelledToast": "Order cancelled",
+    "cancelledStatus": "Order cancelled"
+  },
   "cancelOrder": "Cancel order",
-  "refund": "Refund",
-  "refundTicket": "Refund this ticket"
+  "cancelling": "Cancelling...",
+  "refund": {
+    "all": "Refund whole order",
+    "ticket": "Refund this ticket",
+    "ticketing": "Refunding...",
+    "refundingAll": "Refunding...",
+    "confirmTitle": "Confirm refund",
+    "confirmAll": "Refund the entire order?",
+    "confirmTicket": "Refund this ticket? It will be voided and unusable.",
+    "submittedToast": "Refund submitted",
+    "ticketSubmittedToast": "Refund submitted for {{ticketNo}}",
+    "allSubmittedToast": "Full refund submitted"
+  },
+  "submit": {
+    "creating": "Creating order...",
+    "createdToast": "Order created, please complete payment"
+  },
+  "confirm": {
+    "title": "Confirm order",
+    "empty": "No seats selected",
+    "backHome": "Back to home",
+    "selectedSeats": "Selected seats ({{n}})",
+    "totalLabel": "Order total",
+    "lockHint": "Once submitted, seats are locked for 5 minutes. Unpaid orders expire automatically.",
+    "totalShort": "Total",
+    "submitBtn": "Submit",
+    "submittingBtn": "Submitting...",
+    "submittedToast": "Order placed, redirecting to payment"
+  },
+  "verify": {
+    "title": "Ticket verification",
+    "tabManual": "Manual",
+    "tabScan": "Scan (coming soon)",
+    "placeholder": "Scan or enter ticket #",
+    "btn": "Verify",
+    "verifying": "Verifying...",
+    "needTicketNo": "Please enter the ticket number",
+    "successTitle": "Verified",
+    "successToast": "Verified",
+    "failedTitle": "Verification failed",
+    "failedToast": "Verification failed",
+    "ticketNoLabel": "Ticket #: ",
+    "verifyTimeLabel": "Verified at: ",
+    "scanHint1": "Camera scan will be supported in a future release.",
+    "scanHint2": "Please switch to \"Manual\" for now."
+  },
+  "admin": {
+    "page": {
+      "title": "Orders",
+      "subtitle": "{{total}} orders total",
+      "totalSuffix": "orders"
+    },
+    "filter": {
+      "orderNoLabel": "Order # (exact)",
+      "orderNoPlaceholder": "Complete order #",
+      "showLabel": "Show",
+      "showAll": "All shows",
+      "sessionLabel": "Session ID",
+      "sessionPlaceholder": "Optional, number",
+      "statusLabel": "Status",
+      "statusAll": "All",
+      "startLabel": "From",
+      "endLabel": "To"
+    },
+    "table": {
+      "orderNo": "Order #",
+      "show": "Show / Session",
+      "seats": "Seats",
+      "seatsValue": "{{n}}",
+      "totalAmount": "Total",
+      "status": "Status",
+      "createTime": "Created",
+      "actions": "Actions"
+    },
+    "detailDrawer": {
+      "titlePrefix": "Order",
+      "orderId": "Order ID"
+    }
+  }
 }

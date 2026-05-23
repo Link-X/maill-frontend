@@ -1,6 +1,7 @@
 import { Button } from '@maill/shared';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -17,12 +18,15 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmText = '确定',
-  cancelText = '取消',
+  confirmText,
+  cancelText,
   destructive,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation('common');
+  const finalConfirmText = confirmText ?? t('common:actions.ok');
+  const finalCancelText = cancelText ?? t('common:actions.cancel');
   return (
     <AnimatePresence>
       {open && (
@@ -46,10 +50,10 @@ export function ConfirmDialog({
             {description && <div className="text-sm text-muted-foreground">{description}</div>}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" size="sm" onClick={onCancel}>
-                {cancelText}
+                {finalCancelText}
               </Button>
               <Button variant={destructive ? 'destructive' : 'default'} size="sm" onClick={onConfirm}>
-                {confirmText}
+                {finalConfirmText}
               </Button>
             </div>
           </motion.div>

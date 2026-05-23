@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Ticket, Check } from 'lucide-react';
 import { Button, extractErrorMessage, notify } from '@maill/shared';
 import { Card } from '@/components/Card';
@@ -13,6 +14,7 @@ import {
 import { useSubmitOrderMutation } from './orderApi';
 
 export default function OrderConfirmPage() {
+  const { t } = useTranslation(['order', 'common']);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [search] = useSearchParams();
@@ -25,8 +27,8 @@ export default function OrderConfirmPage() {
     return (
       <div className="p-6 text-center space-y-3">
         <Ticket className="h-10 w-10 text-muted-foreground mx-auto" />
-        <p className="text-muted-foreground">还没有选中座位</p>
-        <Button onClick={() => navigate('/')}>回到首页</Button>
+        <p className="text-muted-foreground">{t('order:confirm.empty')}</p>
+        <Button onClick={() => navigate('/')}>{t('order:confirm.backHome')}</Button>
       </div>
     );
   }
@@ -37,7 +39,7 @@ export default function OrderConfirmPage() {
         sessionId: sessionIdParam,
         seatIds: seats.map((s) => s.seatId),
       }).unwrap();
-      notify.success('下单成功，即将跳转支付');
+      notify.success(t('order:confirm.submittedToast'));
       dispatch(clearCart());
       navigate(`/order/${result.orderNo}/pay`, { replace: true });
     } catch (e) {
@@ -51,19 +53,19 @@ export default function OrderConfirmPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          aria-label="返回"
+          aria-label={t('common:actions.back')}
           className="h-9 w-9 rounded-full bg-card flex items-center justify-center border border-border/60"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="font-semibold">确认订单</div>
+        <div className="font-semibold">{t('order:confirm.title')}</div>
       </div>
 
       <div className="px-4 space-y-4">
         <Card className="p-4 space-y-3">
           <h3 className="font-medium inline-flex items-center gap-1.5">
             <Ticket className="h-4 w-4 text-brand" />
-            已选座位（{seats.length}）
+            {t('order:confirm.selectedSeats', { n: seats.length })}
           </h3>
           <ul className="space-y-2">
             {seats.map((s) => (
@@ -82,19 +84,17 @@ export default function OrderConfirmPage() {
         </Card>
 
         <Card variant="glass" className="p-4 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">订单总价</span>
+          <span className="text-sm text-muted-foreground">{t('order:confirm.totalLabel')}</span>
           <span className="text-2xl font-semibold text-brand">{formatMoney(total)}</span>
         </Card>
 
-        <p className="text-xs text-muted-foreground px-1">
-          点击"提交订单"后系统会立即锁定座位（5 分钟有效），未支付订单到期自动取消。
-        </p>
+        <p className="text-xs text-muted-foreground px-1">{t('order:confirm.lockHint')}</p>
       </div>
 
       <StickyBottomBar>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-xs text-muted-foreground">合计</div>
+            <div className="text-xs text-muted-foreground">{t('order:confirm.totalShort')}</div>
             <div className="text-xl font-semibold text-brand">{formatMoney(total)}</div>
           </div>
           <Button
@@ -102,7 +102,7 @@ export default function OrderConfirmPage() {
             disabled={isLoading}
             onClick={handleSubmit}
           >
-            {isLoading ? '提交中...' : '提交订单'}
+            {isLoading ? t('order:confirm.submittingBtn') : t('order:confirm.submitBtn')}
           </Button>
         </div>
       </StickyBottomBar>

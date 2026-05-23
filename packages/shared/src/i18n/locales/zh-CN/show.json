@@ -1,9 +1,86 @@
 {
   "title": "演出",
-  "list": "演出列表",
-  "detail": "演出详情",
-  "category": "分类",
-  "venue": "场地",
-  "sessions": "场次",
-  "noSessions": "暂无场次"
+  "list": {
+    "title": "演出列表",
+    "searchPlaceholder": "搜索演出...",
+    "empty": "暂无演出",
+    "emptyHint": "换个关键词试试看",
+    "allCategories": "全部"
+  },
+  "detail": {
+    "availableSessions": "可选场次",
+    "noSessions": "暂无可售场次",
+    "noSessionsHint": "商家正在准备中，敬请期待",
+    "limitPerUserSuffix": "限 {{n}} 张",
+    "selectSeats": "选座购票",
+    "duration": "时长",
+    "durationValue": "{{n}} 分钟",
+    "ageLimit": "年龄",
+    "refundRule": "退票"
+  },
+  "card": {
+    "sessionFallback": "{{date}} 场"
+  },
+  "form": {
+    "titleNew": "新建演出",
+    "titleEdit": "编辑演出",
+    "name": "名称",
+    "nameRequired": "请输入演出名称",
+    "category": "分类",
+    "categoryUnspecified": "未分类",
+    "city": "城市",
+    "cityUnspecified": "未指定",
+    "venue": "场地",
+    "venuePlaceholder": "国家体育场",
+    "address": "详细地址",
+    "addressPlaceholder": "朝阳区奥林匹克公园...",
+    "poster": "海报",
+    "posterInvalid": "海报链接需为合法 URL",
+    "description": "描述",
+    "extend": "扩展字段（JSON）",
+    "extendHint": "约定字段：duration（分钟）/ ageLimit / refundRule。其他键也支持，前端会按需要展示。",
+    "extendInvalid": "需要合法的 JSON 对象（如 {\"duration\":120}）",
+    "savedToast": "演出已更新",
+    "createdToast": "演出已创建"
+  },
+  "status": {
+    "draft": "草稿",
+    "onSale": "已上架",
+    "offShelf": "已下架"
+  },
+  "action": {
+    "publish": "上架",
+    "unpublish": "下架",
+    "sessions": "场次",
+    "createBtn": "新建演出"
+  },
+  "table": {
+    "poster": "海报",
+    "name": "名称",
+    "category": "分类",
+    "cityVenue": "城市 · 场地",
+    "status": "状态",
+    "createTime": "创建时间",
+    "actions": "操作",
+    "allStatus": "全部状态"
+  },
+  "page": {
+    "title": "演出管理",
+    "subtitle": "维护可售演出列表",
+    "notFound": "场地不存在"
+  },
+  "toggleConfirm": {
+    "title": {
+      "publish": "上架演出",
+      "unpublish": "下架演出"
+    },
+    "desc": {
+      "publish": "确定要上架 {{name}} 吗？",
+      "unpublish": "确定要下架 {{name}} 吗？"
+    }
+  },
+  "toggleSuccess": {
+    "publish": "已上架：{{name}}",
+    "unpublish": "已下架：{{name}}"
+  }
 }

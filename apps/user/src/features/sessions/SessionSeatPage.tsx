@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, MapPin, Info, Clock } from 'lucide-react';
 import { extractErrorMessage, notify, parseExtend, type SessionExtend } from '@maill/shared';
 import { Card } from '@/components/Card';
@@ -12,6 +13,7 @@ import { SelectionBar } from './SelectionBar';
 import { setSessionContext } from './cartSlice';
 
 export default function SessionSeatPage() {
+  const { t } = useTranslation(['session', 'common']);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
@@ -44,7 +46,7 @@ export default function SessionSeatPage() {
     );
   }
   if (!data) {
-    return <div className="p-6 text-center text-muted-foreground">场次数据加载失败</div>;
+    return <div className="p-6 text-center text-muted-foreground">{t('session:userSeat.loadFailed')}</div>;
   }
 
   const { session, areaPriceList, seatSection, showName, showVenue, showAddress, showCityName } = data;
@@ -57,7 +59,7 @@ export default function SessionSeatPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          aria-label="返回"
+          aria-label={t('common:actions.back')}
           className="h-9 w-9 rounded-full bg-card flex items-center justify-center border border-border/60"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -94,7 +96,7 @@ export default function SessionSeatPage() {
           {typeof sessionExtend.preSaleLeadMinutes === 'number' && (
             <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-brand" />
-              开演前 {sessionExtend.preSaleLeadMinutes} 分钟可入场
+              {t('session:userSeat.leadMinutes', { n: sessionExtend.preSaleLeadMinutes })}
             </p>
           )}
           {sessionExtend.notice && (
@@ -119,11 +121,11 @@ export default function SessionSeatPage() {
           ))}
           <span className="inline-flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded bg-brand" />
-            已选
+            {t('session:userSeat.legendSelected')}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded bg-foreground/30 ring-1 ring-foreground/10" />
-            已售
+            {t('session:userSeat.legendSold')}
           </span>
         </Card>
       </div>
@@ -136,7 +138,7 @@ export default function SessionSeatPage() {
           areaPriceList={areaPriceList}
           limitPerUser={session.limitPerUser ?? 4}
           onLimitExceed={() =>
-            notify.warn(`每人最多选 ${session.limitPerUser ?? 4} 个座位`)
+            notify.warn(t('session:userSeat.limitToast', { n: session.limitPerUser ?? 4 }))
           }
         />
       </div>

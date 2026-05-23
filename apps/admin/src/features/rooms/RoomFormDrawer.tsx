@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { Save, Rows3, Columns3 } from 'lucide-react';
 import {
   Button,
@@ -14,16 +15,6 @@ import {
 import { Drawer } from '@/components/Drawer';
 import { useCreateRoomMutation, useUpdateRoomMutation } from './roomsApi';
 
-const schema = z.object({
-  name: z.string().min(1, '请输入场地名称'),
-  venue: z.string().optional(),
-  rowCount: z.coerce.number().int().min(1, '至少 1 行').max(200, '最多 200 行'),
-  colCount: z.coerce.number().int().min(1, '至少 1 列').max(200, '最多 200 列'),
-  description: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
-
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -31,10 +22,32 @@ interface Props {
 }
 
 export function RoomFormDrawer({ open, onClose, initial }: Props) {
+  const { t } = useTranslation(['room', 'common']);
   const [createRoom, { isLoading: creating }] = useCreateRoomMutation();
   const [updateRoom, { isLoading: updating }] = useUpdateRoomMutation();
   const isEdit = !!initial;
   const isLoading = creating || updating;
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, t('room:form.nameRequired')),
+        venue: z.string().optional(),
+        rowCount: z.coerce
+          .number()
+          .int()
+          .min(1, t('room:form.rowsMin'))
+          .max(200, t('room:form.rowsMax')),
+        colCount: z.coerce
+          .number()
+          .int()
+          .min(1, t('room:form.colsMin'))
+          .max(200, t('room:form.colsMax')),
+        description: z.string().optional(),
+      }),
+    [t],
+  );
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -62,10 +75,10 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
     try {
       if (isEdit && initial) {
         await updateRoom({ ...initial, ...values }).unwrap();
-        notify.success('场地已更新');
+        notify.success(t('room:form.savedToast'));
       } else {
         await createRoom(values).unwrap();
-        notify.success('场地已创建');
+        notify.success(t('room:form.createdToast'));
       }
       onClose();
     } catch (e) {
@@ -77,11 +90,11 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
     <Drawer
       open={open}
       onClose={onClose}
-      title={isEdit ? '编辑场地' : '新建场地'}
+      title={isEdit ? t('room:form.titleEdit') : t('room:form.titleNew')}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose} disabled={isLoading}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button
             size="sm"
@@ -90,26 +103,26 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
             className="bg-gradient-brand hover:opacity-90"
           >
             <Save className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? '保存中...' : '保存'}
+            {isLoading ? t('common:actions.saving') : t('common:actions.save')}
           </Button>
         </>
       }
     >
       <form className="space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="name">名称 *</Label>
+          <Label htmlFor="name">{t('room:form.name')} *</Label>
           <Input id="name" {...register('name')} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="venue">所属场馆</Label>
-          <Input id="venue" placeholder="国家体育场" {...register('venue')} />
+          <Label htmlFor="venue">{t('room:form.venue')}</Label>
+          <Input id="venue" placeholder={t('room:form.venuePlaceholder')} {...register('venue')} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-2">
             <Label htmlFor="rowCount" className="flex items-center gap-1">
               <Rows3 className="h-3.5 w-3.5" />
-              行数 *
+              {t('room:form.rowCount')} *
             </Label>
             <Input id="rowCount" type="number" min={1} {...register('rowCount')} />
             {errors.rowCount && (
@@ -119,7 +132,7 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
           <div className="space-y-2">
             <Label htmlFor="colCount" className="flex items-center gap-1">
               <Columns3 className="h-3.5 w-3.5" />
-              列数 *
+              {t('room:form.colCount')} *
             </Label>
             <Input id="colCount" type="number" min={1} {...register('colCount')} />
             {errors.colCount && (
@@ -128,7 +141,7 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">描述</Label>
+          <Label htmlFor="description">{t('room:form.description')}</Label>
           <textarea
             id="description"
             rows={3}

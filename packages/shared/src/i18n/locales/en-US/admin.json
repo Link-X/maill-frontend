@@ -8,6 +8,14 @@
     "dashboard": "Dashboard"
   },
   "login": {
-    "title": "Admin sign in"
+    "title": "Admin sign in",
+    "switchToRegister": "No admin account? Sign up"
+  },
+  "register": {
+    "title": "Admin sign up",
+    "inviteCodeLabel": "Invite code *",
+    "inviteCodePlaceholder": "Request from system admin",
+    "inviteCodeMin": "Invite code must be at least 16 chars",
+    "successToast": "Signed up successfully, welcome"
   }
 }

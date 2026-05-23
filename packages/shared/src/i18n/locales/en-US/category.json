@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Categories",
+    "subtitle": "Manage show categories — used for home tabs and show form dropdown"
+  },
+  "form": {
+    "titleNew": "New category",
+    "titleEdit": "Edit category",
+    "name": "Name",
+    "namePlaceholder": "Concert / Drama / Stand-up...",
+    "nameRequired": "Please enter the category name",
+    "sort": "Sort",
+    "sortPlaceholder": "Smaller comes first",
+    "icon": "Icon",
+    "iconInvalid": "Icon URL must be valid",
+    "status": "Status",
+    "savedToast": "Category updated",
+    "createdToast": "Category created"
+  },
+  "table": {
+    "icon": "Icon",
+    "name": "Name",
+    "sort": "Sort",
+    "status": "Status",
+    "createTime": "Created",
+    "actions": "Actions"
+  },
+  "action": {
+    "createBtn": "New category",
+    "enableShort": "Enable",
+    "disableShort": "Disable"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "toggle": {
+    "enabledToast": "Enabled: {{name}}",
+    "disabledToast": "Disabled: {{name}}"
+  },
+  "delete": {
+    "title": "Delete category",
+    "desc": "Delete {{name}}? Categories referenced by shows cannot be deleted.",
+    "btn": "Delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Deleted: {{name}}",
+    "inUseError": "Category is referenced by shows and cannot be deleted"
+  }
+}

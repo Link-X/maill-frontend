@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Armchair, Layers, ShoppingBag, Activity } from 'lucide-react';
 import { Card } from '@/components/Card';
@@ -14,6 +15,7 @@ const COLORS = {
 };
 
 export function MonitorPanel({ sessionId }: Props) {
+  const { t } = useTranslation('session');
   const { data, isLoading } = useGetDashboardQuery(sessionId, {
     skip: !sessionId,
     pollingInterval: 5000,
@@ -37,7 +39,7 @@ export function MonitorPanel({ sessionId }: Props) {
     <Card variant="glass" className="p-5">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-4 w-4 text-brand" />
-        <h3 className="font-semibold">实时监控（每 5 秒刷新）</h3>
+        <h3 className="font-semibold">{t('session:monitor.title')}</h3>
       </div>
       <div className="grid grid-cols-[160px_1fr] gap-4">
         <div className="relative h-40 w-40">
@@ -67,14 +69,14 @@ export function MonitorPanel({ sessionId }: Props) {
             >
               {soldPct}%
             </motion.div>
-            <div className="text-xs text-muted-foreground">已售</div>
+            <div className="text-xs text-muted-foreground">{t('session:monitor.sold')}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 self-center">
-          <Metric label="总座位" value={data.totalSeats} icon={Layers} color="text-foreground" />
-          <Metric label="已售" value={data.soldCount} icon={ShoppingBag} color="text-brand" />
-          <Metric label="可售" value={data.availableCount} icon={Armchair} color="text-success" />
+          <Metric label={t('session:monitor.totalSeats')} value={data.totalSeats} icon={Layers} color="text-foreground" />
+          <Metric label={t('session:monitor.sold')} value={data.soldCount} icon={ShoppingBag} color="text-brand" />
+          <Metric label={t('session:monitor.available')} value={data.availableCount} icon={Armchair} color="text-success" />
         </div>
       </div>
     </Card>
