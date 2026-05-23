@@ -4,6 +4,7 @@
     "categories": "分类管理",
     "rooms": "场地管理",
     "orders": "订单查询",
+    "reports": "数据报表",
     "dashboard": "监控看板"
   },
   "login": {

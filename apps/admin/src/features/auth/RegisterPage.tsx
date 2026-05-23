@@ -28,7 +28,12 @@ export default function AdminRegisterPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      inviteCode: 'dev-admin-invite-please-change-in-prod',
+    },
+  });
 
   const onSubmit = handleSubmit(async (values) => {
     try {

@@ -10,6 +10,7 @@ const RoomsPage = lazy(() => import('@/features/rooms/RoomsPage'));
 const RoomDetailPage = lazy(() => import('@/features/rooms/RoomDetailPage'));
 const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'));
+const ReportsPage = lazy(() => import('@/features/reports/ReportsPage'));
 const SessionsPage = lazy(() => import('@/features/sessions/SessionsPage'));
 const SessionFormPage = lazy(() => import('@/features/sessions/SessionFormPage'));
 const SessionDetailPage = lazy(() => import('@/features/sessions/SessionDetailPage'));
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: 'rooms/:id', element: withSuspense(<RoomDetailPage />) },
       { path: 'orders', element: withSuspense(<OrdersPage />) },
       { path: 'categories', element: withSuspense(<CategoriesPage />) },
+      { path: 'reports', element: withSuspense(<ReportsPage />) },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

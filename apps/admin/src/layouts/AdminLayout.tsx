@@ -8,6 +8,7 @@ import {
   Building2,
   Receipt,
   Tag,
+  BarChart3,
   Sun,
   Moon,
   Monitor,
@@ -32,6 +33,7 @@ const navItems = [
   { to: '/categories', key: 'admin:nav.categories', icon: Tag },
   { to: '/rooms', key: 'admin:nav.rooms', icon: Building2 },
   { to: '/orders', key: 'admin:nav.orders', icon: Receipt },
+  { to: '/reports', key: 'admin:nav.reports', icon: BarChart3 },
 ];
 
 const cycleTheme = (mode: ThemeMode): ThemeMode =>
