@@ -2,21 +2,14 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { ArrowLeft } from 'lucide-react';
-import { extractErrorMessage, notify, type AreaPriceVO } from '@maill/shared';
+import { extractErrorMessage, notify } from '@maill/shared';
 import { Card } from '@/components/Card';
 import { Skeleton } from '@/components/Skeleton';
 import { formatDateTime, formatMoney } from '@/lib/format';
 import { useGetSessionDetailQuery } from './sessionsApi';
-import { SeatGrid } from './SeatGrid';
+import { SeatGrid, buildPriceColorMap } from './SeatGrid';
 import { SelectionBar } from './SelectionBar';
 import { setSessionContext } from './cartSlice';
-
-const AREA_DOT: Record<string, string> = {
-  A: 'bg-area-a',
-  B: 'bg-area-b',
-  C: 'bg-area-c',
-  D: 'bg-area-d',
-};
 
 export default function SessionSeatPage() {
   const navigate = useNavigate();
@@ -37,11 +30,10 @@ export default function SessionSeatPage() {
   // 不在 unmount 时清空 cart — 跳转 OrderConfirmPage 也会 unmount。
   // cart 在两种情况下清空：(1) setSessionContext 检测到 sessionId 变化；(2) 提交成功后显式 clearCart。
 
-  const areaPriceMap = useMemo(() => {
-    const m = new Map<string, AreaPriceVO>();
-    (data?.areaPriceList ?? []).forEach((p) => m.set(p.areaId, p));
-    return m;
-  }, [data?.areaPriceList]);
+  const priceColorMap = useMemo(
+    () => buildPriceColorMap(data?.areaPriceList ?? []),
+    [data?.areaPriceList],
+  );
 
   if (isLoading) {
     return (
@@ -81,13 +73,19 @@ export default function SessionSeatPage() {
         <Card variant="glass" className="p-3 flex flex-wrap gap-3 text-xs">
           {areaPriceList.map((p) => (
             <span key={p.areaId} className="inline-flex items-center gap-1.5">
-              <span className={`inline-block h-3 w-3 rounded ${AREA_DOT[p.areaId] ?? 'bg-muted'}`} />
-              区域 {p.areaId} · {formatMoney(p.price)}
+              <span
+                className={`inline-block h-3 w-3 rounded ${priceColorMap.get(p.areaId) ?? 'bg-muted'}`}
+              />
+              {formatMoney(p.price)}
             </span>
           ))}
-          <span className="inline-flex items-center gap-1.5 ml-auto">
+          <span className="inline-flex items-center gap-1.5">
             <span className="inline-block h-3 w-3 rounded bg-brand" />
             已选
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-3 w-3 rounded bg-muted/40" />
+            已售
           </span>
         </Card>
       </div>
@@ -97,7 +95,7 @@ export default function SessionSeatPage() {
           rows={seatSection.seatRows}
           rowCount={seatSection.rowCount}
           columnCount={seatSection.columnCount}
-          areaPriceMap={areaPriceMap}
+          areaPriceList={areaPriceList}
           limitPerUser={session.limitPerUser ?? 4}
           onLimitExceed={() =>
             notify.warn(`每人最多选 ${session.limitPerUser ?? 4} 个座位`)

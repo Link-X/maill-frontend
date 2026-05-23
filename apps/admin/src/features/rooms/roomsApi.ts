@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import type { Room, RoomSeat, RoomArea } from '@maill/shared';
+import type { Room, RoomSeat, RoomArea, RoomTemplateVO } from '@maill/shared';
 import { adminBaseQuery } from '@/api/adminBase';
 
 export const roomsApi = createApi({
@@ -17,6 +17,15 @@ export const roomsApi = createApi({
     getRoom: build.query<Room, number | string>({
       query: (id) => `/api/admin/room/${id}`,
       providesTags: (_r, _e, id) => [{ type: 'Room', id }],
+    }),
+    // 聚合：一次拿全 { room, seats, areas }，供 RoomDetailPage 使用
+    getRoomTemplate: build.query<RoomTemplateVO, number | string>({
+      query: (roomId) => ({ url: '/api/admin/room/template', params: { roomId } }),
+      providesTags: (_r, _e, roomId) => [
+        { type: 'Room', id: roomId },
+        { type: 'RoomSeat', id: roomId },
+        { type: 'RoomArea', id: roomId },
+      ],
     }),
     createRoom: build.mutation<Room, Partial<Room>>({
       query: (body) => ({ url: '/api/admin/room/create', method: 'POST', body }),
@@ -50,6 +59,7 @@ export const roomsApi = createApi({
 export const {
   useListRoomsQuery,
   useGetRoomQuery,
+  useGetRoomTemplateQuery,
   useCreateRoomMutation,
   useUpdateRoomMutation,
   useListRoomSeatsQuery,

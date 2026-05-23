@@ -38,3 +38,10 @@ export interface RoomArea {
 
 // 兼容 Plan 1 类型名
 export type AreaPrice = RoomArea;
+
+// 后端聚合接口 /api/admin/room/template?roomId= 返回值：一次拿全场地基础信息、座位模板、价格区域
+export interface RoomTemplateVO {
+  room: Room;
+  seats: RoomSeat[];
+  areas: RoomArea[];
+}

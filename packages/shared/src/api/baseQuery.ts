@@ -22,10 +22,16 @@ export const createBaseQuery = (
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: options.baseUrl,
-    prepareHeaders: (headers) => {
+    prepareHeaders: (headers, api) => {
       const token = options.getToken?.();
       if (token) headers.set('Authorization', `Bearer ${token}`);
-      headers.set('Content-Type', 'application/json');
+      // 仅当 body 不是 FormData 时强制 JSON；FormData 必须让浏览器自己设
+      // multipart/form-data boundary，否则后端解析 multipart 会失败。
+      const arg = (api as { arg?: FetchArgs | string }).arg;
+      const body = typeof arg === 'object' ? arg?.body : undefined;
+      if (!(body instanceof FormData)) {
+        headers.set('Content-Type', 'application/json');
+      }
       return headers;
     },
   });

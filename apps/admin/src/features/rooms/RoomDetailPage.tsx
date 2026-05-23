@@ -9,8 +9,7 @@ import {
 } from '@maill/shared';
 import { PageHeader } from '@/components/PageHeader';
 import {
-  useGetRoomQuery,
-  useListRoomSeatsQuery,
+  useGetRoomTemplateQuery,
   useSaveRoomSeatsMutation,
 } from './roomsApi';
 import { SeatGridEditor } from './SeatGridEditor';
@@ -20,8 +19,13 @@ export default function RoomDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const roomId = id ?? '';
-  const { data: room, isLoading: loadingRoom } = useGetRoomQuery(roomId, { skip: !roomId });
-  const { data: serverSeats = [] } = useListRoomSeatsQuery(roomId, { skip: !roomId });
+
+  // 聚合接口：一次拿全 { room, seats, areas }
+  const { data, isLoading } = useGetRoomTemplateQuery(roomId, { skip: !roomId });
+  const room = data?.room;
+  const serverSeats = data?.seats ?? [];
+  const serverAreas = data?.areas ?? [];
+
   const [saveSeats, { isLoading: savingSeats }] = useSaveRoomSeatsMutation();
 
   const [draftSeats, setDraftSeats] = useState<RoomSeat[]>([]);
@@ -41,7 +45,7 @@ export default function RoomDetailPage() {
     }
   };
 
-  if (loadingRoom) {
+  if (isLoading) {
     return <div className="p-6 text-muted-foreground">加载中...</div>;
   }
   if (!room) {
@@ -80,6 +84,7 @@ export default function RoomDetailPage() {
         rowCount={room.rowCount}
         colCount={room.colCount}
         seats={draftSeats}
+        areas={serverAreas}
         onChange={setDraftSeats}
         roomId={room.id}
       />
@@ -88,6 +93,8 @@ export default function RoomDetailPage() {
         open={priceDrawerOpen}
         onClose={() => setPriceDrawerOpen(false)}
         roomId={room.id}
+        seats={serverSeats}
+        areas={serverAreas}
       />
     </div>
   );

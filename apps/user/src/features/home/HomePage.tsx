@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +9,25 @@ import { useListShowsQuery } from '@/features/shows/showsApi';
 import { ShowCard } from '@/features/shows/ShowCard';
 
 const PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function HomePage() {
   const { t } = useTranslation(['show']);
   const [name, setName] = useState('');
+  const [debouncedName, setDebouncedName] = useState('');
+
+  // 防抖：用户停止输入 300ms 后再发起搜索请求
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedName(name.trim());
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [name]);
+
   const { data, isLoading, isFetching } = useListShowsQuery({
     page: 1,
     size: PAGE_SIZE,
-    name: name || undefined,
+    name: debouncedName || undefined,
   });
 
   const list = data?.list ?? [];

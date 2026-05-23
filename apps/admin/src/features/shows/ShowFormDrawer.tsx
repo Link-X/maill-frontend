@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Save } from 'lucide-react';
@@ -13,6 +13,7 @@ import {
   type Show,
 } from '@maill/shared';
 import { Drawer } from '@/components/Drawer';
+import { ImageUploader } from '@/components/ImageUploader';
 import { useCreateShowMutation, useUpdateShowMutation } from './showsApi';
 
 const schema = z.object({
@@ -41,6 +42,7 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -112,8 +114,14 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           <Input id="venue" placeholder="国家体育场" {...register('venue')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="posterUrl">海报 URL</Label>
-          <Input id="posterUrl" placeholder="https://..." {...register('posterUrl')} />
+          <Label>海报</Label>
+          <Controller
+            control={control}
+            name="posterUrl"
+            render={({ field }) => (
+              <ImageUploader value={field.value} onChange={field.onChange} dir="posters" />
+            )}
+          />
           {errors.posterUrl && (
             <p className="text-xs text-destructive">{errors.posterUrl.message}</p>
           )}
