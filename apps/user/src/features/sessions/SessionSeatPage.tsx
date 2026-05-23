@@ -84,7 +84,7 @@ export default function SessionSeatPage() {
             已选
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-3 w-3 rounded bg-muted/40" />
+            <span className="inline-block h-3 w-3 rounded bg-foreground/30 ring-1 ring-foreground/10" />
             已售
           </span>
         </Card>

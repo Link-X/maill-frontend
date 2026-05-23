@@ -15,10 +15,15 @@ import {
 import { Drawer } from '@/components/Drawer';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useCreateShowMutation, useUpdateShowMutation } from './showsApi';
+import { useListCategoriesQuery } from '@/features/categories/categoriesApi';
 
 const schema = z.object({
   name: z.string().min(1, '请输入演出名称'),
-  category: z.string().optional(),
+  // categoryId 可为空（草稿允许不挑分类）；空串 → undefined
+  categoryId: z
+    .union([z.coerce.number().int().positive(), z.literal('')])
+    .optional()
+    .transform((v) => (v === '' || v == null ? undefined : Number(v))),
   venue: z.string().optional(),
   posterUrl: z.string().url('海报链接需为合法 URL').optional().or(z.literal('')),
   description: z.string().optional(),
@@ -35,6 +40,8 @@ interface Props {
 export function ShowFormDrawer({ open, onClose, initial }: Props) {
   const [createShow, { isLoading: creating }] = useCreateShowMutation();
   const [updateShow, { isLoading: updating }] = useUpdateShowMutation();
+  // 仅启用的分类供下拉
+  const { data: categories = [] } = useListCategoriesQuery({ status: 1 });
   const isEdit = !!initial;
   const isLoading = creating || updating;
 
@@ -46,14 +53,14 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', category: '', venue: '', posterUrl: '', description: '' },
+    defaultValues: { name: '', categoryId: undefined, venue: '', posterUrl: '', description: '' },
   });
 
   useEffect(() => {
     if (open) {
       reset({
         name: initial?.name ?? '',
-        category: initial?.category ?? '',
+        categoryId: initial?.categoryId,
         venue: initial?.venue ?? '',
         posterUrl: initial?.posterUrl ?? '',
         description: initial?.description ?? '',
@@ -106,8 +113,22 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="category">分类</Label>
-          <Input id="category" placeholder="演唱会 / 话剧 / 音乐会..." {...register('category')} />
+          <Label htmlFor="categoryId">分类</Label>
+          <select
+            id="categoryId"
+            {...register('categoryId')}
+            className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
+          >
+            <option value="">未分类</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {errors.categoryId && (
+            <p className="text-xs text-destructive">{errors.categoryId.message as string}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="venue">场地</Label>

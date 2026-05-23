@@ -23,6 +23,12 @@ export interface OrderStatusResponse {
   tickets?: TicketInfo[];
   showName?: string;
   showVenue?: string;
+  /** 演出城市 GB/T 行政区划码 */
+  showCityCode?: string;
+  /** 演出城市名（后端冗余返回，避免再查 city 表） */
+  showCityName?: string;
+  /** 演出详细地址 */
+  showAddress?: string;
   sessionName?: string;
   sessionStartTime?: string;
 }

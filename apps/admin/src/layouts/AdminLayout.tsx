@@ -7,6 +7,7 @@ import {
   CalendarRange,
   Building2,
   Receipt,
+  Tag,
   Sun,
   Moon,
   Monitor,
@@ -28,6 +29,7 @@ import { PageTransition } from '@/components/PageTransition';
 
 const navItems = [
   { to: '/shows', key: 'admin:nav.shows', icon: CalendarRange },
+  { to: '/categories', key: 'admin:nav.categories', icon: Tag },
   { to: '/rooms', key: 'admin:nav.rooms', icon: Building2 },
   { to: '/orders', key: 'admin:nav.orders', icon: Receipt },
 ];

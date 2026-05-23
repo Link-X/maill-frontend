@@ -44,7 +44,7 @@ export default function ShowDetailPage() {
           <header className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">{show.name}</h1>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {show.category && <Badge variant="brand">{show.category}</Badge>}
+              {show.categoryName && <Badge variant="brand">{show.categoryName}</Badge>}
               {show.venue && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />

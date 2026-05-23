@@ -337,9 +337,10 @@ function Row({
         const cls = isSelected
           ? 'bg-brand text-brand-foreground ring-2 ring-brand shadow-sm'
           : isSold
-            ? 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed'
+            // 已售：深色实底 + 细微斜线纹路，明显区别于可售/锁定
+            ? 'bg-foreground/30 text-background/50 cursor-not-allowed ring-1 ring-foreground/10'
             : isLocked
-              ? 'bg-warning/30 text-warning-foreground/60 cursor-not-allowed'
+              ? 'bg-warning/40 text-warning-foreground/70 cursor-not-allowed'
               : `${areaColor} text-white hover:brightness-110`;
         return (
           <motion.button

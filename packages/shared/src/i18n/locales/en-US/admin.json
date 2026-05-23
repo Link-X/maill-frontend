@@ -1,6 +1,7 @@
 {
   "nav": {
     "shows": "Shows",
+    "categories": "Categories",
     "rooms": "Rooms",
     "orders": "Orders",
     "dashboard": "Dashboard"

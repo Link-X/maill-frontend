@@ -31,9 +31,9 @@ export function ShowCard({ show }: Props) {
               <Sparkles className="h-10 w-10" />
             </div>
           )}
-          {show.category && (
-            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-card/80 backdrop-blur text-xs font-medium">
-              {show.category}
+          {show.categoryName && (
+            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-brand text-brand-foreground text-xs font-medium shadow-sm">
+              {show.categoryName}
             </div>
           )}
         </div>
