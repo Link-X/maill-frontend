@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Square } from 'lucide-react';
+import { Square, MousePointer, X, Trash2 } from 'lucide-react';
 import { cn, SeatType, type RoomArea, type RoomSeat } from '@maill/shared';
 
 const AREA_PALETTE = ['bg-area-a', 'bg-area-b', 'bg-area-c', 'bg-area-d'] as const;
@@ -14,22 +14,132 @@ interface Props {
   roomId: number | string;
 }
 
+interface Cell {
+  rowNo: number;
+  colNo: number;
+}
+
+const cellKey = (rowNo: number, colNo: number) => `${rowNo}-${colNo}`;
+
+// 计算两点形成的矩形覆盖的所有 cell key
+function rectKeys(a: Cell, b: Cell): string[] {
+  const r1 = Math.min(a.rowNo, b.rowNo);
+  const r2 = Math.max(a.rowNo, b.rowNo);
+  const c1 = Math.min(a.colNo, b.colNo);
+  const c2 = Math.max(a.colNo, b.colNo);
+  const out: string[] = [];
+  for (let r = r1; r <= r2; r++) {
+    for (let c = c1; c <= c2; c++) out.push(cellKey(r, c));
+  }
+  return out;
+}
+
 export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roomId }: Props) {
   const seatMap = useMemo(() => {
     const m = new Map<string, RoomSeat>();
-    seats.forEach((s) => m.set(`${s.rowNo}-${s.colNo}`, s));
+    seats.forEach((s) => m.set(cellKey(s.rowNo, s.colNo), s));
     return m;
   }, [seats]);
 
-  // areaId → 颜色类（按 areas 列表顺序分配），与 AreaPriceDrawer 中颜色一致
   const colorMap = useMemo(() => {
     const m = new Map<string, string>();
     areas.forEach((a, i) => m.set(a.areaId, AREA_PALETTE[i % AREA_PALETTE.length]));
     return m;
   }, [areas]);
 
-  // 单元格循环顺序：未占 → areas[0] → areas[1] → ... → 未占
   const areaIdList = useMemo(() => areas.map((a) => a.areaId), [areas]);
+  const noAreas = areas.length === 0;
+
+  // ---------- 选区 ----------
+  // 已确认的选区（拖拽/行列号点击后落定的部分）
+  const [committed, setCommitted] = useState<Set<string>>(new Set());
+  // 当前正在拖拽的起止点（实时矩形高亮）
+  const dragRef = useRef<{ start: Cell; current: Cell; moved: boolean } | null>(null);
+  const [, forceTick] = useState(0);
+  const tick = () => forceTick((t) => t + 1);
+
+  // 当前展示用的选区 = committed ∪ rectKeys(dragStart, dragCurrent)
+  const liveSelection = useMemo(() => {
+    const next = new Set(committed);
+    if (dragRef.current) {
+      const { start, current } = dragRef.current;
+      rectKeys(start, current).forEach((k) => next.add(k));
+    }
+    return next;
+    // 依赖 committed 和 dragTick；dragTick 通过 tick() 触发重渲
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [committed, dragRef.current?.start, dragRef.current?.current]);
+
+  // 目标区域 (默认第一个)
+  const [targetAreaId, setTargetAreaId] = useState<string>('');
+  useEffect(() => {
+    if (!targetAreaId && areaIdList.length > 0) setTargetAreaId(areaIdList[0]);
+    if (targetAreaId && !areaIdList.includes(targetAreaId)) {
+      setTargetAreaId(areaIdList[0] ?? '');
+    }
+  }, [areaIdList, targetAreaId]);
+
+  // 全局 pointerup：拖拽结束时落定选区或视作单击
+  useEffect(() => {
+    const onUp = () => {
+      const d = dragRef.current;
+      if (!d) return;
+      if (d.moved) {
+        const keys = rectKeys(d.start, d.current);
+        setCommitted((prev) => {
+          const next = new Set(prev);
+          keys.forEach((k) => next.add(k));
+          return next;
+        });
+      } else {
+        // 单击：循环切换该格子（与之前点击行为一致）
+        singleClick(d.start.rowNo, d.start.colNo);
+      }
+      dragRef.current = null;
+      tick();
+    };
+    window.addEventListener('pointerup', onUp);
+    return () => window.removeEventListener('pointerup', onUp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seatMap, areaIdList, seats]);
+
+  // Esc 键清空选区
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (committed.size > 0) setCommitted(new Set());
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [committed.size]);
+
+  // ---------- 写入操作 ----------
+  const writeCells = (entries: Array<{ rowNo: number; colNo: number; areaId: string | null }>) => {
+    // 一次性合并到 nextSeats，避免多次 onChange
+    const next = new Map(seatMap);
+    for (const { rowNo, colNo, areaId } of entries) {
+      const key = cellKey(rowNo, colNo);
+      if (areaId === null) {
+        next.delete(key);
+      } else {
+        const existing = next.get(key);
+        if (existing) {
+          next.set(key, { ...existing, areaId });
+        } else {
+          next.set(key, {
+            roomId,
+            rowNo,
+            colNo,
+            type: SeatType.Normal,
+            areaId,
+            seatName: `${rowNo}排${colNo}座`,
+          });
+        }
+      }
+    }
+    onChange(Array.from(next.values()));
+  };
 
   const cycleNext = (current?: string): string | null => {
     if (areaIdList.length === 0) return null;
@@ -39,50 +149,66 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     return areaIdList[idx + 1];
   };
 
-  const setCell = (rowNo: number, colNo: number, nextAreaId: string | null) => {
-    const existing = seatMap.get(`${rowNo}-${colNo}`);
-    let nextSeats: RoomSeat[];
-    if (nextAreaId === null) {
-      nextSeats = seats.filter((s) => !(s.rowNo === rowNo && s.colNo === colNo));
-    } else if (existing) {
-      nextSeats = seats.map((s) =>
-        s.rowNo === rowNo && s.colNo === colNo ? { ...s, areaId: nextAreaId } : s,
-      );
-    } else {
-      const newSeat: RoomSeat = {
-        roomId,
-        rowNo,
-        colNo,
-        type: SeatType.Normal,
-        areaId: nextAreaId,
-        seatName: `${rowNo}排${colNo}座`,
-      };
-      nextSeats = [...seats, newSeat];
-    }
-    onChange(nextSeats);
+  const singleClick = (rowNo: number, colNo: number) => {
+    if (noAreas) return;
+    const existing = seatMap.get(cellKey(rowNo, colNo));
+    const next = cycleNext(existing?.areaId);
+    writeCells([{ rowNo, colNo, areaId: next }]);
   };
 
+  // 批量：把选区应用为 targetAreaId
+  const applySelection = () => {
+    if (!targetAreaId || liveSelection.size === 0) return;
+    const entries = Array.from(liveSelection).map((k) => {
+      const [r, c] = k.split('-').map(Number);
+      return { rowNo: r, colNo: c, areaId: targetAreaId };
+    });
+    writeCells(entries);
+    setCommitted(new Set());
+  };
+
+  // 批量：删除选区内的座位（变回"未占"）
+  const removeSelection = () => {
+    if (liveSelection.size === 0) return;
+    const entries = Array.from(liveSelection).map((k) => {
+      const [r, c] = k.split('-').map(Number);
+      return { rowNo: r, colNo: c, areaId: null };
+    });
+    writeCells(entries);
+    setCommitted(new Set());
+  };
+
+  const clearSelection = () => setCommitted(new Set());
+
   const fillAll = (areaId: string) => {
-    const next: RoomSeat[] = [];
+    const entries: Array<{ rowNo: number; colNo: number; areaId: string | null }> = [];
     for (let r = 1; r <= rowCount; r++) {
       for (let c = 1; c <= colCount; c++) {
-        next.push({
-          roomId,
-          rowNo: r,
-          colNo: c,
-          type: SeatType.Normal,
-          areaId,
-          seatName: `${r}排${c}座`,
-        });
+        entries.push({ rowNo: r, colNo: c, areaId });
       }
     }
-    onChange(next);
+    writeCells(entries);
   };
 
   const clearAll = () => onChange([]);
 
-  const noAreas = areas.length === 0;
+  // 选择整行/整列
+  const selectRow = (rowNo: number, additive: boolean) => {
+    setCommitted((prev) => {
+      const next = additive ? new Set(prev) : new Set<string>();
+      for (let c = 1; c <= colCount; c++) next.add(cellKey(rowNo, c));
+      return next;
+    });
+  };
+  const selectCol = (colNo: number, additive: boolean) => {
+    setCommitted((prev) => {
+      const next = additive ? new Set(prev) : new Set<string>();
+      for (let r = 1; r <= rowCount; r++) next.add(cellKey(r, colNo));
+      return next;
+    });
+  };
 
+  // ---------- 渲染 ----------
   return (
     <div className="space-y-3">
       {noAreas ? (
@@ -117,17 +243,90 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
         </div>
       )}
 
-      <div className="overflow-auto border border-border/60 rounded-xl p-4 bg-card">
+      {/* 批量应用工具栏：常驻显示，避免出现/消失导致下方网格高度抖动打断拖选 */}
+      <div
+        className={cn(
+          'flex flex-wrap items-center gap-2 p-2.5 rounded-lg border transition-colors',
+          liveSelection.size > 0
+            ? 'bg-brand/5 border-brand/30'
+            : 'bg-muted/30 border-border/60',
+        )}
+      >
+        <MousePointer
+          className={cn(
+            'h-4 w-4',
+            liveSelection.size > 0 ? 'text-brand' : 'text-muted-foreground',
+          )}
+        />
+        <span className="text-sm text-muted-foreground">
+          已选{' '}
+          <b className={liveSelection.size > 0 ? 'text-brand' : 'text-foreground/70'}>
+            {liveSelection.size}
+          </b>{' '}
+          个 · 应用为
+        </span>
+        <select
+          value={targetAreaId}
+          onChange={(e) => setTargetAreaId(e.target.value)}
+          disabled={noAreas}
+          className="h-7 px-2 text-xs border border-input bg-background rounded"
+        >
+          {areas.map((a) => (
+            <option key={a.areaId} value={a.areaId}>
+              区域 {a.areaId}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={applySelection}
+          disabled={!targetAreaId || noAreas || liveSelection.size === 0}
+          className="px-3 h-7 rounded-md text-xs font-medium bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          应用
+        </button>
+        <button
+          type="button"
+          onClick={removeSelection}
+          disabled={liveSelection.size === 0}
+          className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current disabled:hover:border-input"
+        >
+          <Trash2 className="h-3 w-3" />
+          删除座位
+        </button>
+        <button
+          type="button"
+          onClick={clearSelection}
+          disabled={liveSelection.size === 0}
+          className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-accent inline-flex items-center gap-1 ml-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        >
+          <X className="h-3 w-3" />
+          清空选区
+        </button>
+      </div>
+
+      <div className="overflow-auto border border-border/60 rounded-xl p-4 bg-card select-none">
         <div
           className="inline-grid gap-1"
           style={{ gridTemplateColumns: `repeat(${colCount + 1}, minmax(28px, 28px))` }}
         >
+          {/* 左上角 */}
           <div />
-          {Array.from({ length: colCount }).map((_, ci) => (
-            <div key={`col-${ci}`} className="text-xs text-muted-foreground text-center">
-              {ci + 1}
-            </div>
-          ))}
+          {/* 列号（可点击全选当前列） */}
+          {Array.from({ length: colCount }).map((_, ci) => {
+            const colNo = ci + 1;
+            return (
+              <button
+                key={`col-${ci}`}
+                type="button"
+                onClick={(e) => selectCol(colNo, e.shiftKey)}
+                className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
+                title={`选中第 ${colNo} 列（Shift 追加）`}
+              >
+                {colNo}
+              </button>
+            );
+          })}
           {Array.from({ length: rowCount }).map((_, ri) => {
             const rowNo = ri + 1;
             return (
@@ -137,8 +336,23 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
                 colCount={colCount}
                 seatMap={seatMap}
                 colorMap={colorMap}
+                liveSelection={liveSelection}
                 disabled={noAreas}
-                onCellClick={(r, c, current) => setCell(r, c, cycleNext(current))}
+                onRowLabelClick={(additive) => selectRow(rowNo, additive)}
+                onCellPointerDown={(colNo, e) => {
+                  if (noAreas) return;
+                  e.preventDefault();
+                  dragRef.current = { start: { rowNo, colNo }, current: { rowNo, colNo }, moved: false };
+                  tick();
+                }}
+                onCellPointerEnter={(colNo) => {
+                  if (!dragRef.current) return;
+                  const cur = dragRef.current.current;
+                  if (cur.rowNo === rowNo && cur.colNo === colNo) return;
+                  dragRef.current.current = { rowNo, colNo };
+                  dragRef.current.moved = true;
+                  tick();
+                }}
               />
             );
           })}
@@ -148,7 +362,9 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
       <p className="text-xs text-muted-foreground">
         {noAreas
           ? '当前没有可用区域，单元格已禁用。'
-          : `点击单元格切换区域：未占 → ${areaIdList.join(' → ')} → 未占。本 MVP 暂未实现情侣座，全部按普通座保存。`}
+          : '单击切换：未占 → ' +
+            areaIdList.join(' → ') +
+            ' → 未占；按住拖动可框选；点行号/列号选中整行/整列（Shift 追加）；Esc 清空选区。'}
       </p>
     </div>
   );
@@ -159,39 +375,55 @@ function Row({
   colCount,
   seatMap,
   colorMap,
+  liveSelection,
   disabled,
-  onCellClick,
+  onRowLabelClick,
+  onCellPointerDown,
+  onCellPointerEnter,
 }: {
   rowNo: number;
   colCount: number;
   seatMap: Map<string, RoomSeat>;
   colorMap: Map<string, string>;
+  liveSelection: Set<string>;
   disabled: boolean;
-  onCellClick: (rowNo: number, colNo: number, currentAreaId?: string) => void;
+  onRowLabelClick: (additive: boolean) => void;
+  onCellPointerDown: (colNo: number, e: React.PointerEvent) => void;
+  onCellPointerEnter: (colNo: number) => void;
 }) {
   return (
     <>
-      <div className="text-xs text-muted-foreground flex items-center justify-center">{rowNo}</div>
+      <button
+        type="button"
+        onClick={(e) => onRowLabelClick(e.shiftKey)}
+        className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
+        title={`选中第 ${rowNo} 排（Shift 追加）`}
+      >
+        {rowNo}
+      </button>
       {Array.from({ length: colCount }).map((_, ci) => {
         const colNo = ci + 1;
-        const seat = seatMap.get(`${rowNo}-${colNo}`);
+        const key = `${rowNo}-${colNo}`;
+        const seat = seatMap.get(key);
         const color = seat ? colorMap.get(seat.areaId) ?? 'bg-muted' : '';
+        const isSelected = liveSelection.has(key);
         return (
           <motion.button
             type="button"
             key={`c-${rowNo}-${colNo}`}
-            onClick={() => onCellClick(rowNo, colNo, seat?.areaId)}
+            onPointerDown={(e) => onCellPointerDown(colNo, e)}
+            onPointerEnter={() => onCellPointerEnter(colNo)}
             disabled={disabled}
             whileTap={disabled ? undefined : { scale: 0.92 }}
-            whileHover={disabled ? undefined : { scale: 1.06 }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
             className={cn(
-              'h-7 w-7 rounded text-[10px] font-medium',
+              'h-7 w-7 rounded text-[10px] font-medium relative',
               seat
                 ? `${color} text-white`
                 : disabled
                   ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
                   : 'bg-muted text-muted-foreground hover:bg-accent',
+              isSelected && 'ring-2 ring-brand ring-offset-1 ring-offset-card z-10',
             )}
             title={seat ? `${rowNo}排${colNo}座 (区域${seat.areaId})` : '点击启用'}
           >

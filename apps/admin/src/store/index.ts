@@ -9,6 +9,7 @@ import { monitorApi } from '@/features/monitor/monitorApi';
 import { adminOrdersApi } from '@/features/orders/ordersApi';
 import { uploadApi } from '@/features/upload/uploadApi';
 import { categoriesApi } from '@/features/categories/categoriesApi';
+import { citiesApi } from '@/features/cities/citiesApi';
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     [adminOrdersApi.reducerPath]: adminOrdersApi.reducer,
     [uploadApi.reducerPath]: uploadApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
+    [citiesApi.reducerPath]: citiesApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -34,6 +36,7 @@ export const store = configureStore({
       adminOrdersApi.middleware,
       uploadApi.middleware,
       categoriesApi.middleware,
+      citiesApi.middleware,
     ),
 });
 

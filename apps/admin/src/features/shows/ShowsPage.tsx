@@ -73,7 +73,14 @@ export default function ShowsPage() {
     },
     { key: 'name', title: '名称', render: (s) => <span className="font-medium">{s.name}</span> },
     { key: 'category', title: '分类', render: (s) => s.categoryName ?? '-' },
-    { key: 'venue', title: '场地', render: (s) => s.venue ?? '-' },
+    {
+      key: 'venue',
+      title: '城市 · 场地',
+      render: (s) => {
+        const parts = [s.cityName, s.venue].filter(Boolean);
+        return parts.length ? parts.join(' · ') : '-';
+      },
+    },
     {
       key: 'status',
       title: '状态',

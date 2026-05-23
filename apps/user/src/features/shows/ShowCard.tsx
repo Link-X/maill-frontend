@@ -39,10 +39,12 @@ export function ShowCard({ show }: Props) {
         </div>
         <div className="p-3 space-y-1.5">
           <h3 className="font-semibold leading-snug line-clamp-2">{show.name}</h3>
-          {show.venue && (
-            <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {show.venue}
+          {(show.cityName || show.venue) && (
+            <p className="text-xs text-muted-foreground inline-flex items-center gap-1 truncate w-full">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {[show.cityName, show.venue].filter(Boolean).join(' · ')}
+              </span>
             </p>
           )}
         </div>

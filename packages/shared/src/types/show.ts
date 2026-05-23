@@ -15,6 +15,8 @@ export interface Show {
   posterUrl?: string;
   description?: string;
   status: ShowStatus;
+  /** 扩展字段：后端原 JSON 字符串，前端用 parseExtend() 解析。约定字段见 ShowExtend */
+  extend?: string;
   createTime?: string;
   updateTime?: string;
 }
@@ -31,8 +33,31 @@ export interface ShowSession {
   status: SessionStatus;
   rowCount?: number;
   colCount?: number;
+  /** 扩展字段：后端原 JSON 字符串，前端用 parseExtend() 解析。约定字段见 SessionExtend */
+  extend?: string;
   createTime?: string;
   updateTime?: string;
   showName?: string;
   venue?: string;
+}
+
+// 演出 extend 约定字段（后端只存原串、不参与 WHERE / 不建索引）
+export interface ShowExtend {
+  /** 时长（分钟） */
+  duration?: number;
+  /** 年龄限制，如 "6+" / "12+" */
+  ageLimit?: string;
+  /** 退票规则文案 */
+  refundRule?: string;
+  /** 允许任意其它键 */
+  [key: string]: unknown;
+}
+
+// 场次 extend 约定字段
+export interface SessionExtend {
+  /** 提前进场分钟数 */
+  preSaleLeadMinutes?: number;
+  /** 现场须知文案 */
+  notice?: string;
+  [key: string]: unknown;
 }

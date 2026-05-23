@@ -66,4 +66,12 @@ export interface SessionSeatResponseVO {
   session: import('./show').ShowSession;
   areaPriceList: AreaPriceVO[];
   seatSection: SeatSectionVO;
+  // 关联演出信息（后端冗余返回，避免前端再查 /api/show/{id}）
+  showId?: number | string;
+  showName?: string;
+  showVenue?: string;
+  showAddress?: string;
+  showCityCode?: string;
+  showCityName?: string;
+  showPosterUrl?: string;
 }

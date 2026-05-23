@@ -111,10 +111,10 @@ function OrderCard({ order, onClick }: { order: OrderStatusResponse; onClick: ()
                   {formatDateTime(order.sessionStartTime)}
                 </span>
               )}
-              {order.showVenue && (
+              {(order.showCityName || order.showVenue) && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {order.showVenue}
+                  {[order.showCityName, order.showVenue].filter(Boolean).join(' · ')}
                 </span>
               )}
             </div>

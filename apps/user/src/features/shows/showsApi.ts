@@ -7,6 +7,7 @@ interface ShowListRequest {
   size: number;
   name?: string;
   categoryId?: number;
+  cityCode?: string;
   venue?: string;
 }
 

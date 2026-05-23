@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ArrowLeft } from 'lucide-react';
-import { extractErrorMessage, notify } from '@maill/shared';
+import { ArrowLeft, MapPin, Info, Clock } from 'lucide-react';
+import { extractErrorMessage, notify, parseExtend, type SessionExtend } from '@maill/shared';
 import { Card } from '@/components/Card';
 import { Skeleton } from '@/components/Skeleton';
 import { formatDateTime, formatMoney } from '@/lib/format';
@@ -47,7 +47,9 @@ export default function SessionSeatPage() {
     return <div className="p-6 text-center text-muted-foreground">场次数据加载失败</div>;
   }
 
-  const { session, areaPriceList, seatSection } = data;
+  const { session, areaPriceList, seatSection, showName, showVenue, showAddress, showCityName } = data;
+  const venueLine = [showCityName, showVenue].filter(Boolean).join(' · ');
+  const sessionExtend = parseExtend<SessionExtend>(session.extend);
 
   return (
     <div className="pb-32">
@@ -61,12 +63,48 @@ export default function SessionSeatPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="font-semibold truncate">{session.name || `场次 #${session.id}`}</div>
-          <div className="text-xs text-muted-foreground">
+          {/* 优先展示演出名 + 场次副标题；都没有则回落场次自己 */}
+          <div className="font-semibold truncate">
+            {showName ?? session.name ?? `场次 #${session.id}`}
+          </div>
+          <div className="text-xs text-muted-foreground truncate">
             {formatDateTime(session.startTime)}
+            {session.name && showName && <span className="ml-1.5">· {session.name}</span>}
           </div>
         </div>
       </div>
+
+      {/* 演出地点 */}
+      {(venueLine || showAddress) && (
+        <div className="px-4 pb-2">
+          <p className="text-xs text-muted-foreground inline-flex items-start gap-1.5">
+            <MapPin className="h-3.5 w-3.5 mt-0.5 text-brand shrink-0" />
+            <span>
+              {venueLine && <span className="text-foreground/80">{venueLine}</span>}
+              {venueLine && showAddress && <span className="mx-1">·</span>}
+              {showAddress}
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* 场次 extend：提前进场分钟数 + 现场须知 */}
+      {sessionExtend && (sessionExtend.preSaleLeadMinutes != null || sessionExtend.notice) && (
+        <div className="px-4 pb-2 space-y-1">
+          {typeof sessionExtend.preSaleLeadMinutes === 'number' && (
+            <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-brand" />
+              开演前 {sessionExtend.preSaleLeadMinutes} 分钟可入场
+            </p>
+          )}
+          {sessionExtend.notice && (
+            <p className="text-xs text-muted-foreground inline-flex items-start gap-1.5">
+              <Info className="h-3.5 w-3.5 mt-0.5 text-brand shrink-0" />
+              <span>{String(sessionExtend.notice)}</span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* 价格图例 */}
       <div className="px-4">

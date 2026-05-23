@@ -28,6 +28,21 @@ const schema = z.object({
   startTime: z.string().min(1, '请填写开始时间'),
   endTime: z.string().min(1, '请填写结束时间'),
   limitPerUser: z.coerce.number().int().min(1, '最少 1').max(20, '最多 20'),
+  extend: z
+    .string()
+    .optional()
+    .refine(
+      (v) => {
+        if (!v || !v.trim()) return true;
+        try {
+          const parsed = JSON.parse(v);
+          return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+        } catch {
+          return false;
+        }
+      },
+      { message: '需要合法的 JSON 对象（如 {"notice":"现场须知"}）' },
+    ),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -64,6 +79,7 @@ export default function SessionFormPage() {
       startTime: '',
       endTime: '',
       limitPerUser: 4,
+      extend: '',
     },
   });
 
@@ -76,6 +92,7 @@ export default function SessionFormPage() {
         startTime: toInputDateTime(existing.startTime),
         endTime: toInputDateTime(existing.endTime),
         limitPerUser: existing.limitPerUser ?? 4,
+        extend: existing.extend ?? '',
       });
     }
   }, [isEdit, existing, reset]);
@@ -88,6 +105,7 @@ export default function SessionFormPage() {
       startTime: values.startTime,
       endTime: values.endTime,
       limitPerUser: values.limitPerUser,
+      extend: values.extend?.trim() || undefined,
     };
     try {
       if (isEdit && existing) {
@@ -178,6 +196,23 @@ export default function SessionFormPage() {
           {errors.limitPerUser && (
             <p className="text-xs text-destructive">{errors.limitPerUser.message}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="extend">扩展字段（JSON）</Label>
+          <textarea
+            id="extend"
+            rows={4}
+            placeholder={'{\n  "preSaleLeadMinutes": 30,\n  "notice": "现场禁止携带食物"\n}'}
+            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            {...register('extend')}
+          />
+          {errors.extend && (
+            <p className="text-xs text-destructive">{errors.extend.message as string}</p>
+          )}
+          <p className="text-[11px] text-muted-foreground">
+            约定字段：preSaleLeadMinutes（分钟）/ notice。
+          </p>
         </div>
 
         <div className="pt-2">

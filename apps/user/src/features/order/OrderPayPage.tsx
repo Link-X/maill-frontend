@@ -147,7 +147,11 @@ export default function OrderPayPage() {
           <div className="text-xs text-muted-foreground">
             {order.sessionName ?? ''} · {formatDateTime(order.sessionStartTime)}
           </div>
-          <div className="text-xs text-muted-foreground">{order.showVenue ?? ''}</div>
+          {(order.showCityName || order.showVenue || order.showAddress) && (
+            <div className="text-xs text-muted-foreground">
+              {[order.showCityName, order.showVenue, order.showAddress].filter(Boolean).join(' · ')}
+            </div>
+          )}
           <div className="pt-2 border-t border-border/60">
             <div className="text-xs text-muted-foreground mb-1">座位</div>
             <div className="flex flex-wrap gap-1.5">

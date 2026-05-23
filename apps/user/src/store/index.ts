@@ -9,6 +9,7 @@ import { paymentApi } from '@/features/payment/paymentApi';
 import { verifyApi } from '@/features/verify/verifyApi';
 import { cartSlice } from '@/features/sessions/cartSlice';
 import { categoriesApi } from '@/features/categories/categoriesApi';
+import { citiesApi } from '@/features/cities/citiesApi';
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     [paymentApi.reducerPath]: paymentApi.reducer,
     [verifyApi.reducerPath]: verifyApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
+    [citiesApi.reducerPath]: citiesApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -33,6 +35,7 @@ export const store = configureStore({
       paymentApi.middleware,
       verifyApi.middleware,
       categoriesApi.middleware,
+      citiesApi.middleware,
     ),
 });
 

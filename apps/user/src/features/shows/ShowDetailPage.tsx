@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Users, Ticket } from 'lucide-react';
-import { Button, SessionStatus } from '@maill/shared';
+import { ArrowLeft, MapPin, Calendar, Users, Ticket, Clock, Shield } from 'lucide-react';
+import { Button, SessionStatus, parseExtend, type ShowExtend } from '@maill/shared';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
 import { Skeleton } from '@/components/Skeleton';
@@ -45,16 +45,22 @@ export default function ShowDetailPage() {
             <h1 className="text-2xl font-semibold tracking-tight">{show.name}</h1>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {show.categoryName && <Badge variant="brand">{show.categoryName}</Badge>}
-              {show.venue && (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {show.venue}
-                </span>
-              )}
+              {show.cityName && <Badge variant="info">{show.cityName}</Badge>}
             </div>
+            {(show.venue || show.address) && (
+              <p className="text-sm text-muted-foreground inline-flex items-start gap-1.5">
+                <MapPin className="h-4 w-4 mt-0.5 text-brand shrink-0" />
+                <span>
+                  {show.venue && <span className="text-foreground/80 font-medium">{show.venue}</span>}
+                  {show.venue && show.address && <span className="mx-1">·</span>}
+                  {show.address}
+                </span>
+              </p>
+            )}
             {show.description && (
               <p className="text-sm text-foreground/80 leading-relaxed">{show.description}</p>
             )}
+            <ShowExtendInfo extend={show.extend} />
           </header>
         ) : null}
 
@@ -104,6 +110,35 @@ export default function ShowDetailPage() {
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+function ShowExtendInfo({ extend }: { extend?: string }) {
+  const data = parseExtend<ShowExtend>(extend);
+  if (!data) return null;
+  const items: { icon: typeof Clock; label: string; value: string }[] = [];
+  if (typeof data.duration === 'number') {
+    items.push({ icon: Clock, label: '时长', value: `${data.duration} 分钟` });
+  }
+  if (data.ageLimit) {
+    items.push({ icon: Users, label: '年龄', value: String(data.ageLimit) });
+  }
+  if (data.refundRule) {
+    items.push({ icon: Shield, label: '退票', value: String(data.refundRule) });
+  }
+  if (items.length === 0) return null;
+  return (
+    <div className="grid grid-cols-1 gap-1.5 pt-1">
+      {items.map(({ icon: Icon, label, value }) => (
+        <div key={label} className="text-xs text-muted-foreground inline-flex items-start gap-1.5">
+          <Icon className="h-3.5 w-3.5 mt-0.5 text-brand shrink-0" />
+          <span>
+            <span className="text-foreground/70">{label}：</span>
+            {value}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

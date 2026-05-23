@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Save } from 'lucide-react';
@@ -12,6 +12,7 @@ import {
   type Category,
 } from '@maill/shared';
 import { Drawer } from '@/components/Drawer';
+import { ImageUploader } from '@/components/ImageUploader';
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from './categoriesApi';
 
 const schema = z.object({
@@ -39,6 +40,7 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -111,8 +113,14 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
           {errors.sort && <p className="text-xs text-destructive">{errors.sort.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="icon">图标 URL</Label>
-          <Input id="icon" {...register('icon')} placeholder="https://..." />
+          <Label>图标</Label>
+          <Controller
+            control={control}
+            name="icon"
+            render={({ field }) => (
+              <ImageUploader value={field.value} onChange={field.onChange} dir="misc" />
+            )}
+          />
           {errors.icon && <p className="text-xs text-destructive">{errors.icon.message}</p>}
         </div>
         <div className="space-y-2">
