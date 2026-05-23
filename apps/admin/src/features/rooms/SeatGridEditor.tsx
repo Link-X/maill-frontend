@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Square, MousePointer, X, Trash2 } from 'lucide-react';
-import { cn, SeatType, type RoomArea, type RoomSeat } from '@maill/shared';
+import {
+  cn,
+  SeatType,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  type RoomArea,
+  type RoomSeat,
+} from '@maill/shared';
 
 const AREA_PALETTE = ['bg-area-a', 'bg-area-b', 'bg-area-c', 'bg-area-d'] as const;
 
@@ -265,18 +275,18 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           </b>{' '}
           个 · 应用为
         </span>
-        <select
-          value={targetAreaId}
-          onChange={(e) => setTargetAreaId(e.target.value)}
-          disabled={noAreas}
-          className="h-7 px-2 text-xs border border-input bg-background rounded"
-        >
-          {areas.map((a) => (
-            <option key={a.areaId} value={a.areaId}>
-              区域 {a.areaId}
-            </option>
-          ))}
-        </select>
+        <Select value={targetAreaId} onValueChange={setTargetAreaId} disabled={noAreas}>
+          <SelectTrigger className="h-7 w-28 text-xs">
+            <SelectValue placeholder="选择区域" />
+          </SelectTrigger>
+          <SelectContent>
+            {areas.map((a) => (
+              <SelectItem key={a.areaId} value={a.areaId}>
+                区域 {a.areaId}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <button
           type="button"
           onClick={applySelection}

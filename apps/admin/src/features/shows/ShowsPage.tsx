@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Plus, Edit2, CalendarRange, Power } from 'lucide-react';
 import {
   Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   ShowStatus,
   extractErrorMessage,
   notify,
@@ -129,18 +134,22 @@ export default function ShowsPage() {
         icon={Sparkles}
         actions={
           <>
-            <select
-              className="h-9 border border-input bg-background px-3 text-sm rounded-md"
-              value={statusFilter ?? ''}
-              onChange={(e) =>
-                setStatusFilter(e.target.value === '' ? undefined : Number(e.target.value))
+            <Select
+              value={statusFilter == null ? '__all__' : String(statusFilter)}
+              onValueChange={(v) =>
+                setStatusFilter(v === '__all__' ? undefined : Number(v))
               }
             >
-              <option value="">全部状态</option>
-              <option value={String(ShowStatus.Draft)}>草稿</option>
-              <option value={String(ShowStatus.OnSale)}>已上架</option>
-              <option value={String(ShowStatus.OffShelf)}>已下架</option>
-            </select>
+              <SelectTrigger className="h-9 w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">全部状态</SelectItem>
+                <SelectItem value={String(ShowStatus.Draft)}>草稿</SelectItem>
+                <SelectItem value={String(ShowStatus.OnSale)}>已上架</SelectItem>
+                <SelectItem value={String(ShowStatus.OffShelf)}>已下架</SelectItem>
+              </SelectContent>
+            </Select>
             <Button onClick={openCreate} className="bg-gradient-brand hover:opacity-90">
               <Plus className="h-4 w-4 mr-1.5" />
               新建演出

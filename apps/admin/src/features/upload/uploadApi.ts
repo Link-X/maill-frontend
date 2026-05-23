@@ -7,7 +7,8 @@ export interface UploadImageResult {
 }
 
 // 后端支持的目录前缀（MinIO 分类存储），与 UploadController dir 参数对应
-export type UploadDir = 'posters' | 'avatars' | 'rooms' | 'misc';
+// 后端 dir 是字符串，未做白名单校验，前端在此处约束以避免拼写漂移
+export type UploadDir = 'posters' | 'avatars' | 'rooms' | 'categories' | 'misc';
 
 export interface UploadImageArg {
   file: File;

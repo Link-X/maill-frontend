@@ -7,6 +7,11 @@ import {
   Button,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   extractErrorMessage,
   notify,
   type Category,
@@ -118,21 +123,31 @@ export function CategoryFormDrawer({ open, onClose, initial }: Props) {
             control={control}
             name="icon"
             render={({ field }) => (
-              <ImageUploader value={field.value} onChange={field.onChange} dir="misc" />
+              <ImageUploader value={field.value} onChange={field.onChange} dir="categories" />
             )}
           />
           {errors.icon && <p className="text-xs text-destructive">{errors.icon.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="status">状态</Label>
-          <select
-            id="status"
-            {...register('status')}
-            className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
-          >
-            <option value={1}>启用</option>
-            <option value={0}>禁用</option>
-          </select>
+          <Label>状态</Label>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <Select
+                value={String(field.value)}
+                onValueChange={(v) => field.onChange(Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">启用</SelectItem>
+                  <SelectItem value="0">禁用</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </form>
     </Drawer>

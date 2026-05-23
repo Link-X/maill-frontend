@@ -7,6 +7,11 @@ import {
   Button,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   ShowStatus,
   extractErrorMessage,
   notify,
@@ -153,38 +158,59 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="categoryId">分类</Label>
-          <select
-            id="categoryId"
-            {...register('categoryId')}
-            className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
-          >
-            <option value="">未分类</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Label>分类</Label>
+          <Controller
+            control={control}
+            name="categoryId"
+            render={({ field }) => (
+              <Select
+                // radix Select 不允许空字符串 value，用 __none__ 作 sentinel
+                value={field.value == null ? '__none__' : String(field.value)}
+                onValueChange={(v) => field.onChange(v === '__none__' ? undefined : Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="未分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">未分类</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.categoryId && (
             <p className="text-xs text-destructive">{errors.categoryId.message as string}</p>
           )}
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label htmlFor="cityCode">城市</Label>
-            <select
-              id="cityCode"
-              {...register('cityCode')}
-              className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
-            >
-              <option value="">未指定</option>
-              {cities.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <Label>城市</Label>
+            <Controller
+              control={control}
+              name="cityCode"
+              render={({ field }) => (
+                <Select
+                  value={field.value ? field.value : '__none__'}
+                  onValueChange={(v) => field.onChange(v === '__none__' ? '' : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="未指定" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">未指定</SelectItem>
+                    {cities.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="venue">场地</Label>

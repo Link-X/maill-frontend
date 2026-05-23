@@ -4,6 +4,11 @@ import {
   Button,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   OrderStatus,
   TicketStatus,
   type OrderStatusResponse,
@@ -187,20 +192,23 @@ export default function OrdersPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="f-show">演出</Label>
-            <select
-              id="f-show"
-              value={draft.showId}
-              onChange={(e) => setDraft({ ...draft, showId: e.target.value })}
-              className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
+            <Label>演出</Label>
+            <Select
+              value={draft.showId || '__all__'}
+              onValueChange={(v) => setDraft({ ...draft, showId: v === '__all__' ? '' : v })}
             >
-              <option value="">全部演出</option>
-              {shows.map((s) => (
-                <option key={String(s.id)} value={String(s.id)}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">全部演出</SelectItem>
+                {shows.map((s) => (
+                  <SelectItem key={String(s.id)} value={String(s.id)}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="f-session">场次 ID</Label>
@@ -213,20 +221,23 @@ export default function OrdersPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="f-status">状态</Label>
-            <select
-              id="f-status"
-              value={draft.status}
-              onChange={(e) => setDraft({ ...draft, status: e.target.value })}
-              className="h-9 w-full border border-input bg-background px-3 text-sm rounded-md"
+            <Label>状态</Label>
+            <Select
+              value={draft.status || '__all__'}
+              onValueChange={(v) => setDraft({ ...draft, status: v === '__all__' ? '' : v })}
             >
-              <option value="">全部状态</option>
-              {Object.entries(ORDER_STATUS_LABEL).map(([v, label]) => (
-                <option key={v} value={v}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">全部状态</SelectItem>
+                {Object.entries(ORDER_STATUS_LABEL).map(([v, label]) => (
+                  <SelectItem key={v} value={v}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="f-start">创建起</Label>

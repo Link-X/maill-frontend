@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -8,6 +8,11 @@ import {
   Button,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   SessionStatus,
   extractErrorMessage,
   notify,
@@ -69,6 +74,7 @@ export default function SessionFormPage() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -151,22 +157,31 @@ export default function SessionFormPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="roomId" className="flex items-center gap-1">
+          <Label className="flex items-center gap-1">
             <Building2 className="h-3.5 w-3.5" />
             场地 *
           </Label>
-          <select
-            id="roomId"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            {...register('roomId')}
-          >
-            <option value={0}>请选择场地</option>
-            {rooms.map((r) => (
-              <option key={String(r.id)} value={Number(r.id)}>
-                {r.name}（{r.rowCount}×{r.colCount}）
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="roomId"
+            render={({ field }) => (
+              <Select
+                value={field.value ? String(field.value) : ''}
+                onValueChange={(v) => field.onChange(Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="请选择场地" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rooms.map((r) => (
+                    <SelectItem key={String(r.id)} value={String(r.id)}>
+                      {r.name}（{r.rowCount}×{r.colCount}）
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.roomId && <p className="text-xs text-destructive">{errors.roomId.message}</p>}
         </div>
 
