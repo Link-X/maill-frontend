@@ -1,10 +1,12 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import type {
   CancelOrderRequest,
+  OrderCreateStatus,
   OrderListRequest,
   OrderStatusResponse,
   RefundTicketRequest,
   SubmitOrderRequest,
+  SubmitOrderResponse,
 } from '@maill/shared';
 import { userBaseQuery } from '@/api/userBase';
 
@@ -18,9 +20,16 @@ export const orderApi = createApi({
   baseQuery: userBaseQuery,
   tagTypes: ['Order'],
   endpoints: (build) => ({
-    submitOrder: build.mutation<OrderStatusResponse, SubmitOrderRequest>({
+    submitOrder: build.mutation<SubmitOrderResponse, SubmitOrderRequest>({
       query: (body) => ({ url: '/api/order/submit', method: 'POST', body }),
       invalidatesTags: ['Order'],
+    }),
+    /**
+     * 异步建单状态轮询。submit 拿到 orderNo 后调本接口轮询,直到 state=SUCCESS/FAILED。
+     * 不开启 RTK Query 缓存(每次都打实时,不需要 providesTags)。
+     */
+    getOrderCreateStatus: build.query<OrderCreateStatus, string>({
+      query: (orderNo) => ({ url: '/api/order/createStatus', params: { orderNo } }),
     }),
     cancelOrder: build.mutation<void, CancelOrderRequest>({
       query: (body) => ({ url: '/api/order/cancel', method: 'POST', body }),
@@ -46,6 +55,7 @@ export const orderApi = createApi({
 
 export const {
   useSubmitOrderMutation,
+  useLazyGetOrderCreateStatusQuery,
   useCancelOrderMutation,
   useRefundTicketMutation,
   useGetOrderDetailsQuery,

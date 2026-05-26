@@ -25,9 +25,9 @@
     "rowCount": "行数",
     "colCount": "列数",
     "rowsMin": "至少 1 行",
-    "rowsMax": "最多 200 行",
+    "rowsMax": "最多 5000 行",
     "colsMin": "至少 1 列",
-    "colsMax": "最多 200 列",
+    "colsMax": "最多 5000 列",
     "savedToast": "场地已更新",
     "createdToast": "场地已创建"
   },

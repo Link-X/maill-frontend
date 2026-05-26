@@ -188,7 +188,7 @@ export default function SessionSeatPage() {
             {areaPriceList.map((p) => (
               <PriceLegendChip
                 key={p.areaId}
-                color={priceColorMap.get(p.areaId) ?? 'bg-muted'}
+                color={priceColorMap.get(p.areaId) ?? '#94a3b8'}
                 price={formatMoney(p.price)}
               />
             ))}
@@ -333,7 +333,7 @@ function PriceLegendChip({ color, price }: { color: string; price: string }) {
   return (
     <span className="inline-flex items-center gap-1 pl-1 pr-2 h-5 rounded-full
                      bg-muted/60 border border-border/40 text-[11px] font-medium tabular-nums">
-      <span className={cn('inline-block h-3 w-3 rounded-sm', color)} />
+      <span className="inline-block h-3 w-3 rounded-sm" style={{ background: color }} />
       {price}
     </span>
   );

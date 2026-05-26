@@ -37,12 +37,12 @@ export function RoomFormDrawer({ open, onClose, initial }: Props) {
           .number()
           .int()
           .min(1, t('room:form.rowsMin'))
-          .max(200, t('room:form.rowsMax')),
+          .max(5000, t('room:form.rowsMax')),
         colCount: z.coerce
           .number()
           .int()
           .min(1, t('room:form.colsMin'))
-          .max(200, t('room:form.colsMax')),
+          .max(5000, t('room:form.colsMax')),
         description: z.string().optional(),
       }),
     [t],

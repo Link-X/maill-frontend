@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
@@ -13,10 +12,12 @@ import {
   Input,
   Label,
   SessionStatus,
-  cn,
+  SeatCanvas,
+  buildAreaColorMap,
   extractErrorMessage,
   notify,
   type AdminSeat,
+  type SeatCell,
   type SessionArea,
 } from '@maill/shared';
 import { PageHeader } from '@/components/PageHeader';
@@ -31,13 +32,6 @@ import {
 } from './sessionsApi';
 import { useListRoomAreasQuery } from '@/features/rooms/roomsApi';
 import { MonitorPanel } from '@/features/monitor/MonitorPanel';
-
-const AREA_COLORS: Record<string, string> = {
-  A: 'bg-area-a text-white',
-  B: 'bg-area-b text-white',
-  C: 'bg-area-c text-white',
-  D: 'bg-area-d text-white',
-};
 
 const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'muted'> = {
   [SessionStatus.Published]: 'success',
@@ -74,6 +68,7 @@ export default function SessionDetailPage() {
     () => Array.from(new Set(seats.map((s) => s.areaId))).sort(),
     [seats],
   );
+  const areaColorMap = useMemo(() => buildAreaColorMap(usedAreaIds), [usedAreaIds]);
 
   useEffect(() => {
     const sessionPriceMap = new Map(areas.map((a) => [a.areaId, a]));
@@ -164,10 +159,8 @@ export default function SessionDetailPage() {
               <div key={row.areaId} className="grid grid-cols-[60px_1fr_1fr] gap-3 items-end">
                 <div className="font-medium flex items-center gap-1.5">
                   <span
-                    className={cn(
-                      'inline-block h-4 w-4 rounded',
-                      AREA_COLORS[row.areaId]?.split(' ')[0] ?? 'bg-muted',
-                    )}
+                    className="inline-block h-4 w-4 rounded"
+                    style={{ background: areaColorMap.get(row.areaId) ?? '#94a3b8' }}
                     aria-hidden
                   />
                   {row.areaId}
@@ -217,6 +210,7 @@ export default function SessionDetailPage() {
             seats={seats}
             rowCount={session.rowCount ?? 0}
             colCount={session.colCount ?? 0}
+            areaColorMap={areaColorMap}
           />
         )}
       </section>
@@ -228,96 +222,38 @@ function SeatPreview({
   seats,
   rowCount,
   colCount,
+  areaColorMap,
 }: {
   seats: AdminSeat[];
   rowCount: number;
   colCount: number;
+  areaColorMap: Map<string, string>;
 }) {
-  const { t } = useTranslation('room');
-  const seatMap = useMemo(() => {
-    const m = new Map<string, AdminSeat>();
-    seats.forEach((s) => m.set(`${s.rowNo}-${s.colNo}`, s));
-    return m;
-  }, [seats]);
-
   const effRow = rowCount || Math.max(0, ...seats.map((s) => s.rowNo));
   const effCol = colCount || Math.max(0, ...seats.map((s) => s.colNo));
 
+  const cells = useMemo<SeatCell[]>(
+    () =>
+      seats.map((s) => ({
+        key: String(s.id ?? `${s.rowNo}-${s.colNo}`),
+        r: s.rowNo - 1,
+        c: s.colNo - 1,
+        fill: areaColorMap.get(s.areaId) ?? '#94a3b8',
+        label: s.areaId,
+      })),
+    [seats, areaColorMap],
+  );
+
   return (
-    <div className="overflow-auto border border-border/60 rounded-xl p-4 bg-card">
-      <div
-        className="inline-grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${effCol + 1}, minmax(28px, 28px))` }}
-      >
-        <div />
-        {Array.from({ length: effCol }).map((_, ci) => (
-          <div key={`col-${ci}`} className="text-xs text-muted-foreground text-center">
-            {ci + 1}
-          </div>
-        ))}
-        {Array.from({ length: effRow }).map((_, ri) => {
-          const rowNo = ri + 1;
-          return (
-            <PreviewRow
-              key={`row-${rowNo}`}
-              rowNo={rowNo}
-              colCount={effCol}
-              seatMap={seatMap}
-              baseIndex={ri * effCol}
-              seatTitleFor={(seat) =>
-                t('room:seatEditor.seatLabel', {
-                  row: rowNo,
-                  col: seat.colNo,
-                  areaId: seat.areaId,
-                })
-              }
-            />
-          );
-        })}
-      </div>
+    <div className="border border-border/60 rounded-xl bg-card overflow-hidden">
+      <SeatCanvas
+        rowCount={effRow}
+        colCount={effCol}
+        cells={cells}
+        mode="readonly"
+        height="min(70vh, 560px)"
+      />
     </div>
   );
 }
 
-function PreviewRow({
-  rowNo,
-  colCount,
-  seatMap,
-  baseIndex,
-  seatTitleFor,
-}: {
-  rowNo: number;
-  colCount: number;
-  seatMap: Map<string, AdminSeat>;
-  baseIndex: number;
-  seatTitleFor: (seat: AdminSeat) => string;
-}) {
-  return (
-    <>
-      <div className="text-xs text-muted-foreground flex items-center justify-center">{rowNo}</div>
-      {Array.from({ length: colCount }).map((_, ci) => {
-        const colNo = ci + 1;
-        const seat = seatMap.get(`${rowNo}-${colNo}`);
-        const delay = ((baseIndex + ci) * 4) / 1000;
-        if (!seat) {
-          return <div key={`c-${rowNo}-${colNo}`} className="h-7 w-7" />;
-        }
-        return (
-          <motion.div
-            key={`c-${rowNo}-${colNo}`}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay, duration: 0.18, ease: 'easeOut' }}
-            className={cn(
-              'h-7 w-7 rounded text-[10px] font-medium flex items-center justify-center',
-              AREA_COLORS[seat.areaId] ?? 'bg-muted',
-            )}
-            title={seatTitleFor(seat)}
-          >
-            {seat.areaId}
-          </motion.div>
-        );
-      })}
-    </>
-  );
-}

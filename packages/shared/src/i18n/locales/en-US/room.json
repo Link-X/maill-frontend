@@ -25,9 +25,9 @@
     "rowCount": "Rows",
     "colCount": "Columns",
     "rowsMin": "At least 1 row",
-    "rowsMax": "At most 200 rows",
+    "rowsMax": "At most 5000 rows",
     "colsMin": "At least 1 column",
-    "colsMax": "At most 200 columns",
+    "colsMax": "At most 5000 columns",
     "savedToast": "Room updated",
     "createdToast": "Room created"
   },

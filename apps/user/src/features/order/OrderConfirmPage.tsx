@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Ticket, ShieldCheck, ChevronRight, Wallet } from 'lucide-react';
+import { ArrowLeft, Ticket, ShieldCheck, ChevronRight, Wallet, Loader2 } from 'lucide-react';
 import { extractErrorMessage, notify, cn } from '@maill/shared';
 import { StickyBottomBar } from '@/components/StickyBottomBar';
 import { formatMoney } from '@/lib/format';
@@ -11,7 +12,10 @@ import {
   selectCartTotalPrice,
   clearCart,
 } from '@/features/sessions/cartSlice';
-import { useSubmitOrderMutation } from './orderApi';
+import { useSubmitOrderMutation, useLazyGetOrderCreateStatusQuery } from './orderApi';
+
+const POLL_INTERVAL_MS = 600;
+const POLL_TIMEOUT_MS = 30_000;
 
 const listVariants = {
   hidden: {},
@@ -30,7 +34,10 @@ export default function OrderConfirmPage() {
   const sessionIdParam = search.get('sessionId') ?? '';
   const seats = useSelector(selectCartSeats);
   const total = useSelector(selectCartTotalPrice);
-  const [submitOrder, { isLoading }] = useSubmitOrderMutation();
+  const [submitOrder, { isLoading: submitting }] = useSubmitOrderMutation();
+  const [fetchStatus] = useLazyGetOrderCreateStatusQuery();
+  const [polling, setPolling] = useState(false);
+  const isLoading = submitting || polling;
 
   // 空状态:友好引导
   if (seats.length === 0) {
@@ -63,15 +70,33 @@ export default function OrderConfirmPage() {
 
   const handleSubmit = async () => {
     try {
-      const result = await submitOrder({
+      // 1. 同步锁座并拿到 orderNo
+      const { orderNo } = await submitOrder({
         sessionId: sessionIdParam,
         seatIds: seats.map((s) => s.seatId),
       }).unwrap();
-      notify.success(t('order:confirm.submittedToast'));
-      dispatch(clearCart());
-      navigate(`/order/${result.orderNo}/pay`, { replace: true });
+      // 2. 轮询异步建单状态
+      setPolling(true);
+      const deadline = Date.now() + POLL_TIMEOUT_MS;
+      while (Date.now() < deadline) {
+        const status = await fetchStatus(orderNo).unwrap();
+        if (status.state === 'SUCCESS') {
+          notify.success(t('order:confirm.submittedToast'));
+          dispatch(clearCart());
+          navigate(`/order/${orderNo}/pay`, { replace: true });
+          return;
+        }
+        if (status.state === 'FAILED' || status.state === 'NOT_FOUND') {
+          notify.error(status.message ?? '下单失败,请重试');
+          return;
+        }
+        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+      }
+      notify.error('下单超时,请到"我的订单"确认是否生成');
     } catch (e) {
       notify.error(extractErrorMessage(e));
+    } finally {
+      setPolling(false);
     }
   };
 
@@ -214,8 +239,12 @@ export default function OrderConfirmPage() {
                 : 'bg-gradient-brand text-brand-foreground shadow-lg shadow-brand/35 hover:opacity-95',
             )}
           >
-            <Wallet className="h-4 w-4" />
-            {isLoading ? t('order:confirm.submittingBtn') : t('order:confirm.submitBtn')}
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+            {polling
+              ? '建单中...'
+              : submitting
+                ? t('order:confirm.submittingBtn')
+                : t('order:confirm.submitBtn')}
           </motion.button>
         </div>
       </StickyBottomBar>

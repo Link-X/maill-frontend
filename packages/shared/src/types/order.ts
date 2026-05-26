@@ -53,6 +53,20 @@ export interface SubmitOrderRequest {
   seatIds: Array<number | string>;
 }
 
+/** /api/order/submit 锁座成功的同步响应。前端拿到 orderNo 后轮询 /api/order/createStatus */
+export interface SubmitOrderResponse {
+  orderNo: string;
+  status: 'PROCESSING';
+}
+
+/** /api/order/createStatus 轮询响应 */
+export interface OrderCreateStatus {
+  state: 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'NOT_FOUND';
+  message?: string;
+  /** state=SUCCESS 时携带完整订单 */
+  order?: OrderStatusResponse;
+}
+
 export interface CancelOrderRequest {
   orderNo: string;
 }

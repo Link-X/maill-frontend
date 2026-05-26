@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Trans, useTranslation } from 'react-i18next';
-import { Square, MousePointer, X, Trash2 } from 'lucide-react';
+import { Square, MousePointer, X, Trash2, Plus, Minus, Maximize2 } from 'lucide-react';
 import {
   cn,
   SeatType,
@@ -10,11 +9,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SeatCanvas,
+  buildAreaColorMap,
+  type SeatCanvasHandle,
+  type SeatCell,
   type RoomArea,
   type RoomSeat,
 } from '@maill/shared';
-
-const AREA_PALETTE = ['bg-area-a', 'bg-area-b', 'bg-area-c', 'bg-area-d'] as const;
 
 interface Props {
   rowCount: number;
@@ -25,58 +26,38 @@ interface Props {
   roomId: number | string;
 }
 
-interface Cell {
-  rowNo: number;
-  colNo: number;
-}
-
 const cellKey = (rowNo: number, colNo: number) => `${rowNo}-${colNo}`;
 
-// 计算两点形成的矩形覆盖的所有 cell key
-function rectKeys(a: Cell, b: Cell): string[] {
-  const r1 = Math.min(a.rowNo, b.rowNo);
-  const r2 = Math.max(a.rowNo, b.rowNo);
-  const c1 = Math.min(a.colNo, b.colNo);
-  const c2 = Math.max(a.colNo, b.colNo);
+// 矩形覆盖的所有 1-based (rowNo,colNo) key
+function rectKeys(r1: number, c1: number, r2: number, c2: number): string[] {
+  const rMin = Math.min(r1, r2);
+  const rMax = Math.max(r1, r2);
+  const cMin = Math.min(c1, c2);
+  const cMax = Math.max(c1, c2);
   const out: string[] = [];
-  for (let r = r1; r <= r2; r++) {
-    for (let c = c1; c <= c2; c++) out.push(cellKey(r, c));
+  for (let r = rMin; r <= rMax; r++) {
+    for (let c = cMin; c <= cMax; c++) out.push(cellKey(r, c));
   }
   return out;
 }
 
 export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roomId }: Props) {
   const { t } = useTranslation(['room', 'common']);
+
   const seatMap = useMemo(() => {
     const m = new Map<string, RoomSeat>();
     seats.forEach((s) => m.set(cellKey(s.rowNo, s.colNo), s));
     return m;
   }, [seats]);
 
-  const colorMap = useMemo(() => {
-    const m = new Map<string, string>();
-    areas.forEach((a, i) => m.set(a.areaId, AREA_PALETTE[i % AREA_PALETTE.length]));
-    return m;
-  }, [areas]);
-
   const areaIdList = useMemo(() => areas.map((a) => a.areaId), [areas]);
   const noAreas = areas.length === 0;
 
+  // 按 areas 顺序(管理员配置序)映射颜色,与底层调色板对齐
+  const colorMap = useMemo(() => buildAreaColorMap(areaIdList), [areaIdList]);
+
   // ---------- 选区 ----------
   const [committed, setCommitted] = useState<Set<string>>(new Set());
-  const dragRef = useRef<{ start: Cell; current: Cell; moved: boolean } | null>(null);
-  const [, forceTick] = useState(0);
-  const tick = () => forceTick((t) => t + 1);
-
-  const liveSelection = useMemo(() => {
-    const next = new Set(committed);
-    if (dragRef.current) {
-      const { start, current } = dragRef.current;
-      rectKeys(start, current).forEach((k) => next.add(k));
-    }
-    return next;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [committed, dragRef.current?.start, dragRef.current?.current]);
 
   const [targetAreaId, setTargetAreaId] = useState<string>('');
   useEffect(() => {
@@ -86,40 +67,17 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     }
   }, [areaIdList, targetAreaId]);
 
-  useEffect(() => {
-    const onUp = () => {
-      const d = dragRef.current;
-      if (!d) return;
-      if (d.moved) {
-        const keys = rectKeys(d.start, d.current);
-        setCommitted((prev) => {
-          const next = new Set(prev);
-          keys.forEach((k) => next.add(k));
-          return next;
-        });
-      } else {
-        singleClick(d.start.rowNo, d.start.colNo);
-      }
-      dragRef.current = null;
-      tick();
-    };
-    window.addEventListener('pointerup', onUp);
-    return () => window.removeEventListener('pointerup', onUp);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seatMap, areaIdList, seats]);
-
+  // ESC 清空选区
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (committed.size > 0) setCommitted(new Set());
-      }
+      if (e.key === 'Escape' && committed.size > 0) setCommitted(new Set());
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [committed.size]);
 
-  // ---------- 写入操作 ----------
-  // seatName 作为后端数据字段保留中文，确保跨语言切换不影响 DB 一致性
+  // ---------- 写入 ----------
+  // seatName 作为后端数据字段保留中文,确保跨语言切换不影响 DB 一致性
   const writeCells = (entries: Array<{ rowNo: number; colNo: number; areaId: string | null }>) => {
     const next = new Map(seatMap);
     for (const { rowNo, colNo, areaId } of entries) {
@@ -161,8 +119,8 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
   };
 
   const applySelection = () => {
-    if (!targetAreaId || liveSelection.size === 0) return;
-    const entries = Array.from(liveSelection).map((k) => {
+    if (!targetAreaId || committed.size === 0) return;
+    const entries = Array.from(committed).map((k) => {
       const [r, c] = k.split('-').map(Number);
       return { rowNo: r, colNo: c, areaId: targetAreaId };
     });
@@ -171,8 +129,8 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
   };
 
   const removeSelection = () => {
-    if (liveSelection.size === 0) return;
-    const entries = Array.from(liveSelection).map((k) => {
+    if (committed.size === 0) return;
+    const entries = Array.from(committed).map((k) => {
       const [r, c] = k.split('-').map(Number);
       return { rowNo: r, colNo: c, areaId: null };
     });
@@ -194,14 +152,75 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
 
   const clearAll = () => onChange([]);
 
-  const selectRow = (rowNo: number, additive: boolean) => {
+  // ---------- cells 构造 ----------
+  // 所有格子都生成 SeatCell:空格 fill 透明,用于点击命中
+  const cells = useMemo<SeatCell[]>(() => {
+    const out: SeatCell[] = [];
+    for (let r = 1; r <= rowCount; r++) {
+      for (let c = 1; c <= colCount; c++) {
+        const key = cellKey(r, c);
+        const seat = seatMap.get(key);
+        const fill = seat
+          ? colorMap.get(seat.areaId) ?? '#94a3b8'
+          : noAreas
+            ? 'rgba(148,163,184,0.18)' // 无区域时整体灰
+            : 'rgba(148,163,184,0.32)'; // 浅灰空位,便于看到点击靶
+        out.push({
+          key,
+          r: r - 1,
+          c: c - 1,
+          fill,
+          label: seat?.areaId,
+        });
+      }
+    }
+    return out;
+  }, [rowCount, colCount, seatMap, colorMap, noAreas]);
+
+  // ---------- 渲染 ----------
+  // 高度按行数自适应:每行约 30px,夹在 240..560 之间
+  // 大网格(≥40 行)固定 560,留给用户用缩放工具浏览
+  const canvasHeight = useMemo(() => {
+    if (rowCount >= 40) return '560px';
+    const h = Math.min(560, Math.max(240, rowCount * 30 + 40));
+    return `${h}px`;
+  }, [rowCount]);
+
+  const canvasRef = useRef<SeatCanvasHandle>(null);
+  const [scale, setScale] = useState(1);
+
+  // SeatCanvas 取 cells 时已含全格,框选 keys 1-based
+  const handleBoxSelect = (rect: { r1: number; c1: number; r2: number; c2: number }) => {
+    const keys = rectKeys(rect.r1 + 1, rect.c1 + 1, rect.r2 + 1, rect.c2 + 1);
+    setCommitted((prev) => {
+      const next = new Set(prev);
+      for (const k of keys) next.add(k);
+      return next;
+    });
+  };
+
+  const handleCellClick = (cell: SeatCell) => {
+    if (noAreas) return;
+    // 有选区时,单击优先取消选区(批量编辑场景下,先退出选区再单点编辑)
+    if (committed.size > 0) {
+      setCommitted(new Set());
+      return;
+    }
+    const r = cell.r + 1;
+    const c = cell.c + 1;
+    singleClick(r, c);
+  };
+
+  const handleRowLabelClick = (r: number, additive: boolean) => {
+    const rowNo = r + 1;
     setCommitted((prev) => {
       const next = additive ? new Set(prev) : new Set<string>();
       for (let c = 1; c <= colCount; c++) next.add(cellKey(rowNo, c));
       return next;
     });
   };
-  const selectCol = (colNo: number, additive: boolean) => {
+  const handleColLabelClick = (c: number, additive: boolean) => {
+    const colNo = c + 1;
     setCommitted((prev) => {
       const next = additive ? new Set(prev) : new Set<string>();
       for (let r = 1; r <= rowCount; r++) next.add(cellKey(r, colNo));
@@ -209,7 +228,6 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
     });
   };
 
-  // ---------- 渲染 ----------
   return (
     <div className="space-y-3">
       {noAreas ? (
@@ -221,15 +239,13 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
           <span className="text-sm text-muted-foreground mr-2">
             {t('room:seatEditor.fillAllPrefix')}
           </span>
-          {areas.map((a, i) => (
+          {areas.map((a) => (
             <button
               key={a.areaId}
               type="button"
               onClick={() => fillAll(a.areaId)}
-              className={cn(
-                'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-white',
-                AREA_PALETTE[i % AREA_PALETTE.length],
-              )}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-white"
+              style={{ background: colorMap.get(a.areaId) ?? '#94a3b8' }}
               title={t('room:seatEditor.fillAllTooltip', {
                 rows: rowCount,
                 cols: colCount,
@@ -254,25 +270,21 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
       <div
         className={cn(
           'flex flex-wrap items-center gap-2 p-2.5 rounded-lg border transition-colors',
-          liveSelection.size > 0
-            ? 'bg-brand/5 border-brand/30'
-            : 'bg-muted/30 border-border/60',
+          committed.size > 0 ? 'bg-brand/5 border-brand/30' : 'bg-muted/30 border-border/60',
         )}
       >
         <MousePointer
           className={cn(
             'h-4 w-4',
-            liveSelection.size > 0 ? 'text-brand' : 'text-muted-foreground',
+            committed.size > 0 ? 'text-brand' : 'text-muted-foreground',
           )}
         />
         <span className="text-sm text-muted-foreground">
           <Trans
             i18nKey="room:seatEditor.selectedCount"
-            values={{ n: liveSelection.size }}
+            values={{ n: committed.size }}
             components={{
-              b: (
-                <b className={liveSelection.size > 0 ? 'text-brand' : 'text-foreground/70'} />
-              ),
+              b: <b className={committed.size > 0 ? 'text-brand' : 'text-foreground/70'} />,
             }}
           />
         </span>
@@ -291,7 +303,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
         <button
           type="button"
           onClick={applySelection}
-          disabled={!targetAreaId || noAreas || liveSelection.size === 0}
+          disabled={!targetAreaId || noAreas || committed.size === 0}
           className="px-3 h-7 rounded-md text-xs font-medium bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {t('room:seatEditor.applyBtn')}
@@ -299,7 +311,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
         <button
           type="button"
           onClick={removeSelection}
-          disabled={liveSelection.size === 0}
+          disabled={committed.size === 0}
           className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current disabled:hover:border-input"
         >
           <Trash2 className="h-3 w-3" />
@@ -308,7 +320,7 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
         <button
           type="button"
           onClick={clearSelection}
-          disabled={liveSelection.size === 0}
+          disabled={committed.size === 0}
           className="px-2.5 h-7 rounded-md text-xs border border-input hover:bg-accent inline-flex items-center gap-1 ml-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
         >
           <X className="h-3 w-3" />
@@ -316,64 +328,35 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
         </button>
       </div>
 
-      <div className="overflow-auto border border-border/60 rounded-xl p-4 bg-card select-none">
-        <div
-          className="inline-grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${colCount + 1}, minmax(28px, 28px))` }}
-        >
-          <div />
-          {Array.from({ length: colCount }).map((_, ci) => {
-            const colNo = ci + 1;
-            return (
-              <button
-                key={`col-${ci}`}
-                type="button"
-                onClick={(e) => selectCol(colNo, e.shiftKey)}
-                className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
-                title={t('room:seatEditor.selectColTip', { n: colNo })}
-              >
-                {colNo}
-              </button>
-            );
-          })}
-          {Array.from({ length: rowCount }).map((_, ri) => {
-            const rowNo = ri + 1;
-            return (
-              <Row
-                key={`row-${rowNo}`}
-                rowNo={rowNo}
-                colCount={colCount}
-                seatMap={seatMap}
-                colorMap={colorMap}
-                liveSelection={liveSelection}
-                disabled={noAreas}
-                rowTitle={t('room:seatEditor.selectRowTip', { n: rowNo })}
-                seatTitleFor={(seat) =>
-                  t('room:seatEditor.seatLabel', {
-                    row: rowNo,
-                    col: seat ? seat.colNo : 0,
-                    areaId: seat?.areaId ?? '',
-                  })
-                }
-                emptyTitle={t('room:seatEditor.cellEnableHint')}
-                onRowLabelClick={(additive) => selectRow(rowNo, additive)}
-                onCellPointerDown={(colNo, e) => {
-                  if (noAreas) return;
-                  e.preventDefault();
-                  dragRef.current = { start: { rowNo, colNo }, current: { rowNo, colNo }, moved: false };
-                  tick();
-                }}
-                onCellPointerEnter={(colNo) => {
-                  if (!dragRef.current) return;
-                  const cur = dragRef.current.current;
-                  if (cur.rowNo === rowNo && cur.colNo === colNo) return;
-                  dragRef.current.current = { rowNo, colNo };
-                  dragRef.current.moved = true;
-                  tick();
-                }}
-              />
-            );
-          })}
+      <div className="relative border border-border/60 rounded-xl bg-card overflow-hidden">
+        <SeatCanvas
+          ref={canvasRef}
+          rowCount={rowCount}
+          colCount={colCount}
+          cells={cells}
+          mode="box-select"
+          selectedKeys={committed}
+          height={canvasHeight}
+          onCellClick={handleCellClick}
+          onBoxSelect={handleBoxSelect}
+          onRowLabelClick={handleRowLabelClick}
+          onColLabelClick={handleColLabelClick}
+          onScaleChange={setScale}
+        />
+        <div className="absolute right-2 bottom-2 flex flex-col items-center gap-1 bg-card/90 backdrop-blur border border-border/60 shadow-sm rounded-full p-1">
+          <ZoomBtn aria-label={t('common:actions.zoomIn', '放大')} onClick={() => canvasRef.current?.zoomBy(1.25)}>
+            <Plus className="h-4 w-4" />
+          </ZoomBtn>
+          <div className="text-[9px] font-semibold text-muted-foreground tabular-nums leading-none">
+            {Math.round(scale * 100)}%
+          </div>
+          <ZoomBtn aria-label={t('common:actions.zoomOut', '缩小')} onClick={() => canvasRef.current?.zoomBy(0.8)}>
+            <Minus className="h-4 w-4" />
+          </ZoomBtn>
+          <div className="h-px w-5 bg-border/60 my-0.5" />
+          <ZoomBtn aria-label={t('common:actions.fit', '适应窗口')} onClick={() => canvasRef.current?.resetView()}>
+            <Maximize2 className="h-3.5 w-3.5" />
+          </ZoomBtn>
         </div>
       </div>
 
@@ -386,73 +369,23 @@ export function SeatGridEditor({ rowCount, colCount, seats, areas, onChange, roo
   );
 }
 
-function Row({
-  rowNo,
-  colCount,
-  seatMap,
-  colorMap,
-  liveSelection,
-  disabled,
-  rowTitle,
-  seatTitleFor,
-  emptyTitle,
-  onRowLabelClick,
-  onCellPointerDown,
-  onCellPointerEnter,
+function ZoomBtn({
+  children,
+  onClick,
+  ...rest
 }: {
-  rowNo: number;
-  colCount: number;
-  seatMap: Map<string, RoomSeat>;
-  colorMap: Map<string, string>;
-  liveSelection: Set<string>;
-  disabled: boolean;
-  rowTitle: string;
-  seatTitleFor: (seat: RoomSeat | undefined) => string;
-  emptyTitle: string;
-  onRowLabelClick: (additive: boolean) => void;
-  onCellPointerDown: (colNo: number, e: React.PointerEvent) => void;
-  onCellPointerEnter: (colNo: number) => void;
+  children: React.ReactNode;
+  onClick: () => void;
+  'aria-label': string;
 }) {
   return (
-    <>
-      <button
-        type="button"
-        onClick={(e) => onRowLabelClick(e.shiftKey)}
-        className="text-xs text-muted-foreground hover:text-brand hover:bg-brand/10 rounded transition-colors"
-        title={rowTitle}
-      >
-        {rowNo}
-      </button>
-      {Array.from({ length: colCount }).map((_, ci) => {
-        const colNo = ci + 1;
-        const key = `${rowNo}-${colNo}`;
-        const seat = seatMap.get(key);
-        const color = seat ? colorMap.get(seat.areaId) ?? 'bg-muted' : '';
-        const isSelected = liveSelection.has(key);
-        return (
-          <motion.button
-            type="button"
-            key={`c-${rowNo}-${colNo}`}
-            onPointerDown={(e) => onCellPointerDown(colNo, e)}
-            onPointerEnter={() => onCellPointerEnter(colNo)}
-            disabled={disabled}
-            whileTap={disabled ? undefined : { scale: 0.92 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            className={cn(
-              'h-7 w-7 rounded text-[10px] font-medium relative',
-              seat
-                ? `${color} text-white`
-                : disabled
-                  ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
-                  : 'bg-muted text-muted-foreground hover:bg-accent',
-              isSelected && 'ring-2 ring-brand ring-offset-1 ring-offset-card z-10',
-            )}
-            title={seat ? seatTitleFor(seat) : emptyTitle}
-          >
-            {seat?.areaId ?? ''}
-          </motion.button>
-        );
-      })}
-    </>
+    <button
+      type="button"
+      onClick={onClick}
+      className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition"
+      {...rest}
+    >
+      {children}
+    </button>
   );
 }
