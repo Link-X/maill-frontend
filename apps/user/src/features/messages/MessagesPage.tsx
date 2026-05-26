@@ -138,9 +138,14 @@ export default function MessagesPage() {
 
   return (
     <div className="pb-6">
-      {/* ===== 顶部 hero:渐变背景 + 玻璃返回 + 未读统计 ===== */}
-      <header className="relative isolate px-4 pt-3 pb-5 overflow-hidden">
+      {/* ===== 顶部 hero:渐变背景 + 玻璃返回 + 未读统计 + 内嵌 tabs ===== */}
+      <header className="relative isolate px-4 pt-3 pb-3 overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-brand-soft opacity-80" />
+        {/* 底部羽化：让 header 渐变向下溶解到普通背景，消除硬边界 */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 -z-10 h-10 bg-gradient-to-b from-transparent to-background"
+        />
         <div aria-hidden className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-brand/20 blur-3xl" />
 
         <div className="flex items-center justify-between gap-2">
@@ -187,53 +192,53 @@ export default function MessagesPage() {
             )}
           </p>
         </div>
-      </header>
 
-      {/* ===== 类型 tab:layoutId 滑块 ===== */}
-      <div className="relative -mt-2 mb-3 px-4">
-        <div className="flex gap-1 overflow-x-auto -mx-4 px-4 pb-1 scrollbar-none">
-          {TYPE_TABS.map((it) => {
-            const unreadKey = UNREAD_KEYS[it.value];
-            const unread =
-              unreadKey && counts
-                ? ((counts as unknown as Record<string, number>)[unreadKey] ?? 0)
-                : 0;
-            const active = tab === it.value;
-            return (
-              <button
-                key={String(it.value)}
-                type="button"
-                onClick={() => setTab(it.value)}
-                className={cn(
-                  'relative shrink-0 px-3.5 h-8 rounded-full text-xs font-medium transition-colors',
-                  active ? 'text-brand-foreground' : 'text-foreground/70 hover:text-foreground',
-                )}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="message-tab-pill"
-                    className="absolute inset-0 rounded-full bg-gradient-brand shadow-sm shadow-brand/30"
-                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  />
-                )}
-                <span className="relative inline-flex items-center gap-1.5">
-                  {t(it.key)}
-                  {unread > 0 && (
-                    <span
-                      className={cn(
-                        'min-w-[16px] h-[16px] rounded-full text-[10px] font-semibold px-1 flex items-center justify-center',
-                        active ? 'bg-white/30 text-white' : 'bg-destructive text-white',
-                      )}
-                    >
-                      {unread > 99 ? '99+' : unread}
-                    </span>
+        {/* ===== 类型 tab:嵌入 header,与渐变背景融为一体 ===== */}
+        <div className="relative mt-4 -mx-4 px-4">
+          <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+            {TYPE_TABS.map((it) => {
+              const unreadKey = UNREAD_KEYS[it.value];
+              const unread =
+                unreadKey && counts
+                  ? ((counts as unknown as Record<string, number>)[unreadKey] ?? 0)
+                  : 0;
+              const active = tab === it.value;
+              return (
+                <button
+                  key={String(it.value)}
+                  type="button"
+                  onClick={() => setTab(it.value)}
+                  className={cn(
+                    'relative shrink-0 px-3.5 h-8 rounded-full text-xs font-medium transition-colors',
+                    active ? 'text-brand-foreground' : 'text-foreground/65 hover:text-foreground',
                   )}
-                </span>
-              </button>
-            );
-          })}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="message-tab-pill"
+                      className="absolute inset-0 rounded-full bg-gradient-brand shadow-sm shadow-brand/30"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative inline-flex items-center gap-1.5">
+                    {t(it.key)}
+                    {unread > 0 && (
+                      <span
+                        className={cn(
+                          'min-w-[16px] h-[16px] rounded-full text-[10px] font-semibold px-1 flex items-center justify-center',
+                          active ? 'bg-white/30 text-white' : 'bg-destructive text-white',
+                        )}
+                      >
+                        {unread > 99 ? '99+' : unread}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* ===== 列表 ===== */}
       <div className="px-4">

@@ -170,7 +170,9 @@ export function SeatGrid({ rows, rowCount, columnCount, areaPriceList, limitPerU
   // ---------- 点击选座（普通 onClick，不与平移/缩放交叉） ----------
   const handleSeatClick = (col: SeatColVO, row: SeatRowVO) => {
     if (col.type === 0) return;
-    if (col.status === SeatStatus.Locked || col.status === SeatStatus.Sold) return;
+    // 后端 status 可能是字符串（Jackson long→string 序列化波及），统一转 Number 再比较
+    const status = col.status == null ? null : Number(col.status);
+    if (status === SeatStatus.Locked || status === SeatStatus.Sold) return;
 
     const id = String(col.colId);
     const isSelected = selectedIds.has(id);
@@ -353,8 +355,10 @@ function Row({
         }
         const id = String(col.colId);
         const isSelected = selectedIds.has(id);
-        const isLocked = col.status === SeatStatus.Locked;
-        const isSold = col.status === SeatStatus.Sold;
+        // 后端 status 可能是字符串，统一 Number 转换避免严格相等失效
+        const statusNum = col.status == null ? null : Number(col.status);
+        const isLocked = statusNum === SeatStatus.Locked;
+        const isSold = statusNum === SeatStatus.Sold;
         const areaColor = priceColorMap.get(normalizeAreaId(col.areaId)) ?? 'bg-muted';
         const cls = isSelected
           ? 'bg-gradient-brand text-brand-foreground ring-2 ring-brand/40 shadow-[0_2px_8px_-1px_hsl(var(--brand)/0.5)]'

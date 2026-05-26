@@ -19,7 +19,11 @@ export default function SessionSeatPage() {
   const { id } = useParams<{ id: string }>();
   const sessionId = id ?? '';
 
-  const { data, isLoading, error } = useGetSessionDetailQuery(sessionId, { skip: !sessionId });
+  // 每次进入页面强制重新拉取，避免命中 RTK Query 缓存而看到陈旧的座位状态（已售/已锁未更新）
+  const { data, isLoading, error } = useGetSessionDetailQuery(sessionId, {
+    skip: !sessionId,
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
     if (sessionId) dispatch(setSessionContext(sessionId));

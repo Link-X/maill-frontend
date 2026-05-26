@@ -119,7 +119,8 @@ export default function OrderPayPage() {
       <div className="px-4 py-3 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => navigate('/orders')}
+          // 用 replace 而不是 push，避免与 /orders 的 navigate(-1) 形成"详情 ↔ 列表"循环
+          onClick={() => navigate('/orders', { replace: true })}
           aria-label={t('order:pay.backToList')}
           className="h-9 w-9 rounded-full bg-card flex items-center justify-center border border-border/60"
         >
