@@ -24,7 +24,6 @@ export interface Show {
   reviewMode?: 0 | 1 | 2;
   avgRating?: number;
   reviewCount?: number;
-  openSaleTime?: string;
   artists?: Artist[];
 }
 

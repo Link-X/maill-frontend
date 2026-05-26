@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, Calendar, X } from 'lucide-react';
+import { ArrowLeft, Bell, X } from 'lucide-react';
 import { extractErrorMessage, notify } from '@maill/shared';
-import { formatDateTime } from '@/lib/format';
 import { useListSubscribesQuery, useRemoveSubscribeMutation } from './subscribeApi';
 
 export default function SubscriptionsPage() {
@@ -60,14 +59,8 @@ export default function SubscriptionsPage() {
                   {s.show?.venue && (
                     <p className="text-xs text-muted-foreground truncate">{s.show.venue}</p>
                   )}
-                  {s.show?.openSaleTime && (
-                    <p className="text-xs text-muted-foreground inline-flex items-center gap-1 mt-1">
-                      <Calendar className="h-3 w-3" />
-                      开售: {formatDateTime(s.show.openSaleTime)}
-                    </p>
-                  )}
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    提前 {s.notifyBeforeMinutes ?? 10} 分钟提醒
+                    提前 {s.notifyBeforeMinutes ?? 10} 分钟提醒(按每场次推送)
                   </p>
                 </div>
               </button>

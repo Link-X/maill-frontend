@@ -9,5 +9,5 @@ export interface ShowSubscribe {
   notifiedPre?: 0 | 1;
   notifiedOpen?: 0 | 1;
   createTime?: string;
-  show?: Pick<Show, 'id' | 'name' | 'posterUrl' | 'venue' | 'openSaleTime'>;
+  show?: Pick<Show, 'id' | 'name' | 'posterUrl' | 'venue'>;
 }

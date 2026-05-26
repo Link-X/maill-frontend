@@ -72,7 +72,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
             { message: t('show:form.extendInvalid') },
           ),
         reviewMode: z.coerce.number().int().min(0).max(2).default(1),
-        openSaleTime: z.string().optional().or(z.literal('')),
         artistIds: z.array(z.number()).default([]),
       }),
     [t],
@@ -97,7 +96,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
       description: '',
       extend: '',
       reviewMode: 1,
-      openSaleTime: '',
       artistIds: [],
     },
   });
@@ -114,7 +112,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
         description: initial?.description ?? '',
         extend: initial?.extend ?? '',
         reviewMode: (initial?.reviewMode ?? 1) as 0 | 1 | 2,
-        openSaleTime: initial?.openSaleTime ? initial.openSaleTime.replace(' ', 'T').slice(0, 16) : '',
         artistIds: initial?.artists?.map((a) => a.id) ?? [],
       });
     }
@@ -129,7 +126,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
       posterUrl: values.posterUrl || undefined,
       extend: values.extend?.trim() || undefined,
       reviewMode: values.reviewMode as 0 | 1 | 2,
-      openSaleTime: values.openSaleTime ? values.openSaleTime.replace('T', ' ') + ':00' : undefined,
       artistIds: values.artistIds,
     };
     try {
@@ -293,10 +289,6 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
                 </Select>
               )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="openSaleTime">{t('show:form.openSaleTime', '开售时间')}</Label>
-            <Input id="openSaleTime" type="datetime-local" {...register('openSaleTime')} />
           </div>
         </div>
 
