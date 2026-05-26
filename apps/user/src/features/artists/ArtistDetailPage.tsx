@@ -13,7 +13,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { extractErrorMessage, notify, cn } from '@maill/shared';
-import { Skeleton } from '@/components/Skeleton';
+import { Skeleton, SkeletonCard } from '@/components/Skeleton';
+import { ShowCard } from '@/features/shows/ShowCard';
+import { useListShowsByArtistQuery } from '@/features/shows/showsApi';
 import {
   useGetArtistQuery,
   useCheckFollowQuery,
@@ -38,6 +40,11 @@ export default function ArtistDetailPage() {
   const artistId = Number(id);
   const { data: artist, isLoading } = useGetArtistQuery(artistId, { skip: !artistId });
   const { data: articles = [] } = useListByArtistQuery(artistId, { skip: !artistId });
+  const { data: showsData, isLoading: showsLoading } = useListShowsByArtistQuery(
+    { artistId, page: 1, size: 20 },
+    { skip: !artistId, refetchOnMountOrArgChange: true },
+  );
+  const shows = showsData?.list ?? [];
   const { data: following = false } = useCheckFollowQuery(artistId, { skip: !artistId });
   const [followArtist, { isLoading: following1 }] = useFollowArtistMutation();
   const [unfollowArtist, { isLoading: unfollowing }] = useUnfollowArtistMutation();
@@ -228,15 +235,33 @@ export default function ArtistDetailPage() {
           </SectionCard>
         )}
 
-        {/* 代表演出占位 */}
+        {/* 代表演出：GET /api/show/by-artist/{artistId} */}
         <motion.section variants={itemVariants}>
           <SectionTitle icon={Ticket} tone="amber">
             {t('artist:user.tabShows')}
+            {shows.length > 0 && (
+              <span className="text-xs font-normal text-muted-foreground ml-1">
+                ({showsData?.total ?? shows.length})
+              </span>
+            )}
           </SectionTitle>
-          <div className="rounded-2xl border border-dashed border-border/60 py-6 text-center">
-            <Ticket className="h-7 w-7 text-muted-foreground/40 mx-auto mb-1.5" />
-            <p className="text-xs text-muted-foreground">{t('artist:user.noShows')}</p>
-          </div>
+          {showsLoading ? (
+            <div className="grid grid-cols-2 gap-3">
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          ) : shows.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/60 py-6 text-center">
+              <Ticket className="h-7 w-7 text-muted-foreground/40 mx-auto mb-1.5" />
+              <p className="text-xs text-muted-foreground">{t('artist:user.noShows')}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {shows.map((s) => (
+                <ShowCard key={s.id} show={s} />
+              ))}
+            </div>
+          )}
         </motion.section>
 
         {/* 相关资讯 */}

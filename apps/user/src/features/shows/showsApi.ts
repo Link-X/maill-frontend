@@ -16,6 +16,12 @@ interface ShowListResponse {
   list: Show[];
 }
 
+interface ShowsByArtistRequest {
+  artistId: number | string;
+  page?: number;
+  size?: number;
+}
+
 export const showsApi = createApi({
   reducerPath: 'showsApi',
   baseQuery: userBaseQuery,
@@ -32,7 +38,19 @@ export const showsApi = createApi({
       query: (id) => `/api/show/${id}`,
       providesTags: (_r, _e, id) => [{ type: 'Show', id }],
     }),
+    // GET /api/show/by-artist/{artistId} — 公开接口，按 show_artist 关联 id DESC 排
+    listShowsByArtist: build.query<ShowListResponse, ShowsByArtistRequest>({
+      query: ({ artistId, page = 1, size = 20 }) => ({
+        url: `/api/show/by-artist/${artistId}`,
+        method: 'GET',
+        params: { page, size },
+      }),
+      providesTags: (result, _e, arg) => [
+        { type: 'Show', id: `artist-${arg.artistId}` },
+        ...(result?.list ?? []).map((s) => ({ type: 'Show' as const, id: s.id })),
+      ],
+    }),
   }),
 });
 
-export const { useListShowsQuery, useGetShowQuery } = showsApi;
+export const { useListShowsQuery, useGetShowQuery, useListShowsByArtistQuery } = showsApi;
