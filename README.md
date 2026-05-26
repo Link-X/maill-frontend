@@ -118,3 +118,7 @@ pnpm typecheck       # 全 workspace 执行 tsc --noEmit
 ## 相关项目
 
 - 后端：[maill-backend](https://github.com/Link-X/maill-backend)
+
+## License
+
+[MIT](./LICENSE) © 2026 xdb
