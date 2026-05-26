@@ -75,6 +75,28 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      keyframes: {
+        // Skeleton 光带从左扫到右
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+        // EmptyState/空状态图标的呼吸光
+        'breath-glow': {
+          '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.04)' },
+        },
+        // 收藏成功心跳
+        heartbeat: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '30%': { transform: 'scale(1.25)' },
+          '60%': { transform: 'scale(0.92)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 1.6s infinite',
+        'breath-glow': 'breath-glow 2.8s ease-in-out infinite',
+        heartbeat: 'heartbeat 0.5s ease-out',
+      },
     },
   },
   plugins: [animate],

@@ -1,0 +1,63 @@
+{
+  "page": {
+    "title": "资讯管理",
+    "subtitle": "维护资讯内容,支持富文本与草稿/发布/下架流程",
+    "addBtn": "新建资讯"
+  },
+  "table": {
+    "cover": "封面",
+    "title": "标题",
+    "category": "分类",
+    "artist": "关联艺人",
+    "author": "作者",
+    "viewCount": "浏览",
+    "status": "状态",
+    "publishedAt": "发布时间",
+    "actions": "操作"
+  },
+  "form": {
+    "titleNew": "新建资讯",
+    "titleEdit": "编辑资讯",
+    "title": "标题",
+    "titleRequired": "请输入标题",
+    "summary": "摘要",
+    "summaryPlaceholder": "列表展示摘要,留空则取正文前几十字",
+    "content": "正文",
+    "contentRequired": "请输入正文",
+    "cover": "封面",
+    "category": "分类",
+    "categoryRequired": "请选择分类",
+    "artist": "关联艺人(可选)",
+    "artistUnspecified": "不关联艺人",
+    "author": "作者",
+    "status": "状态",
+    "savedToast": "资讯已保存",
+    "publishedToast": "已发布",
+    "offlinedToast": "已下架"
+  },
+  "status": {
+    "draft": "草稿",
+    "published": "已发布",
+    "offline": "已下架"
+  },
+  "action": {
+    "publish": "发布",
+    "offline": "下架",
+    "edit": "编辑",
+    "delete": "删除"
+  },
+  "delete": {
+    "title": "删除资讯",
+    "desc": "确定要删除 {{title}} 吗?",
+    "btn": "删除",
+    "btnDeleting": "删除中...",
+    "successToast": "已删除"
+  },
+  "user": {
+    "listTitle": "资讯",
+    "allCategories": "全部",
+    "noArticles": "暂无资讯",
+    "viewCount": "{{n}} 浏览",
+    "publishedAt": "发布于 {{time}}"
+  }
+}

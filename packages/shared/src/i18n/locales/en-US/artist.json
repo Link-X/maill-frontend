@@ -1,0 +1,65 @@
+{
+  "page": {
+    "title": "Artists",
+    "subtitle": "Manage artist profiles and show associations",
+    "addBtn": "New artist"
+  },
+  "table": {
+    "avatar": "Avatar",
+    "name": "Name",
+    "stageName": "Stage name",
+    "nationality": "Nationality",
+    "tags": "Tags",
+    "followCount": "Fans",
+    "showCount": "Shows",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "form": {
+    "titleNew": "New artist",
+    "titleEdit": "Edit artist",
+    "name": "Name",
+    "namePlaceholder": "e.g. Jay Chou",
+    "nameRequired": "Please enter the name",
+    "stageName": "Stage name",
+    "stageNamePlaceholder": "Optional, leave empty if none",
+    "avatarUrl": "Avatar",
+    "gender": "Gender",
+    "nationality": "Nationality",
+    "tags": "Tags (comma separated)",
+    "tagsPlaceholder": "singer,actor,pianist",
+    "bio": "Bio",
+    "bioPlaceholder": "One-line bio for lists / cards",
+    "description": "Description",
+    "descriptionPlaceholder": "Multi-line, can be upgraded to rich text later",
+    "socialLinks": "Social links (JSON)",
+    "socialLinksPlaceholder": "{\"weibo\":\"\",\"instagram\":\"\",\"x\":\"\"}",
+    "status": "Status",
+    "savedToast": "Artist updated",
+    "createdToast": "Artist created"
+  },
+  "gender": { "secret": "Undisclosed", "male": "Male", "female": "Female" },
+  "status": { "online": "Online", "offline": "Offline" },
+  "action": { "enableShort": "Publish", "disableShort": "Unpublish" },
+  "toggle": { "onlineToast": "Published", "offlineToast": "Unpublished" },
+  "delete": {
+    "title": "Delete artist",
+    "desc": "Are you sure you want to delete artist {{name}}? Related shows will not be deleted, but the artist will no longer be shown.",
+    "btn": "Delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Deleted"
+  },
+  "user": {
+    "listTitle": "Artists",
+    "follow": "Follow",
+    "following": "Following",
+    "unfollow": "Unfollow",
+    "follows": "My follows",
+    "noShows": "No shows yet",
+    "noArticles": "No articles yet",
+    "tabShows": "Shows",
+    "tabArticles": "Articles",
+    "bio": "Bio",
+    "description": "Description"
+  }
+}

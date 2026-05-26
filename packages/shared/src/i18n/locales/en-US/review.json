@@ -1,0 +1,56 @@
+{
+  "page": {
+    "publishTitle": "Write a review",
+    "replyTitle": "Reply",
+    "moderationTitle": "Review moderation",
+    "reportsTitle": "Report handling"
+  },
+  "form": {
+    "rating": "Rating",
+    "ratingRequired": "Please rate",
+    "content": "Content",
+    "contentPlaceholder": "Share your experience...",
+    "contentRequired": "Please enter content",
+    "images": "Photos (up to 9)",
+    "publishBtn": "Publish",
+    "replyBtn": "Reply",
+    "publishedToast": "Published",
+    "permissionDenied": "You cannot review this show right now"
+  },
+  "list": {
+    "all": "All",
+    "latest": "Latest",
+    "hottest": "Hottest",
+    "noReviews": "No reviews yet",
+    "viewReplies": "View {{n}} replies",
+    "reply": "Reply",
+    "delete": "Delete",
+    "report": "Report",
+    "deletedToast": "Deleted"
+  },
+  "status": {
+    "normal": "Normal",
+    "reported": "Reported",
+    "hidden": "Hidden"
+  },
+  "action": {
+    "hide": "Hide",
+    "restore": "Restore",
+    "delete": "Delete",
+    "keep": "Keep",
+    "deleteReview": "Delete review"
+  },
+  "report": {
+    "reasonPlaceholder": "Please enter the reason...",
+    "submittedToast": "Reported, we will handle it soon",
+    "pending": "Pending",
+    "handledKeep": "Kept",
+    "handledDelete": "Deleted"
+  },
+  "user": {
+    "writeReview": "Write review",
+    "alreadyReviewed": "Reviewed",
+    "reviewsTab": "Reviews",
+    "myReviews": "My reviews"
+  }
+}

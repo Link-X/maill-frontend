@@ -1,0 +1,65 @@
+{
+  "page": {
+    "title": "艺人管理",
+    "subtitle": "维护艺人主页与演出关联",
+    "addBtn": "新建艺人"
+  },
+  "table": {
+    "avatar": "头像",
+    "name": "本名",
+    "stageName": "艺名",
+    "nationality": "国籍/地区",
+    "tags": "标签",
+    "followCount": "粉丝",
+    "showCount": "演出",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "form": {
+    "titleNew": "新建艺人",
+    "titleEdit": "编辑艺人",
+    "name": "本名",
+    "namePlaceholder": "如：周杰伦",
+    "nameRequired": "请输入本名",
+    "stageName": "艺名",
+    "stageNamePlaceholder": "若有,留空也可",
+    "avatarUrl": "头像",
+    "gender": "性别",
+    "nationality": "国籍/地区",
+    "tags": "标签(逗号分隔)",
+    "tagsPlaceholder": "歌手,演员,钢琴家",
+    "bio": "简介",
+    "bioPlaceholder": "一句话简介,列表/卡片展示用",
+    "description": "详细介绍",
+    "descriptionPlaceholder": "支持多行,后续可升级为富文本",
+    "socialLinks": "社交链接(JSON)",
+    "socialLinksPlaceholder": "{\"weibo\":\"\",\"instagram\":\"\",\"x\":\"\"}",
+    "status": "状态",
+    "savedToast": "艺人已更新",
+    "createdToast": "艺人已创建"
+  },
+  "gender": { "secret": "保密", "male": "男", "female": "女" },
+  "status": { "online": "已上架", "offline": "已下架" },
+  "action": { "enableShort": "上架", "disableShort": "下架" },
+  "toggle": { "onlineToast": "已上架", "offlineToast": "已下架" },
+  "delete": {
+    "title": "删除艺人",
+    "desc": "确定要删除艺人 {{name}} 吗？关联演出不会被删,但展示将失去该艺人。",
+    "btn": "删除",
+    "btnDeleting": "删除中...",
+    "successToast": "已删除"
+  },
+  "user": {
+    "listTitle": "艺人",
+    "follow": "关注",
+    "following": "已关注",
+    "unfollow": "取消关注",
+    "follows": "我的关注",
+    "noShows": "暂无演出",
+    "noArticles": "暂无资讯",
+    "tabShows": "演出",
+    "tabArticles": "资讯",
+    "bio": "简介",
+    "description": "详细介绍"
+  }
+}

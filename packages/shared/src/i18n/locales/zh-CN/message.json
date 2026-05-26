@@ -1,0 +1,51 @@
+{
+  "page": {
+    "title": "消息中心",
+    "broadcastTitle": "群发消息",
+    "addBtn": "新建消息"
+  },
+  "type": {
+    "order": "订单",
+    "openSale": "开售提醒",
+    "system": "系统通知",
+    "interaction": "互动",
+    "followFeed": "关注动态",
+    "all": "全部"
+  },
+  "linkType": {
+    "none": "无跳转",
+    "show": "演出",
+    "artist": "艺人",
+    "article": "资讯",
+    "order": "订单",
+    "url": "外链"
+  },
+  "form": {
+    "type": "类型",
+    "title": "标题",
+    "titleRequired": "请输入标题",
+    "content": "内容",
+    "contentRequired": "请输入内容",
+    "linkType": "跳转类型",
+    "linkTarget": "跳转目标",
+    "userIds": "目标用户 ID(逗号分隔)",
+    "userIdsPlaceholder": "1,2,3",
+    "broadcast": "广播",
+    "broadcastBtn": "群发",
+    "sendBtn": "单发",
+    "broadcastToast": "已群发",
+    "sentToast": "已发送"
+  },
+  "table": {
+    "type": "类型",
+    "title": "标题",
+    "broadcast": "类型",
+    "createTime": "创建时间"
+  },
+  "user": {
+    "empty": "暂无消息",
+    "readAll": "全部已读",
+    "delete": "删除",
+    "unread": "未读"
+  }
+}

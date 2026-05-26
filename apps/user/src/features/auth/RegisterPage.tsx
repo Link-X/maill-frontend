@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { UserPlus } from 'lucide-react';
 import { Button, Input, Label, extractErrorMessage, notify } from '@maill/shared';
 import { useRegisterMutation } from './authApi';
 import { setCredentials } from './authSlice';
@@ -50,9 +52,30 @@ export default function RegisterPage() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background text-foreground">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-center">{t('auth:register')}</h1>
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-6 overflow-hidden bg-background text-foreground">
+      <div aria-hidden className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-brand-soft opacity-60" />
+        <div className="absolute -top-32 -right-24 w-72 h-72 rounded-full bg-brand-2/30 blur-3xl animate-breath-glow" />
+        <div className="absolute -bottom-32 -left-24 w-80 h-80 rounded-full bg-brand/30 blur-3xl animate-breath-glow [animation-delay:1.2s]" />
+      </div>
+
+      <motion.form
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+        onSubmit={onSubmit}
+        className="w-full max-w-sm rounded-3xl bg-card/75 dark:bg-card/55 backdrop-blur-2xl
+                   border border-white/40 dark:border-white/10
+                   shadow-[0_24px_60px_-20px_rgba(15,23,42,0.25),inset_0_1px_0_0_rgba(255,255,255,0.5)]
+                   p-7 space-y-4"
+      >
+        <div className="text-center space-y-2">
+          <div className="mx-auto h-12 w-12 rounded-2xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand/30">
+            <UserPlus className="h-6 w-6 text-brand-foreground" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">{t('auth:register')}</h1>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="username">{t('auth:username')}</Label>
           <Input id="username" {...register('username')} />
@@ -71,15 +94,19 @@ export default function RegisterPage() {
           <Label htmlFor="email">{t('auth:email')}</Label>
           <Input id="email" type="email" {...register('email')} />
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button
+          type="submit"
+          className="w-full h-11 bg-gradient-brand hover:opacity-90 shadow-md shadow-brand/25"
+          disabled={isLoading}
+        >
           {isLoading ? t('common:states.loading') : t('auth:register')}
         </Button>
-        <p className="text-center text-sm">
-          <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+        <p className="text-center text-sm text-muted-foreground">
+          <Link to="/login" className="text-brand font-medium underline-offset-4 hover:underline">
             {t('auth:switchToLogin')}
           </Link>
         </p>
-      </form>
+      </motion.form>
     </div>
   );
 }

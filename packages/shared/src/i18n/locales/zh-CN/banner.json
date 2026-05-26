@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "Banner 管理",
+    "subtitle": "首页轮播图与运营位。支持图片、跳转配置、定时上下架、排序。",
+    "addBtn": "新建 Banner"
+  },
+  "table": {
+    "image": "图片",
+    "title": "备注",
+    "linkType": "跳转",
+    "linkTarget": "目标",
+    "sort": "排序",
+    "window": "上下架时间",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "form": {
+    "titleNew": "新建 Banner",
+    "titleEdit": "编辑 Banner",
+    "image": "图片",
+    "imageRequired": "请上传图片",
+    "imageInvalid": "图片需为合法 URL",
+    "remark": "备注",
+    "remarkPlaceholder": "后台备注，前端可不展示",
+    "linkType": "跳转类型",
+    "linkTarget": "跳转目标",
+    "linkTargetPlaceholder": "演出/艺人/资讯 ID 或完整外链 URL",
+    "sort": "排序",
+    "startAt": "上架时间",
+    "endAt": "下架时间",
+    "dateTimeHelp": "本地时间，留空表示不限",
+    "status": "状态",
+    "savedToast": "Banner 已更新",
+    "createdToast": "Banner 已创建"
+  },
+  "linkType": {
+    "none": "无跳转",
+    "show": "演出",
+    "artist": "艺人",
+    "article": "资讯",
+    "url": "外链"
+  },
+  "status": {
+    "online": "已上架",
+    "offline": "已下架"
+  },
+  "action": {
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "enableShort": "上架",
+    "disableShort": "下架"
+  },
+  "toggle": {
+    "onlineToast": "已上架",
+    "offlineToast": "已下架"
+  },
+  "delete": {
+    "title": "删除 Banner",
+    "desc": "确定要删除这个 Banner 吗？此操作不可撤销。",
+    "btn": "删除",
+    "btnDeleting": "删除中...",
+    "successToast": "已删除"
+  }
+}

@@ -11,6 +11,12 @@ import { uploadApi } from '@/features/upload/uploadApi';
 import { categoriesApi } from '@/features/categories/categoriesApi';
 import { citiesApi } from '@/features/cities/citiesApi';
 import { reportsApi } from '@/features/reports/reportsApi';
+import { bannersApi } from '@/features/banners/bannersApi';
+import { artistsApi } from '@/features/artists/artistsApi';
+import { articleCategoriesApi } from '@/features/articles/articleCategoriesApi';
+import { articlesApi } from '@/features/articles/articlesApi';
+import { messagesApi } from '@/features/messages/messagesApi';
+import { reviewsApi as adminReviewsApi } from '@/features/reviews/reviewsApi';
 
 export const store = configureStore({
   reducer: {
@@ -27,6 +33,12 @@ export const store = configureStore({
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [citiesApi.reducerPath]: citiesApi.reducer,
     [reportsApi.reducerPath]: reportsApi.reducer,
+    [bannersApi.reducerPath]: bannersApi.reducer,
+    [artistsApi.reducerPath]: artistsApi.reducer,
+    [articleCategoriesApi.reducerPath]: articleCategoriesApi.reducer,
+    [articlesApi.reducerPath]: articlesApi.reducer,
+    [messagesApi.reducerPath]: messagesApi.reducer,
+    [adminReviewsApi.reducerPath]: adminReviewsApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -40,6 +52,12 @@ export const store = configureStore({
       categoriesApi.middleware,
       citiesApi.middleware,
       reportsApi.middleware,
+      bannersApi.middleware,
+      artistsApi.middleware,
+      articleCategoriesApi.middleware,
+      articlesApi.middleware,
+      messagesApi.middleware,
+      adminReviewsApi.middleware,
     ),
 });
 

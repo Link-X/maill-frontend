@@ -8,6 +8,12 @@ import {
   Building2,
   Receipt,
   Tag,
+  Image as ImageIcon,
+  Users,
+  FolderTree,
+  Newspaper,
+  MessageSquare,
+  MessagesSquare,
   BarChart3,
   Sun,
   Moon,
@@ -34,6 +40,12 @@ const navItems = [
   { to: '/categories', key: 'admin:nav.categories', icon: Tag },
   { to: '/rooms', key: 'admin:nav.rooms', icon: Building2 },
   { to: '/orders', key: 'admin:nav.orders', icon: Receipt },
+  { to: '/banners', key: 'admin:nav.banner', icon: ImageIcon },
+  { to: '/artists', key: 'admin:nav.artists', icon: Users },
+  { to: '/article-categories', key: 'admin:nav.articleCategories', icon: FolderTree },
+  { to: '/articles', key: 'admin:nav.articles', icon: Newspaper },
+  { to: '/messages', key: 'admin:nav.messages', icon: MessageSquare },
+  { to: '/reviews', key: 'admin:nav.reviews', icon: MessagesSquare },
 ];
 
 const cycleTheme = (mode: ThemeMode): ThemeMode =>

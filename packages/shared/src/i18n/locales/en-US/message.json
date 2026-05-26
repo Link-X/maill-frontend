@@ -1,0 +1,51 @@
+{
+  "page": {
+    "title": "Messages",
+    "broadcastTitle": "Broadcast Message",
+    "addBtn": "New Message"
+  },
+  "type": {
+    "order": "Order",
+    "openSale": "On-sale Alert",
+    "system": "System",
+    "interaction": "Interaction",
+    "followFeed": "Following Feed",
+    "all": "All"
+  },
+  "linkType": {
+    "none": "No link",
+    "show": "Show",
+    "artist": "Artist",
+    "article": "Article",
+    "order": "Order",
+    "url": "External URL"
+  },
+  "form": {
+    "type": "Type",
+    "title": "Title",
+    "titleRequired": "Please enter a title",
+    "content": "Content",
+    "contentRequired": "Please enter content",
+    "linkType": "Link type",
+    "linkTarget": "Link target",
+    "userIds": "Target user IDs (comma separated)",
+    "userIdsPlaceholder": "1,2,3",
+    "broadcast": "Broadcast",
+    "broadcastBtn": "Broadcast",
+    "sendBtn": "Send",
+    "broadcastToast": "Broadcasted",
+    "sentToast": "Sent"
+  },
+  "table": {
+    "type": "Type",
+    "title": "Title",
+    "broadcast": "Type",
+    "createTime": "Created at"
+  },
+  "user": {
+    "empty": "No messages",
+    "readAll": "Mark all read",
+    "delete": "Delete",
+    "unread": "Unread"
+  }
+}

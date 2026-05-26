@@ -13,6 +13,18 @@ const SessionSeatPage = lazy(() => import('@/features/sessions/SessionSeatPage')
 const OrderConfirmPage = lazy(() => import('@/features/order/OrderConfirmPage'));
 const OrderPayPage = lazy(() => import('@/features/order/OrderPayPage'));
 const VerifyPage = lazy(() => import('@/features/verify/VerifyPage'));
+const ArtistsListPage = lazy(() => import('@/features/artists/ArtistsListPage'));
+const ArtistDetailPage = lazy(() => import('@/features/artists/ArtistDetailPage'));
+const FollowsPage = lazy(() => import('@/features/artists/FollowsPage'));
+const ArticlesListPage = lazy(() => import('@/features/articles/ArticlesListPage'));
+const ArticleDetailPage = lazy(() => import('@/features/articles/ArticleDetailPage'));
+const MessagesPage = lazy(() => import('@/features/messages/MessagesPage'));
+const FavoritesPage = lazy(() => import('@/features/favorites/FavoritesPage'));
+const FavoriteGroupsPage = lazy(() => import('@/features/favorites/FavoriteGroupsPage'));
+const SubscriptionsPage = lazy(() => import('@/features/subscriptions/SubscriptionsPage'));
+const SearchPage = lazy(() => import('@/features/search/SearchPage'));
+const PublishReviewPage = lazy(() => import('@/features/reviews/PublishReviewPage'));
+const ReviewDetailPage = lazy(() => import('@/features/reviews/ReviewDetailPage'));
 
 const withSuspense = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-4">Loading...</div>}>{node}</Suspense>
@@ -37,6 +49,18 @@ export const router = createBrowserRouter([
       { path: 'order/confirm', element: withSuspense(<OrderConfirmPage />) },
       { path: 'order/:orderNo/pay', element: withSuspense(<OrderPayPage />) },
       { path: 'verify', element: withSuspense(<VerifyPage />) },
+      { path: 'artists', element: withSuspense(<ArtistsListPage />) },
+      { path: 'artist/:id', element: withSuspense(<ArtistDetailPage />) },
+      { path: 'follows', element: withSuspense(<FollowsPage />) },
+      { path: 'articles', element: withSuspense(<ArticlesListPage />) },
+      { path: 'article/:id', element: withSuspense(<ArticleDetailPage />) },
+      { path: 'messages', element: withSuspense(<MessagesPage />) },
+      { path: 'favorites', element: withSuspense(<FavoritesPage />) },
+      { path: 'favorites/groups', element: withSuspense(<FavoriteGroupsPage />) },
+      { path: 'subscriptions', element: withSuspense(<SubscriptionsPage />) },
+      { path: 'search', element: withSuspense(<SearchPage />) },
+      { path: 'review/publish', element: withSuspense(<PublishReviewPage />) },
+      { path: 'review/:id', element: withSuspense(<ReviewDetailPage />) },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

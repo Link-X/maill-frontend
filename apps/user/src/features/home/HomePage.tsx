@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Sparkles, MapPin, ChevronDown, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,12 +10,15 @@ import { useListShowsQuery } from '@/features/shows/showsApi';
 import { ShowCard } from '@/features/shows/ShowCard';
 import { useListCategoriesQuery } from '@/features/categories/categoriesApi';
 import { useListCitiesQuery } from '@/features/cities/citiesApi';
+import { useListEffectiveBannersQuery } from '@/features/home/bannersApi';
+import { BannerCarousel } from '@/features/home/BannerCarousel';
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function HomePage() {
   const { t } = useTranslation(['show', 'common', 'city']);
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [debouncedName, setDebouncedName] = useState('');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
@@ -30,6 +34,7 @@ export default function HomePage() {
 
   const { data: categories = [] } = useListCategoriesQuery();
   const { data: cities = [] } = useListCitiesQuery();
+  const { data: banners = [] } = useListEffectiveBannersQuery();
   const { data, isLoading, isFetching } = useListShowsQuery({
     page: 1,
     size: PAGE_SIZE,
@@ -43,9 +48,12 @@ export default function HomePage() {
 
   return (
     <div className="px-4 py-3 space-y-4">
+      {banners.length > 0 && <BannerCarousel banners={banners} />}
       <header className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('show:list.title')}</h1>
+          <h1 className="text-2xl font-bold tracking-tight bg-gradient-brand bg-clip-text text-transparent">
+            {t('show:list.title')}
+          </h1>
           <CityPicker
             cities={cities}
             value={cityCode}
@@ -53,15 +61,23 @@ export default function HomePage() {
             onChange={setCityCode}
           />
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t('show:list.searchPlaceholder')}
-            className="pl-9 h-11 rounded-xl"
-          />
-        </div>
+        {/* 搜索入口：点击后跳转到独立 /search 页面 */}
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          className="w-full text-left"
+        >
+          <div className="relative pointer-events-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              readOnly
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('show:list.searchPlaceholder')}
+              className="pl-9 h-11 rounded-xl cursor-pointer"
+            />
+          </div>
+        </button>
 
         {/* 分类 tabs */}
         {categories.length > 0 && (
@@ -102,7 +118,7 @@ export default function HomePage() {
           className="grid grid-cols-2 gap-3"
           initial="hidden"
           animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
         >
           {list.map((show) => (
             <ShowCard key={String(show.id)} show={show} />

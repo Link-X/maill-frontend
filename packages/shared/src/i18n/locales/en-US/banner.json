@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "Banners",
+    "subtitle": "Homepage carousel & promotion slots. Supports images, link targets, scheduled visibility, and reordering.",
+    "addBtn": "New Banner"
+  },
+  "table": {
+    "image": "Image",
+    "title": "Remark",
+    "linkType": "Link",
+    "linkTarget": "Target",
+    "sort": "Sort",
+    "window": "Window",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "form": {
+    "titleNew": "New Banner",
+    "titleEdit": "Edit Banner",
+    "image": "Image",
+    "imageRequired": "Image is required",
+    "imageInvalid": "Image must be a valid URL",
+    "remark": "Remark",
+    "remarkPlaceholder": "Internal note (optional)",
+    "linkType": "Link Type",
+    "linkTarget": "Link Target",
+    "linkTargetPlaceholder": "Show/Artist/Article ID or full external URL",
+    "sort": "Sort",
+    "startAt": "Online from",
+    "endAt": "Offline at",
+    "dateTimeHelp": "Local time. Leave empty for no limit.",
+    "status": "Status",
+    "savedToast": "Banner updated",
+    "createdToast": "Banner created"
+  },
+  "linkType": {
+    "none": "None",
+    "show": "Show",
+    "artist": "Artist",
+    "article": "Article",
+    "url": "External URL"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "action": {
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "enableShort": "Online",
+    "disableShort": "Offline"
+  },
+  "toggle": {
+    "onlineToast": "Banner is now online",
+    "offlineToast": "Banner is now offline"
+  },
+  "delete": {
+    "title": "Delete banner",
+    "desc": "Are you sure you want to delete this banner?",
+    "btn": "Delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Banner deleted"
+  }
+}

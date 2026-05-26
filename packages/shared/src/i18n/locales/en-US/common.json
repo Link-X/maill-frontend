@@ -47,6 +47,7 @@
   "tabBar": {
     "home": "Home",
     "orders": "Orders",
+    "articles": "News",
     "profile": "Me"
   },
   "profile": {

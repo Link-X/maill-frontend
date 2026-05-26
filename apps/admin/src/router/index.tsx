@@ -10,10 +10,18 @@ const RoomsPage = lazy(() => import('@/features/rooms/RoomsPage'));
 const RoomDetailPage = lazy(() => import('@/features/rooms/RoomDetailPage'));
 const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 const CategoriesPage = lazy(() => import('@/features/categories/CategoriesPage'));
+const BannersPage = lazy(() => import('@/features/banners/BannersPage'));
+const ArtistsPage = lazy(() => import('@/features/artists/ArtistsPage'));
+const ArticleCategoriesPage = lazy(() => import('@/features/articles/ArticleCategoriesPage'));
+const ArticlesPage = lazy(() => import('@/features/articles/ArticlesPage'));
+const ArticleEditPage = lazy(() => import('@/features/articles/ArticleEditPage'));
 const ReportsPage = lazy(() => import('@/features/reports/ReportsPage'));
+const MessagesPage = lazy(() => import('@/features/messages/MessagesPage'));
 const SessionsPage = lazy(() => import('@/features/sessions/SessionsPage'));
 const SessionFormPage = lazy(() => import('@/features/sessions/SessionFormPage'));
 const SessionDetailPage = lazy(() => import('@/features/sessions/SessionDetailPage'));
+const ReviewsPage = lazy(() => import('@/features/reviews/ReviewsPage'));
+const ReviewReportsPage = lazy(() => import('@/features/reviews/ReportsPage'));
 
 const withSuspense = (node: React.ReactNode) => (
   <Suspense fallback={<div className="p-6">Loading...</div>}>{node}</Suspense>
@@ -40,7 +48,16 @@ export const router = createBrowserRouter([
       { path: 'rooms/:id', element: withSuspense(<RoomDetailPage />) },
       { path: 'orders', element: withSuspense(<OrdersPage />) },
       { path: 'categories', element: withSuspense(<CategoriesPage />) },
+      { path: 'banners', element: withSuspense(<BannersPage />) },
+      { path: 'artists', element: withSuspense(<ArtistsPage />) },
+      { path: 'article-categories', element: withSuspense(<ArticleCategoriesPage />) },
+      { path: 'articles', element: withSuspense(<ArticlesPage />) },
+      { path: 'articles/edit', element: withSuspense(<ArticleEditPage />) },
+      { path: 'articles/edit/:id', element: withSuspense(<ArticleEditPage />) },
       { path: 'reports', element: withSuspense(<ReportsPage />) },
+      { path: 'messages', element: withSuspense(<MessagesPage />) },
+      { path: 'reviews', element: withSuspense(<ReviewsPage />) },
+      { path: 'reviews/reports', element: withSuspense(<ReviewReportsPage />) },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

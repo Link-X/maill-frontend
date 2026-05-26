@@ -1,0 +1,31 @@
+{
+  "page": {
+    "title": "资讯分类",
+    "subtitle": "维护资讯分类(独立于演出分类)",
+    "addBtn": "新建分类"
+  },
+  "form": {
+    "titleNew": "新建分类",
+    "titleEdit": "编辑分类",
+    "name": "名称",
+    "nameRequired": "请输入分类名",
+    "sort": "排序",
+    "status": "状态",
+    "savedToast": "已保存",
+    "createdToast": "已创建"
+  },
+  "table": {
+    "name": "名称",
+    "sort": "排序",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "status": { "enabled": "启用", "disabled": "禁用" },
+  "delete": {
+    "title": "删除分类",
+    "desc": "确定要删除分类 {{name}} 吗?被资讯引用的分类无法删除。",
+    "btn": "删除",
+    "btnDeleting": "删除中...",
+    "successToast": "已删除"
+  }
+}

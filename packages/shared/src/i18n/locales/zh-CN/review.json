@@ -1,0 +1,56 @@
+{
+  "page": {
+    "publishTitle": "发布评价",
+    "replyTitle": "回复评论",
+    "moderationTitle": "评价审核",
+    "reportsTitle": "举报处理"
+  },
+  "form": {
+    "rating": "评分",
+    "ratingRequired": "请打分",
+    "content": "评价内容",
+    "contentPlaceholder": "分享你的观看体验...",
+    "contentRequired": "请输入内容",
+    "images": "晒图(最多 9 张)",
+    "publishBtn": "发布",
+    "replyBtn": "回复",
+    "publishedToast": "已发布",
+    "permissionDenied": "你暂时无法评价该演出"
+  },
+  "list": {
+    "all": "全部",
+    "latest": "最新",
+    "hottest": "最热",
+    "noReviews": "暂无评价",
+    "viewReplies": "查看 {{n}} 条回复",
+    "reply": "回复",
+    "delete": "删除",
+    "report": "举报",
+    "deletedToast": "已删除"
+  },
+  "status": {
+    "normal": "正常",
+    "reported": "举报中",
+    "hidden": "已隐藏"
+  },
+  "action": {
+    "hide": "隐藏",
+    "restore": "恢复",
+    "delete": "删除",
+    "keep": "保留",
+    "deleteReview": "删除评价"
+  },
+  "report": {
+    "reasonPlaceholder": "请填写举报原因...",
+    "submittedToast": "已举报,我们会尽快处理",
+    "pending": "待处理",
+    "handledKeep": "已保留",
+    "handledDelete": "已删除"
+  },
+  "user": {
+    "writeReview": "写评价",
+    "alreadyReviewed": "已评价",
+    "reviewsTab": "评价",
+    "myReviews": "我的评价"
+  }
+}

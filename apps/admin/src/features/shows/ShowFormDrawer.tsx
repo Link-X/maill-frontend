@@ -23,6 +23,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { useCreateShowMutation, useUpdateShowMutation } from './showsApi';
 import { useListCategoriesQuery } from '@/features/categories/categoriesApi';
 import { useListCitiesQuery } from '@/features/cities/citiesApi';
+import { useListArtistsQuery } from '@/features/artists/artistsApi';
 
 interface Props {
   open: boolean;
@@ -37,6 +38,7 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
   // 仅启用的分类/城市供下拉
   const { data: categories = [] } = useListCategoriesQuery({ status: 1 });
   const { data: cities = [] } = useListCitiesQuery({ status: 1 });
+  const { data: artists = [] } = useListArtistsQuery({ status: 1 });
   const isEdit = !!initial;
   const isLoading = creating || updating;
 
@@ -69,6 +71,9 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
             },
             { message: t('show:form.extendInvalid') },
           ),
+        reviewMode: z.coerce.number().int().min(0).max(2).default(1),
+        openSaleTime: z.string().optional().or(z.literal('')),
+        artistIds: z.array(z.number()).default([]),
       }),
     [t],
   );
@@ -91,6 +96,9 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
       posterUrl: '',
       description: '',
       extend: '',
+      reviewMode: 1,
+      openSaleTime: '',
+      artistIds: [],
     },
   });
 
@@ -105,6 +113,9 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
         posterUrl: initial?.posterUrl ?? '',
         description: initial?.description ?? '',
         extend: initial?.extend ?? '',
+        reviewMode: (initial?.reviewMode ?? 1) as 0 | 1 | 2,
+        openSaleTime: initial?.openSaleTime ? initial.openSaleTime.replace(' ', 'T').slice(0, 16) : '',
+        artistIds: initial?.artists?.map((a) => a.id) ?? [],
       });
     }
   }, [open, initial, reset]);
@@ -117,6 +128,9 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
       address: values.address || undefined,
       posterUrl: values.posterUrl || undefined,
       extend: values.extend?.trim() || undefined,
+      reviewMode: values.reviewMode as 0 | 1 | 2,
+      openSaleTime: values.openSaleTime ? values.openSaleTime.replace('T', ' ') + ':00' : undefined,
+      artistIds: values.artistIds,
     };
     try {
       if (isEdit && initial) {
@@ -260,6 +274,76 @@ export function ShowFormDrawer({ open, onClose, initial }: Props) {
           <p className="text-[11px] text-muted-foreground">
             {t('show:form.extendHint')}
           </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>{t('show:form.reviewMode', '评价模式')}</Label>
+            <Controller
+              control={control}
+              name="reviewMode"
+              render={({ field }) => (
+                <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">{t('show:form.reviewModeNone', '无评价')}</SelectItem>
+                    <SelectItem value="1">{t('show:form.reviewModeAll', '所有可评')}</SelectItem>
+                    <SelectItem value="2">{t('show:form.reviewModeWatched', '仅已观看')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="openSaleTime">{t('show:form.openSaleTime', '开售时间')}</Label>
+            <Input id="openSaleTime" type="datetime-local" {...register('openSaleTime')} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t('show:form.artists', '关联艺人')}</Label>
+          <Controller
+            control={control}
+            name="artistIds"
+            render={({ field }) => {
+              const selected = new Set(field.value ?? []);
+              const toggle = (id: number) => {
+                const next = new Set(selected);
+                if (next.has(id)) next.delete(id); else next.add(id);
+                field.onChange(Array.from(next));
+              };
+              return (
+                <div className="flex flex-wrap gap-2">
+                  {artists.length === 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {t('show:form.noArtists', '暂无可选艺人,先去艺人管理新建')}
+                    </span>
+                  )}
+                  {artists.map((a) => {
+                    const active = selected.has(a.id);
+                    return (
+                      <button
+                        type="button"
+                        key={a.id}
+                        onClick={() => toggle(a.id)}
+                        className={
+                          'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs transition-colors ' +
+                          (active
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground hover:bg-muted/80')
+                        }
+                      >
+                        {a.avatarUrl && (
+                          <img src={a.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                        )}
+                        <span>{a.stageName || a.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            }}
+          />
         </div>
       </form>
     </Drawer>

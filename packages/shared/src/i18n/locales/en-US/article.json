@@ -1,0 +1,63 @@
+{
+  "page": {
+    "title": "Articles",
+    "subtitle": "Maintain article content with rich text and draft/publish/offline workflow",
+    "addBtn": "New article"
+  },
+  "table": {
+    "cover": "Cover",
+    "title": "Title",
+    "category": "Category",
+    "artist": "Linked artist",
+    "author": "Author",
+    "viewCount": "Views",
+    "status": "Status",
+    "publishedAt": "Published at",
+    "actions": "Actions"
+  },
+  "form": {
+    "titleNew": "New article",
+    "titleEdit": "Edit article",
+    "title": "Title",
+    "titleRequired": "Please enter a title",
+    "summary": "Summary",
+    "summaryPlaceholder": "Summary shown in list; leave blank to use the first chars of body",
+    "content": "Content",
+    "contentRequired": "Please enter content",
+    "cover": "Cover",
+    "category": "Category",
+    "categoryRequired": "Please select a category",
+    "artist": "Linked artist (optional)",
+    "artistUnspecified": "No linked artist",
+    "author": "Author",
+    "status": "Status",
+    "savedToast": "Article saved",
+    "publishedToast": "Published",
+    "offlinedToast": "Taken offline"
+  },
+  "status": {
+    "draft": "Draft",
+    "published": "Published",
+    "offline": "Offline"
+  },
+  "action": {
+    "publish": "Publish",
+    "offline": "Take offline",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "delete": {
+    "title": "Delete article",
+    "desc": "Are you sure you want to delete {{title}}?",
+    "btn": "Delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Deleted"
+  },
+  "user": {
+    "listTitle": "Articles",
+    "allCategories": "All",
+    "noArticles": "No articles yet",
+    "viewCount": "{{n}} views",
+    "publishedAt": "Published at {{time}}"
+  }
+}

@@ -5,6 +5,12 @@
     "rooms": "场地管理",
     "orders": "订单查询",
     "reports": "数据报表",
+    "banner": "Banner 管理",
+    "artists": "艺人管理",
+    "articleCategories": "资讯分类",
+    "articles": "资讯管理",
+    "messages": "消息管理",
+    "reviews": "评价审核",
     "dashboard": "监控看板"
   },
   "login": {

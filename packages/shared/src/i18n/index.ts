@@ -11,6 +11,12 @@ import zhCity from './locales/zh-CN/city.json';
 import zhRoom from './locales/zh-CN/room.json';
 import zhSession from './locales/zh-CN/session.json';
 import zhReport from './locales/zh-CN/report.json';
+import zhBanner from './locales/zh-CN/banner.json';
+import zhArtist from './locales/zh-CN/artist.json';
+import zhArticle from './locales/zh-CN/article.json';
+import zhArticleCategory from './locales/zh-CN/articleCategory.json';
+import zhMessage from './locales/zh-CN/message.json';
+import zhReview from './locales/zh-CN/review.json';
 
 import enCommon from './locales/en-US/common.json';
 import enAuth from './locales/en-US/auth.json';
@@ -22,13 +28,19 @@ import enCity from './locales/en-US/city.json';
 import enRoom from './locales/en-US/room.json';
 import enSession from './locales/en-US/session.json';
 import enReport from './locales/en-US/report.json';
+import enBanner from './locales/en-US/banner.json';
+import enArtist from './locales/en-US/artist.json';
+import enArticle from './locales/en-US/article.json';
+import enArticleCategory from './locales/en-US/articleCategory.json';
+import enMessage from './locales/en-US/message.json';
+import enReview from './locales/en-US/review.json';
 
 import type { AppLocale } from './localeSlice';
 import type { Resource } from 'i18next';
 
 export type AppName = 'user' | 'admin';
 
-const USER_NAMESPACES = ['common', 'auth', 'show', 'order', 'category', 'city', 'session'] as const;
+const USER_NAMESPACES = ['common', 'auth', 'show', 'order', 'category', 'city', 'session', 'artist', 'article', 'articleCategory', 'message', 'review'] as const;
 const ADMIN_NAMESPACES = [
   'common',
   'auth',
@@ -40,6 +52,12 @@ const ADMIN_NAMESPACES = [
   'room',
   'session',
   'report',
+  'banner',
+  'artist',
+  'article',
+  'articleCategory',
+  'message',
+  'review',
 ] as const;
 
 const ZH_BUNDLES = {
@@ -53,6 +71,12 @@ const ZH_BUNDLES = {
   room: zhRoom,
   session: zhSession,
   report: zhReport,
+  banner: zhBanner,
+  artist: zhArtist,
+  article: zhArticle,
+  articleCategory: zhArticleCategory,
+  message: zhMessage,
+  review: zhReview,
 };
 const EN_BUNDLES = {
   common: enCommon,
@@ -65,6 +89,12 @@ const EN_BUNDLES = {
   room: enRoom,
   session: enSession,
   report: enReport,
+  banner: enBanner,
+  artist: enArtist,
+  article: enArticle,
+  articleCategory: enArticleCategory,
+  message: enMessage,
+  review: enReview,
 };
 
 const localeStorageKey = 'maill.locale';

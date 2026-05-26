@@ -8,10 +8,10 @@ import { router } from './router';
 import './styles/index.css';
 
 async function bootstrap() {
-  if (import.meta.env.DEV) {
-    const { default: VConsole } = await import('vconsole');
-    new VConsole();
-  }
+  // if (import.meta.env.DEV) {
+  //   const { default: VConsole } = await import('vconsole');
+  //   new VConsole();
+  // }
   await initI18n('user');
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>

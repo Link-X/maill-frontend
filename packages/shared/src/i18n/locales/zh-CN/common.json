@@ -47,6 +47,7 @@
   "tabBar": {
     "home": "首页",
     "orders": "订单",
+    "articles": "资讯",
     "profile": "我的"
   },
   "profile": {

@@ -1,4 +1,5 @@
 import type { ShowStatus, SessionStatus } from './enums';
+import type { Artist } from './artist';
 
 export interface Show {
   id: number | string;
@@ -19,6 +20,12 @@ export interface Show {
   extend?: string;
   createTime?: string;
   updateTime?: string;
+  /** 0=无评价 1=所有可评 2=仅已观看 */
+  reviewMode?: 0 | 1 | 2;
+  avgRating?: number;
+  reviewCount?: number;
+  openSaleTime?: string;
+  artists?: Artist[];
 }
 
 export interface ShowSession {

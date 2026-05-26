@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Receipt, MapPin, Calendar } from 'lucide-react';
+import { Receipt, MapPin, Calendar, ArrowLeft } from 'lucide-react';
 import { OrderStatus, type OrderStatusResponse } from '@maill/shared';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
@@ -21,9 +21,17 @@ const STATUS_VARIANT: Record<number, 'success' | 'warning' | 'info' | 'muted'> =
 };
 
 export default function OrdersPage() {
-  const { t } = useTranslation(['order', 'show']);
+  const { t } = useTranslation(['order', 'show', 'common']);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<OrderStatus | undefined>(undefined);
+  const [searchParams] = useSearchParams();
+  // 支持外部通过 ?status=1 直接进入对应状态 tab
+  const initialStatus = (() => {
+    const raw = searchParams.get('status');
+    if (raw === null) return undefined;
+    const n = Number(raw);
+    return Number.isFinite(n) ? (n as OrderStatus) : undefined;
+  })();
+  const [activeTab, setActiveTab] = useState<OrderStatus | undefined>(initialStatus);
   // tabs 文案随 locale 变化时重建
   const tabs = useMemo<Array<{ label: string; value: OrderStatus | undefined }>>(
     () => [
@@ -45,7 +53,17 @@ export default function OrdersPage() {
   return (
     <div className="px-4 py-3 space-y-4">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight mb-3">{t('order:myOrders')}</h1>
+        <div className="flex items-center gap-2 mb-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label={t('common:actions.back', '返回')}
+            className="h-9 w-9 -ml-2 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('order:myOrders')}</h1>
+        </div>
         <div className="flex gap-1 overflow-x-auto -mx-4 px-4 pb-1">
           {tabs.map((tab) => {
             const active = activeTab === tab.value;

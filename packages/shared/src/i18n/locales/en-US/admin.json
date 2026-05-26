@@ -5,6 +5,12 @@
     "rooms": "Rooms",
     "orders": "Orders",
     "reports": "Reports",
+    "banner": "Banners",
+    "artists": "Artists",
+    "articleCategories": "Article Categories",
+    "articles": "Articles",
+    "messages": "Messages",
+    "reviews": "Reviews",
     "dashboard": "Dashboard"
   },
   "login": {

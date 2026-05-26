@@ -1,0 +1,31 @@
+{
+  "page": {
+    "title": "Article Categories",
+    "subtitle": "Maintain article categories (independent from show categories)",
+    "addBtn": "New category"
+  },
+  "form": {
+    "titleNew": "New category",
+    "titleEdit": "Edit category",
+    "name": "Name",
+    "nameRequired": "Please enter a category name",
+    "sort": "Sort",
+    "status": "Status",
+    "savedToast": "Saved",
+    "createdToast": "Created"
+  },
+  "table": {
+    "name": "Name",
+    "sort": "Sort",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": { "enabled": "Enabled", "disabled": "Disabled" },
+  "delete": {
+    "title": "Delete category",
+    "desc": "Are you sure you want to delete category {{name}}? Categories referenced by articles cannot be deleted.",
+    "btn": "Delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Deleted"
+  }
+}
