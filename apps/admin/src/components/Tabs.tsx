@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { cn } from '@maill/shared';
+import { spring } from '@/lib/motion';
 
 interface TabItem {
   value: string;
@@ -10,9 +11,11 @@ interface TabsProps {
   items: TabItem[];
   value: string;
   onChange: (v: string) => void;
+  // 为不同位置的 Tabs 提供独立的 layoutId 命名空间，避免冲突
+  layoutId?: string;
 }
 
-export function Tabs({ items, value, onChange }: TabsProps) {
+export function Tabs({ items, value, onChange, layoutId = 'tabs-indicator' }: TabsProps) {
   return (
     <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg">
       {items.map((item) => {
@@ -29,9 +32,9 @@ export function Tabs({ items, value, onChange }: TabsProps) {
           >
             {active && (
               <motion.span
-                layoutId="tabs-indicator"
-                className="absolute inset-0 bg-background rounded-md shadow-sm"
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                layoutId={layoutId}
+                className="absolute inset-0 bg-background rounded-md shadow-elevate-1"
+                transition={spring.snappy}
               />
             )}
             <span className="relative">{item.label}</span>

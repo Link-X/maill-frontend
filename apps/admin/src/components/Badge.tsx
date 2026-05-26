@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { cn } from '@maill/shared';
 import type { ReactNode } from 'react';
+import { spring } from '@/lib/motion';
 
 type BadgeVariant = 'default' | 'success' | 'warning' | 'info' | 'brand' | 'muted';
 
@@ -13,25 +14,28 @@ const variantClass: Record<BadgeVariant, string> = {
   muted: 'bg-muted text-muted-foreground',
 };
 
-export function Badge({
-  variant = 'default',
-  children,
-  className,
-}: {
+interface BadgeProps {
   variant?: BadgeVariant;
   children: ReactNode;
   className?: string;
-}) {
+  // 状态变化时通过此 key 触发翻牌动画（rotateX）；不传则用 children 作为 key
+  flipKey?: string | number;
+}
+
+export function Badge({ variant = 'default', children, className, flipKey }: BadgeProps) {
+  const k = flipKey ?? (typeof children === 'string' ? children : undefined);
   return (
     <motion.span
+      key={k}
       className={cn(
         'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium',
         variantClass[variant],
         className,
       )}
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 24 }}
+      initial={{ opacity: 0, scale: 0.85, rotateX: -90 }}
+      animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+      transition={spring.snappy}
+      style={{ transformPerspective: 200 }}
     >
       {children}
     </motion.span>

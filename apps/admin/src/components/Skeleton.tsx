@@ -1,14 +1,8 @@
 import { cn } from '@maill/shared';
 
+// shimmer 替代 animate-pulse，wave 效果更接近现代后台
 export function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        'animate-pulse rounded-md bg-muted',
-        className,
-      )}
-    />
-  );
+  return <div className={cn('skeleton-shimmer rounded-md', className)} />;
 }
 
 export function SkeletonRows({ count = 3, className }: { count?: number; className?: string }) {

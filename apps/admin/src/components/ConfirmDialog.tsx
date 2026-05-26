@@ -2,6 +2,7 @@ import { Button } from '@maill/shared';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { duration, easing, spring } from '@/lib/motion';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -37,14 +38,14 @@ export function ConfirmDialog({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: duration.fast, ease: easing.standard }}
           />
           <motion.div
-            className="relative z-10 bg-card/95 backdrop-blur-md border border-border/60 rounded-xl w-full max-w-sm p-6 space-y-4 shadow-2xl"
+            className="relative z-10 bg-card/95 backdrop-saturated border border-border/60 rounded-xl w-full max-w-sm p-6 space-y-4 shadow-elevate-3 card-hairline"
             initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            exit={{ opacity: 0, y: 8, scale: 0.96, transition: { duration: duration.fast, ease: easing.decelerated } }}
+            transition={spring.gentle}
           >
             <h2 className="font-semibold text-lg">{title}</h2>
             {description && <div className="text-sm text-muted-foreground">{description}</div>}
@@ -52,9 +53,17 @@ export function ConfirmDialog({
               <Button variant="outline" size="sm" onClick={onCancel}>
                 {finalCancelText}
               </Button>
-              <Button variant={destructive ? 'destructive' : 'default'} size="sm" onClick={onConfirm}>
-                {finalConfirmText}
-              </Button>
+              <motion.div
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.96 }}
+                transition={spring.snappy}
+                animate={destructive ? { boxShadow: ['0 0 0 0 hsl(var(--destructive) / 0.0)', '0 0 0 4px hsl(var(--destructive) / 0.15)', '0 0 0 0 hsl(var(--destructive) / 0.0)'] } : undefined}
+                style={{ borderRadius: 6 }}
+              >
+                <Button variant={destructive ? 'destructive' : 'default'} size="sm" onClick={onConfirm}>
+                  {finalConfirmText}
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
         </div>

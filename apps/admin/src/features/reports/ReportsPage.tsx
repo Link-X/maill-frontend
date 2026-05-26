@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import {
   Bar,
   BarChart,
@@ -35,7 +36,9 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/Card';
 import { Badge } from '@/components/Badge';
 import { DataTable, type Column } from '@/components/DataTable';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { formatDateTime, formatMoney } from '@/lib/format';
+import { duration, easing, spring, fadeUp, fadeUpTransition, staggerContainer } from '@/lib/motion';
 import {
   useOverviewQuery,
   useTimeseriesQuery,
@@ -124,27 +127,51 @@ export default function ReportsPage() {
       />
 
       <OverviewKpis arg={queryArg} />
-      <TrendSection arg={queryArg} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ByShowSection arg={queryArg} className="lg:col-span-2" />
-        <ByCategorySection arg={queryArg} />
-      </div>
+      <FadeSection delay={0.18}>
+        <TrendSection arg={queryArg} />
+      </FadeSection>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ByCitySection arg={queryArg} />
-        <StatusDistributionSection arg={queryArg} />
-        <HourDistributionSection arg={queryArg} />
-      </div>
+      <FadeSection delay={0.24}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <ByShowSection arg={queryArg} className="lg:col-span-2" />
+          <ByCategorySection arg={queryArg} />
+        </div>
+      </FadeSection>
 
-      <BySessionSection arg={queryArg} />
+      <FadeSection delay={0.3}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <ByCitySection arg={queryArg} />
+          <StatusDistributionSection arg={queryArg} />
+          <HourDistributionSection arg={queryArg} />
+        </div>
+      </FadeSection>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <UserStatsCard arg={queryArg} />
-        <RefundStatsCard arg={queryArg} />
-        <CancellationStatsCard arg={queryArg} />
-      </div>
+      <FadeSection delay={0.36}>
+        <BySessionSection arg={queryArg} />
+      </FadeSection>
+
+      <FadeSection delay={0.42}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <UserStatsCard arg={queryArg} />
+          <RefundStatsCard arg={queryArg} />
+          <CancellationStatsCard arg={queryArg} />
+        </div>
+      </FadeSection>
     </div>
+  );
+}
+
+// 简单的 fade-up 区块包装，让大段图表分批进入
+function FadeSection({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: duration.slow, ease: easing.emphasized, delay }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -174,21 +201,31 @@ function RangePicker({
   return (
     <Card className="p-3 flex flex-wrap items-center gap-2">
       <Calendar className="h-4 w-4 text-muted-foreground" />
-      {presets.map((p) => (
-        <button
-          key={p.key}
-          type="button"
-          onClick={() => onPresetChange(p.key)}
-          className={cn(
-            'px-3 h-8 rounded-full text-xs font-medium border transition-colors',
-            preset === p.key
-              ? 'bg-brand text-brand-foreground border-brand shadow-sm'
-              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:border-brand/40',
-          )}
-        >
-          {p.label}
-        </button>
-      ))}
+      {presets.map((p) => {
+        const active = preset === p.key;
+        return (
+          <button
+            key={p.key}
+            type="button"
+            onClick={() => onPresetChange(p.key)}
+            className={cn(
+              'relative px-3 h-8 rounded-full text-xs font-medium transition-colors',
+              active
+                ? 'text-brand-foreground'
+                : 'text-muted-foreground border border-border/60 hover:text-foreground hover:border-brand/40',
+            )}
+          >
+            {active && (
+              <motion.span
+                layoutId="report-range-indicator"
+                className="absolute inset-0 bg-brand rounded-full shadow-elevate-1"
+                transition={spring.snappy}
+              />
+            )}
+            <span className="relative">{p.label}</span>
+          </button>
+        );
+      })}
       {preset === 'custom' && (
         <div className="flex items-center gap-2 ml-2">
           <input
@@ -211,42 +248,58 @@ function RangePicker({
 }
 
 // ===================== 顶部 KPI =====================
+type KpiKind = 'money' | 'int' | 'percent';
+interface KpiItem {
+  icon: typeof Wallet;
+  label: string;
+  numeric: number;
+  kind: KpiKind;
+  delta?: number;
+  sub?: React.ReactNode;
+}
+
 function OverviewKpis({ arg }: { arg: RangeArg }) {
   const { t } = useTranslation('report');
   const { data, isFetching } = useOverviewQuery(arg);
-  const kpis = [
+  const kpis: KpiItem[] = [
     {
       icon: Wallet,
       label: t('report:kpi.revenue'),
-      value: formatMoney(data?.revenue ?? 0),
+      numeric: data?.revenue ?? 0,
+      kind: 'money',
       delta: data?.revenueDeltaPct,
     },
     {
       icon: ShoppingCart,
       label: t('report:kpi.paidOrders'),
-      value: String(data?.orderCount ?? 0),
+      numeric: data?.orderCount ?? 0,
+      kind: 'int',
       delta: data?.orderCountDeltaPct,
     },
     {
       icon: Hourglass,
       label: t('report:kpi.pending'),
-      value: String(data?.pendingOrderCount ?? 0),
+      numeric: data?.pendingOrderCount ?? 0,
+      kind: 'int',
     },
     {
       icon: Undo2,
       label: t('report:kpi.refundAmount'),
-      value: formatMoney(data?.refundAmount ?? 0),
+      numeric: data?.refundAmount ?? 0,
+      kind: 'money',
       sub: t('report:kpi.refundCountSuffix', { n: data?.refundCount ?? 0 }),
     },
     {
       icon: Ticket,
       label: t('report:kpi.ticketsSold'),
-      value: String(data?.ticketSoldCount ?? 0),
+      numeric: data?.ticketSoldCount ?? 0,
+      kind: 'int',
     },
     {
       icon: CheckCircle2,
       label: t('report:kpi.verifyRate'),
-      value: fmtPct(data?.verifyRate),
+      numeric: data?.verifyRate ?? 0,
+      kind: 'percent',
       sub: t('report:kpi.verifyDetail', {
         verified: data?.ticketVerifiedCount ?? 0,
         sold: data?.ticketSoldCount ?? 0,
@@ -254,20 +307,38 @@ function OverviewKpis({ arg }: { arg: RangeArg }) {
     },
   ];
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <motion.div
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
+      variants={staggerContainer(0.05)}
+      initial="hidden"
+      animate="show"
+    >
       {kpis.map((k) => (
-        <Card key={k.label} className="p-4 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{k.label}</span>
-            <k.icon className="h-3.5 w-3.5 text-muted-foreground/70" />
-          </div>
-          <div className={cn('text-2xl font-semibold', isFetching && 'opacity-50')}>{k.value}</div>
-          <div className="text-[11px] text-muted-foreground min-h-[14px]">
-            {k.delta != null ? <DeltaBadge value={k.delta} /> : k.sub ?? ''}
-          </div>
-        </Card>
+        <motion.div key={k.label} variants={fadeUp} transition={fadeUpTransition}>
+          <Card interactive className="p-4 space-y-1.5 h-full">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">{k.label}</span>
+              <k.icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+            </div>
+            <div className={cn('text-2xl font-semibold tabular-nums', isFetching && 'opacity-50')}>
+              <AnimatedNumber
+                value={k.numeric}
+                format={
+                  k.kind === 'money'
+                    ? (v) => formatMoney(v)
+                    : k.kind === 'percent'
+                    ? (v) => `${(v * 100).toFixed(1)}%`
+                    : (v) => v.toFixed(0)
+                }
+              />
+            </div>
+            <div className="text-[11px] text-muted-foreground min-h-[14px]">
+              {k.delta != null ? <DeltaBadge value={k.delta} /> : k.sub ?? ''}
+            </div>
+          </Card>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
