@@ -35,6 +35,8 @@ export interface ShowSession {
   name?: string;
   startTime: string;
   endTime: string;
+  /** 开售时间;NULL 表示创建后立即可被定时任务流转为销售中 */
+  openSaleTime?: string;
   totalSeats?: number;
   limitPerUser: number;
   status: SessionStatus;

@@ -32,11 +32,6 @@ export const sessionsApi = createApi({
         { type: 'Session', id: `show-${arg.showId}` },
       ],
     }),
-    publishSession: build.mutation<unknown, number | string>({
-      query: (id) => ({ url: `/api/admin/session/${id}/publish`, method: 'PUT' }),
-      invalidatesTags: (_r, _e, id) => [{ type: 'Session', id }, 'Session'],
-    }),
-
     listSessionSeats: build.query<AdminSeat[], number | string>({
       query: (sessionId) => ({ url: '/api/admin/seat/list', params: { sessionId } }),
       providesTags: (_r, _e, sessionId) => [{ type: 'SessionSeat', id: sessionId }],
@@ -60,13 +55,6 @@ export const sessionsApi = createApi({
       query: (body) => ({ url: '/api/admin/seat/area/save', method: 'POST', body }),
       invalidatesTags: (_r, _e, arg) => [{ type: 'SessionArea', id: arg.sessionId }],
     }),
-
-    warmupSession: build.mutation<unknown, number | string>({
-      query: (sessionId) => ({
-        url: `/api/admin/seat/warmup/${sessionId}`,
-        method: 'POST',
-      }),
-    }),
   }),
 });
 
@@ -75,10 +63,8 @@ export const {
   useGetSessionQuery,
   useCreateSessionMutation,
   useUpdateSessionMutation,
-  usePublishSessionMutation,
   useListSessionSeatsQuery,
   useSaveSessionSeatsMutation,
   useListSessionAreasQuery,
   useSaveSessionAreasMutation,
-  useWarmupSessionMutation,
 } = sessionsApi;

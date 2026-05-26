@@ -21,6 +21,8 @@
     "namePlaceholder": "2026 上海站 晚场",
     "startTime": "开始时间 *",
     "endTime": "结束时间 *",
+    "openSaleTime": "开售时间",
+    "openSaleTimeHint": "留空表示创建后立即可被定时任务流转为销售中",
     "limitPerUser": "每人限购 *",
     "limitMin": "最少 1",
     "limitMax": "最多 20",
@@ -35,28 +37,21 @@
     "savedToast": "场次已更新"
   },
   "status": {
-    "draft": "草稿",
-    "published": "已开售",
+    "draft": "待开售",
+    "published": "销售中",
     "ended": "已结束"
   },
   "action": {
     "createBtn": "新建场次",
-    "publish": "上架开售",
-    "unpublish": "下架",
     "createdSuccess": "场次创建成功",
     "createSubmit": "创建",
-    "backToShows": "返回演出列表",
-    "warmup": "预热库存",
-    "warmingUp": "预热中...",
-    "warmupDone": "预热完成",
-    "publishLong": "发布开售",
-    "publishing": "发布中...",
-    "publishedToast": "场次已发布开售"
+    "backToShows": "返回演出列表"
   },
   "table": {
     "id": "ID",
     "name": "场次名称",
     "startTime": "开始时间",
+    "openSaleTime": "开售时间",
     "limitPerUser": "每人限购",
     "status": "状态",
     "actions": "操作"
@@ -72,13 +67,23 @@
     "leadMinutes": "开演前 {{n}} 分钟可入场",
     "tooltipZoomIn": "放大",
     "tooltipZoomOut": "缩小",
-    "tooltipReset": "复位"
+    "tooltipReset": "复位",
+    "notOnSaleBanner": "尚未开售,座位仅可预览",
+    "endedBanner": "场次已结束",
+    "openSaleAt": "开售时间:{{time}}",
+    "countdownPrefix": "距开售",
+    "days": "天",
+    "hours": "小时",
+    "minutes": "分钟",
+    "seconds": "秒"
   },
   "selectionBar": {
     "selectedCount": "已选 {{n}} 个座位",
     "moreSeats": "+{{n}}",
     "total": "合计",
-    "submit": "立即下单"
+    "submit": "立即下单",
+    "submitNotOnSale": "未开售",
+    "submitEnded": "已结束"
   },
   "detail": {
     "title": "场次详情",

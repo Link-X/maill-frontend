@@ -55,6 +55,7 @@ export default function SessionFormPage() {
         roomId: z.coerce.number().int().positive(t('session:form.roomRequired')),
         startTime: z.string().min(1, t('session:form.startRequired')),
         endTime: z.string().min(1, t('session:form.endRequired')),
+        openSaleTime: z.string().optional(),
         limitPerUser: z.coerce
           .number()
           .int()
@@ -94,6 +95,7 @@ export default function SessionFormPage() {
       roomId: 0,
       startTime: '',
       endTime: '',
+      openSaleTime: '',
       limitPerUser: 4,
       extend: '',
     },
@@ -107,6 +109,7 @@ export default function SessionFormPage() {
         roomId: Number(existing.roomId ?? 0),
         startTime: toInputDateTime(existing.startTime),
         endTime: toInputDateTime(existing.endTime),
+        openSaleTime: toInputDateTime(existing.openSaleTime),
         limitPerUser: existing.limitPerUser ?? 4,
         extend: existing.extend ?? '',
       });
@@ -120,6 +123,7 @@ export default function SessionFormPage() {
       name: values.name || undefined,
       startTime: values.startTime,
       endTime: values.endTime,
+      openSaleTime: values.openSaleTime?.trim() || undefined,
       limitPerUser: values.limitPerUser,
       extend: values.extend?.trim() || undefined,
     };
@@ -217,6 +221,12 @@ export default function SessionFormPage() {
             <Input id="endTime" type="datetime-local" {...register('endTime')} />
             {errors.endTime && <p className="text-xs text-destructive">{errors.endTime.message}</p>}
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="openSaleTime">{t('session:form.openSaleTime')}</Label>
+          <Input id="openSaleTime" type="datetime-local" {...register('openSaleTime')} />
+          <p className="text-[11px] text-muted-foreground">{t('session:form.openSaleTimeHint')}</p>
         </div>
 
         <div className="space-y-2">

@@ -54,8 +54,9 @@ export default function ShowDetailPage() {
   const { id } = useParams<{ id: string }>();
   const showId = id ?? '';
   const { data: show, isLoading: loadingShow } = useGetShowQuery(showId, { skip: !showId });
+  // 不再硬过滤 status:未开售/销售中/已结束都展示,由 SessionRow 按 status 渲染状态徽章
   const { data: sessions, isLoading: loadingSessions } = useListSessionsQuery(
-    { showId, page: 1, size: 50, status: SessionStatus.Published },
+    { showId, page: 1, size: 50 },
     { skip: !showId },
   );
   const sessionList = sessions?.list ?? [];
@@ -326,6 +327,8 @@ export default function ShowDetailPage() {
                   key={String(s.id)}
                   startTime={s.startTime}
                   name={s.name}
+                  status={Number(s.status)}
+                  openSaleTime={s.openSaleTime}
                   onClick={() => navigate(`/session/${s.id}`)}
                   selectSeatsLabel={t('show:detail.selectSeats')}
                   fallbackLabel={t('show:card.sessionFallback', { date: formatDateTime(s.startTime) })}
@@ -444,6 +447,8 @@ function ShowExtendInfo({ extend }: { extend?: string }) {
 function SessionRow({
   startTime,
   name,
+  status,
+  openSaleTime,
   onClick,
   selectSeatsLabel,
   fallbackLabel,
@@ -451,6 +456,8 @@ function SessionRow({
 }: {
   startTime: string;
   name?: string;
+  status: number;
+  openSaleTime?: string;
   onClick: () => void;
   selectSeatsLabel: string;
   fallbackLabel: string;
@@ -464,6 +471,16 @@ function SessionRow({
     ? `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
     : '';
 
+  // 状态徽章 + CTA 文案
+  const isDraft = status === SessionStatus.Draft;
+  const isEnded = status === SessionStatus.Ended;
+  const isPublished = status === SessionStatus.Published;
+  const ctaLabel = isPublished
+    ? selectSeatsLabel
+    : isEnded
+      ? '已结束'
+      : '即将开售';
+
   return (
     <motion.button
       variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
@@ -471,26 +488,47 @@ function SessionRow({
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.985 }}
-      className="group w-full text-left rounded-2xl overflow-hidden
-                 bg-card border border-border/60
-                 shadow-[0_2px_6px_-2px_rgba(15,23,42,0.06)]
-                 hover:shadow-[0_10px_22px_-8px_rgba(15,23,42,0.18)]
-                 hover:border-brand/30
-                 transition-all duration-300"
+      className={cn(
+        'group w-full text-left rounded-2xl overflow-hidden',
+        'bg-card border border-border/60',
+        'shadow-[0_2px_6px_-2px_rgba(15,23,42,0.06)]',
+        'hover:shadow-[0_10px_22px_-8px_rgba(15,23,42,0.18)]',
+        isPublished && 'hover:border-brand/30',
+        'transition-all duration-300',
+      )}
     >
       <div className="flex items-center gap-3 p-3 pr-3.5">
         {/* 左侧渐变日期块 */}
-        <div className="relative h-16 w-16 shrink-0 rounded-xl overflow-hidden
-                        bg-gradient-brand text-brand-foreground
-                        flex flex-col items-center justify-center
-                        shadow-sm shadow-brand/20">
+        <div
+          className={cn(
+            'relative h-16 w-16 shrink-0 rounded-xl overflow-hidden',
+            'text-brand-foreground flex flex-col items-center justify-center shadow-sm',
+            isEnded
+              ? 'bg-muted-foreground/40 shadow-muted-foreground/10'
+              : isDraft
+                ? 'bg-warning/80 shadow-warning/20'
+                : 'bg-gradient-brand shadow-brand/20',
+          )}
+        >
           <span className="text-[10px] font-medium opacity-90">{month}</span>
           <span className="text-2xl font-bold leading-none tabular-nums">{day}</span>
         </div>
 
         {/* 中间信息 */}
         <div className="min-w-0 flex-1 space-y-1">
-          <div className="font-semibold text-sm truncate">{name || fallbackLabel}</div>
+          <div className="font-semibold text-sm truncate inline-flex items-center gap-1.5">
+            <span className="truncate">{name || fallbackLabel}</span>
+            {isDraft && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-warning/15 text-warning shrink-0">
+                即将开售
+              </span>
+            )}
+            {isEnded && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                已结束
+              </span>
+            )}
+          </div>
           <div className="text-xs text-muted-foreground inline-flex items-center gap-3 flex-wrap">
             {time && (
               <span className="inline-flex items-center gap-1">
@@ -502,20 +540,33 @@ function SessionRow({
               <Users className="h-3 w-3 text-brand" />
               {limitLabel}
             </span>
+            {isDraft && openSaleTime && (
+              <span className="inline-flex items-center gap-1 text-warning">
+                <Calendar className="h-3 w-3" />
+                开售 {formatDateTime(openSaleTime)}
+              </span>
+            )}
           </div>
         </div>
 
         {/* 右侧 CTA */}
         <Button
           size="sm"
-          className="bg-gradient-brand hover:opacity-90 shrink-0 shadow-sm shadow-brand/25 h-9 px-3.5"
+          className={cn(
+            'shrink-0 h-9 px-3.5',
+            isPublished
+              ? 'bg-gradient-brand hover:opacity-90 shadow-sm shadow-brand/25'
+              : isEnded
+                ? 'bg-muted text-muted-foreground hover:bg-muted'
+                : 'bg-warning/90 text-warning-foreground hover:bg-warning',
+          )}
           onClick={(e) => {
             e.stopPropagation();
             onClick();
           }}
         >
-          {selectSeatsLabel}
-          <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+          {ctaLabel}
+          {isPublished && <ChevronRight className="h-3.5 w-3.5 ml-0.5" />}
         </Button>
       </div>
     </motion.button>

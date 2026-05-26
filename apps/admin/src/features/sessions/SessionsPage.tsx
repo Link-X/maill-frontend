@@ -29,6 +29,7 @@ export default function SessionsPage() {
 
   const columns: Column<ShowSession>[] = [
     { key: 'name', title: t('session:table.name'), render: (s) => <span className="font-medium">{s.name ?? '-'}</span> },
+    { key: 'openSaleTime', title: t('session:table.openSaleTime'), render: (s) => formatDateTime(s.openSaleTime) },
     { key: 'startTime', title: t('session:table.startTime'), render: (s) => formatDateTime(s.startTime) },
     { key: 'endTime', title: t('session:form.endTime'), render: (s) => formatDateTime(s.endTime) },
     { key: 'limit', title: t('session:table.limitPerUser'), width: '90px', render: (s) => s.limitPerUser ?? '-' },

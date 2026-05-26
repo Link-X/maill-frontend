@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Ticket, ChevronRight } from 'lucide-react';
-import { cn } from '@maill/shared';
+import { cn, SessionStatus } from '@maill/shared';
 import { StickyBottomBar } from '@/components/StickyBottomBar';
 import { formatMoney } from '@/lib/format';
 import { selectCartSeats, selectCartTotalPrice } from './cartSlice';
@@ -13,9 +13,11 @@ const MAX_VISIBLE_CHIPS = 4;
 export function SelectionBar({
   sessionId,
   limitPerUser,
+  sessionStatus,
 }: {
   sessionId: number | string;
   limitPerUser: number;
+  sessionStatus?: number;
 }) {
   const { t } = useTranslation(['session']);
   const seats = useSelector(selectCartSeats);
@@ -24,6 +26,15 @@ export function SelectionBar({
 
   const hasSeats = seats.length > 0;
   const progress = Math.min(1, seats.length / limitPerUser);
+
+  // 销售中(1) 才允许下单;未开售(0) / 已结束(2) 都拒绝
+  const isOnSale = sessionStatus === undefined || sessionStatus === SessionStatus.Published;
+  const canSubmit = hasSeats && isOnSale;
+  const submitLabel = !isOnSale
+    ? sessionStatus === SessionStatus.Ended
+      ? t('session:selectionBar.submitEnded')
+      : t('session:selectionBar.submitNotOnSale')
+    : t('session:selectionBar.submit');
 
   return (
     <StickyBottomBar>
@@ -125,18 +136,18 @@ export function SelectionBar({
         {/* 提交按钮 */}
         <motion.button
           type="button"
-          disabled={!hasSeats}
+          disabled={!canSubmit}
           onClick={() => navigate(`/order/confirm?sessionId=${sessionId}`)}
-          whileTap={hasSeats ? { scale: 0.96 } : undefined}
+          whileTap={canSubmit ? { scale: 0.96 } : undefined}
           className={cn(
             'inline-flex items-center gap-0.5 h-11 px-5 rounded-full shrink-0 text-sm font-semibold transition-all',
-            hasSeats
+            canSubmit
               ? 'bg-gradient-brand text-brand-foreground shadow-md shadow-brand/30 hover:opacity-95'
               : 'bg-muted text-muted-foreground/60 cursor-not-allowed',
           )}
         >
-          {t('session:selectionBar.submit')}
-          {hasSeats && <ChevronRight className="h-4 w-4 -mr-1" />}
+          {submitLabel}
+          {canSubmit && <ChevronRight className="h-4 w-4 -mr-1" />}
         </motion.button>
       </div>
     </StickyBottomBar>

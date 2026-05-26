@@ -21,6 +21,8 @@
     "namePlaceholder": "2026 Shanghai · Evening",
     "startTime": "Start *",
     "endTime": "End *",
+    "openSaleTime": "Open-sale time",
+    "openSaleTimeHint": "Leave blank to let the scheduler flip status as soon as the session is created.",
     "limitPerUser": "Limit per user *",
     "limitMin": "Min 1",
     "limitMax": "Max 20",
@@ -35,28 +37,21 @@
     "savedToast": "Session updated"
   },
   "status": {
-    "draft": "Draft",
+    "draft": "Pending sale",
     "published": "On sale",
     "ended": "Ended"
   },
   "action": {
     "createBtn": "New session",
-    "publish": "Publish",
-    "unpublish": "Unpublish",
     "createdSuccess": "Session created",
     "createSubmit": "Create",
-    "backToShows": "Back to shows",
-    "warmup": "Warm up inventory",
-    "warmingUp": "Warming up...",
-    "warmupDone": "Warm-up done",
-    "publishLong": "Publish & open sale",
-    "publishing": "Publishing...",
-    "publishedToast": "Session published"
+    "backToShows": "Back to shows"
   },
   "table": {
     "id": "ID",
     "name": "Name",
     "startTime": "Start",
+    "openSaleTime": "Open sale",
     "limitPerUser": "Limit",
     "status": "Status",
     "actions": "Actions"
@@ -72,13 +67,23 @@
     "leadMinutes": "Entry opens {{n}} min before start",
     "tooltipZoomIn": "Zoom in",
     "tooltipZoomOut": "Zoom out",
-    "tooltipReset": "Reset"
+    "tooltipReset": "Reset",
+    "notOnSaleBanner": "Not on sale yet — seat map is preview only",
+    "endedBanner": "Session ended",
+    "openSaleAt": "Opens at {{time}}",
+    "countdownPrefix": "Opens in",
+    "days": "d",
+    "hours": "h",
+    "minutes": "m",
+    "seconds": "s"
   },
   "selectionBar": {
     "selectedCount": "{{n}} seats selected",
     "moreSeats": "+{{n}}",
     "total": "Total",
-    "submit": "Place order"
+    "submit": "Place order",
+    "submitNotOnSale": "Not on sale",
+    "submitEnded": "Ended"
   },
   "detail": {
     "title": "Session detail",

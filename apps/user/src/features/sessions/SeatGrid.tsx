@@ -172,7 +172,14 @@ export function SeatGrid({ rows, rowCount, columnCount, areaPriceList, limitPerU
     if (col.type === 0) return;
     // 后端 status 可能是字符串（Jackson long→string 序列化波及），统一转 Number 再比较
     const status = col.status == null ? null : Number(col.status);
-    if (status === SeatStatus.Locked || status === SeatStatus.Sold) return;
+    // 未开售/已结束(-1) 或 已锁/已售,均不可选
+    if (
+      status === SeatStatus.NotOnSale ||
+      status === SeatStatus.Locked ||
+      status === SeatStatus.Sold
+    ) {
+      return;
+    }
 
     const id = String(col.colId);
     const isSelected = selectedIds.has(id);
@@ -359,23 +366,28 @@ function Row({
         const statusNum = col.status == null ? null : Number(col.status);
         const isLocked = statusNum === SeatStatus.Locked;
         const isSold = statusNum === SeatStatus.Sold;
+        // -1=未开售/已结束:整体灰显,不可点
+        const isNotOnSale = statusNum === SeatStatus.NotOnSale;
+        const isDisabled = isSold || isLocked || isNotOnSale;
         const areaColor = priceColorMap.get(normalizeAreaId(col.areaId)) ?? 'bg-muted';
         const cls = isSelected
           ? 'bg-gradient-brand text-brand-foreground ring-2 ring-brand/40 shadow-[0_2px_8px_-1px_hsl(var(--brand)/0.5)]'
-          : isSold
-            ? 'bg-foreground/25 text-background/50 cursor-not-allowed ring-1 ring-foreground/10'
-            : isLocked
-              ? 'bg-warning/40 text-warning-foreground/70 cursor-not-allowed'
-              : `${areaColor} text-white hover:brightness-110 active:brightness-95`;
+          : isNotOnSale
+            ? 'bg-foreground/15 text-background/40 cursor-not-allowed ring-1 ring-foreground/10'
+            : isSold
+              ? 'bg-foreground/25 text-background/50 cursor-not-allowed ring-1 ring-foreground/10'
+              : isLocked
+                ? 'bg-warning/40 text-warning-foreground/70 cursor-not-allowed'
+                : `${areaColor} text-white hover:brightness-110 active:brightness-95`;
         return (
           <motion.button
             type="button"
             key={`s-${col.colId}-${ci}`}
             onClick={() => onClick(col)}
-            disabled={isSold || isLocked}
+            disabled={isDisabled}
             // 选中态加微微跳动;点击瞬间 scale 0.8 回弹
             animate={isSelected ? { scale: [1, 1.18, 1] } : { scale: 1 }}
-            whileTap={isSold || isLocked ? undefined : { scale: 0.8 }}
+            whileTap={isDisabled ? undefined : { scale: 0.8 }}
             transition={
               isSelected
                 ? { duration: 0.32, ease: [0.32, 0.72, 0, 1] }

@@ -11,6 +11,8 @@ export const OrderStatus = {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export const SeatStatus = {
+  /** 场次未开售/已结束时后端返回,前端整体灰显不可点 */
+  NotOnSale: -1,
   Available: 0,
   Locked: 1,
   Sold: 2,

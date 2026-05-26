@@ -3,8 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Info, Clock, Calendar, ChevronDown } from 'lucide-react';
-import { extractErrorMessage, notify, parseExtend, cn, type SessionExtend } from '@maill/shared';
+import { ArrowLeft, MapPin, Info, Clock, Calendar, ChevronDown, Timer, CalendarX } from 'lucide-react';
+import {
+  extractErrorMessage,
+  notify,
+  parseExtend,
+  cn,
+  SessionStatus,
+  type SessionExtend,
+} from '@maill/shared';
 import { Skeleton } from '@/components/Skeleton';
 import { formatDateTime, formatMoney } from '@/lib/format';
 import { useGetSessionDetailQuery } from './sessionsApi';
@@ -66,6 +73,8 @@ export default function SessionSeatPage() {
     sessionExtend?.preSaleLeadMinutes != null ||
     !!sessionExtend?.notice;
 
+  const sessionStatus = Number(session.status);
+
   return (
     <div className="pb-36">
       {/* ===== 沉浸式 header ===== */}
@@ -109,6 +118,16 @@ export default function SessionSeatPage() {
           </div>
         </motion.div>
       </header>
+
+      {/* ===== 状态横幅:未开售/已结束时显示 ===== */}
+      {sessionStatus !== SessionStatus.Published && (
+        <div className="px-4 mb-3">
+          <SessionStatusBanner
+            status={sessionStatus}
+            openSaleTime={session.openSaleTime}
+          />
+        </div>
+      )}
 
       {/* ===== 信息卡片:浮在 header 底部 ===== */}
       {hasInfo && (
@@ -201,7 +220,81 @@ export default function SessionSeatPage() {
         />
       </div>
 
-      <SelectionBar sessionId={sessionId} limitPerUser={session.limitPerUser ?? 4} />
+      <SelectionBar
+        sessionId={sessionId}
+        limitPerUser={session.limitPerUser ?? 4}
+        sessionStatus={sessionStatus}
+      />
+    </div>
+  );
+}
+
+/** 把"开售剩余毫秒"格式化为 D 天 H 小时 M 分 S 秒 */
+function formatCountdown(ms: number, t: (k: string) => string): string {
+  if (ms <= 0) return '0' + t('session:userSeat.seconds');
+  const totalSec = Math.floor(ms / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}${t('session:userSeat.days')}`);
+  if (hours > 0 || days > 0) parts.push(`${hours}${t('session:userSeat.hours')}`);
+  if (minutes > 0 || hours > 0 || days > 0)
+    parts.push(`${minutes}${t('session:userSeat.minutes')}`);
+  parts.push(`${seconds}${t('session:userSeat.seconds')}`);
+  return parts.join(' ');
+}
+
+function SessionStatusBanner({
+  status,
+  openSaleTime,
+}: {
+  status: number;
+  openSaleTime?: string;
+}) {
+  const { t } = useTranslation(['session']);
+  const targetTs = openSaleTime ? new Date(openSaleTime).getTime() : 0;
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (status !== SessionStatus.Draft || !targetTs) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [status, targetTs]);
+
+  if (status === SessionStatus.Ended) {
+    return (
+      <div className="rounded-2xl bg-muted/60 border border-border/60 p-3 flex items-center gap-2">
+        <CalendarX className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="text-sm text-muted-foreground">{t('session:userSeat.endedBanner')}</div>
+      </div>
+    );
+  }
+
+  // status=0 未开售
+  const remainMs = targetTs - now;
+  const showCountdown = targetTs > 0 && remainMs > 0;
+  return (
+    <div className="rounded-2xl bg-warning/10 border border-warning/30 p-3 space-y-1">
+      <div className="flex items-center gap-2">
+        <Timer className="h-4 w-4 text-warning shrink-0" />
+        <div className="text-sm font-medium text-warning-foreground/90">
+          {t('session:userSeat.notOnSaleBanner')}
+        </div>
+      </div>
+      {openSaleTime && (
+        <div className="text-[11px] text-muted-foreground pl-6">
+          {t('session:userSeat.openSaleAt', {
+            time: formatDateTime(openSaleTime),
+          })}
+        </div>
+      )}
+      {showCountdown && (
+        <div className="text-[12px] font-semibold text-warning pl-6 tabular-nums">
+          {t('session:userSeat.countdownPrefix')} {formatCountdown(remainMs, t)}
+        </div>
+      )}
     </div>
   );
 }

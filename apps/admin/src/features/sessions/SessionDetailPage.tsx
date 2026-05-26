@@ -4,8 +4,6 @@ import { motion } from 'framer-motion';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
-  Flame,
-  Rocket,
   ArrowLeft,
   Edit2,
   Save,
@@ -29,9 +27,7 @@ import {
   useGetSessionQuery,
   useListSessionAreasQuery,
   useListSessionSeatsQuery,
-  usePublishSessionMutation,
   useSaveSessionAreasMutation,
-  useWarmupSessionMutation,
 } from './sessionsApi';
 import { useListRoomAreasQuery } from '@/features/rooms/roomsApi';
 import { MonitorPanel } from '@/features/monitor/MonitorPanel';
@@ -71,8 +67,6 @@ export default function SessionDetailPage() {
   });
 
   const [saveAreas, { isLoading: savingAreas }] = useSaveSessionAreasMutation();
-  const [warmup, { isLoading: warmingUp }] = useWarmupSessionMutation();
-  const [publish, { isLoading: publishing }] = usePublishSessionMutation();
 
   const [priceDraft, setPriceDraft] = useState<PriceDraftRow[]>([]);
 
@@ -121,41 +115,24 @@ export default function SessionDetailPage() {
     }
   };
 
-  const handleWarmup = async () => {
-    try {
-      const res = (await warmup(sessionId).unwrap()) as string;
-      notify.success(typeof res === 'string' ? res : t('session:action.warmupDone'));
-    } catch (e) {
-      notify.error(extractErrorMessage(e));
-    }
-  };
-
-  const handlePublish = async () => {
-    try {
-      await publish(sessionId).unwrap();
-      notify.success(t('session:action.publishedToast'));
-    } catch (e) {
-      notify.error(extractErrorMessage(e));
-    }
-  };
-
   if (loadingSession) return <div className="p-6 text-muted-foreground">{t('common:states.loading')}</div>;
   if (!session) return <div className="p-6 text-muted-foreground">{t('session:detail.notFound')}</div>;
-
-  const canWarmup =
-    session.status === SessionStatus.Draft && seats.length > 0 && areas.length > 0;
-  const canPublish = session.status === SessionStatus.Draft;
 
   return (
     <div className="p-6 space-y-6">
       <PageHeader
         title={session.name || t('session:detail.titleFallback', { id: session.id })}
         subtitle={
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex flex-wrap items-center gap-2">
             {formatDateTime(session.startTime)} - {formatDateTime(session.endTime)} · {t('session:detail.statusLabel')}
             <Badge variant={STATUS_VARIANT[session.status] ?? 'default'}>
               {t(`session:status.${sessionStatusKey(session.status)}`)}
             </Badge>
+            {session.openSaleTime && (
+              <span className="text-xs text-muted-foreground">
+                · {t('session:userSeat.openSaleAt', { time: formatDateTime(session.openSaleTime) })}
+              </span>
+            )}
           </span>
         }
         icon={LayoutDashboard}
@@ -168,18 +145,6 @@ export default function SessionDetailPage() {
             <Button variant="outline" onClick={() => navigate(`/sessions/${session.id}/edit`)}>
               <Edit2 className="h-3.5 w-3.5 mr-1" />
               {t('common:actions.edit')}
-            </Button>
-            <Button variant="outline" disabled={!canWarmup || warmingUp} onClick={handleWarmup}>
-              <Flame className="h-3.5 w-3.5 mr-1" />
-              {warmingUp ? t('session:action.warmingUp') : t('session:action.warmup')}
-            </Button>
-            <Button
-              disabled={!canPublish || publishing}
-              onClick={handlePublish}
-              className="bg-gradient-brand hover:opacity-90"
-            >
-              <Rocket className="h-3.5 w-3.5 mr-1.5" />
-              {publishing ? t('session:action.publishing') : t('session:action.publishLong')}
             </Button>
           </>
         }
