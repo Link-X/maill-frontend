@@ -195,15 +195,24 @@ export function SeatGrid({ rows, rowCount, columnCount, areaPriceList, limitPerU
 
   return (
     <div className="space-y-3">
-      {/* 舞台示意 */}
-      <div className="flex justify-center">
-        <div className="px-10 py-1.5 text-xs bg-muted text-muted-foreground rounded-b-2xl shadow-inner">
-          舞台 / STAGE
+      {/* 舞台示意:弧形 + brand 渐变 + 微光晕 */}
+      <div className="relative flex justify-center isolate">
+        <div
+          aria-hidden
+          className="absolute top-1 left-1/2 -translate-x-1/2 w-44 h-8 rounded-full bg-brand/25 blur-2xl -z-10"
+        />
+        <div
+          className="px-12 py-2 text-[11px] font-medium tracking-[0.18em]
+                     text-brand-foreground
+                     bg-gradient-brand
+                     rounded-b-[40%] rounded-t-md
+                     shadow-[0_6px_16px_-6px_hsl(var(--brand)/0.5),inset_0_-1px_0_0_rgba(0,0,0,0.1)]"
+        >
+          STAGE · 舞台
         </div>
       </div>
 
-      {/* 视口：原生 overflow:auto 提供平移；touch-action pan-x pan-y 让浏览器接管单指 pan，
-          自定义代码只处理双指捏合（pinch），单指 tap 走原生 click 链不被吞 */}
+      {/* 视口:原生 overflow:auto + 双指捏合;单指 tap 走原生 click 不被吞 */}
       <div className="relative">
         <div
           ref={viewportRef}
@@ -211,7 +220,9 @@ export function SeatGrid({ rows, rowCount, columnCount, areaPriceList, limitPerU
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="overflow-auto rounded-2xl border border-border/60 bg-card/50 select-none"
+          className="overflow-auto rounded-2xl border border-border/60
+                     bg-gradient-to-b from-muted/30 to-card/60
+                     shadow-inner select-none"
           style={{ height: 'min(60vh, 480px)', touchAction: 'pan-x pan-y' }}
         >
           {/* scaler：宽高随 scale 撑开，让浏览器 scrollbar 反映 content 真实大小 */}
@@ -261,23 +272,34 @@ export function SeatGrid({ rows, rowCount, columnCount, areaPriceList, limitPerU
           </div>
         </div>
 
-        {/* 浮动缩放控制 */}
-        <div className="absolute right-2 bottom-2 flex flex-col gap-1.5 bg-card/95 backdrop-blur rounded-full p-1 border border-border/60 shadow-sm pointer-events-auto">
+        {/* 浮动缩放控制:玻璃质感胶囊 */}
+        <div className="absolute right-2 bottom-2 flex flex-col items-center gap-1
+                        bg-white/70 dark:bg-white/[0.08] backdrop-blur-xl
+                        border border-white/40 dark:border-white/15
+                        shadow-[0_6px_16px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_0_rgba(255,255,255,0.55)]
+                        rounded-full p-1 pointer-events-auto">
           <ToolBtn ariaLabel="放大" onClick={() => zoomBy(1.25)}>
             <Plus className="h-4 w-4" />
           </ToolBtn>
+          {scale !== 1 && (
+            <div className="text-[9px] font-semibold text-foreground/70 tabular-nums leading-none">
+              {Math.round(scale * 100)}%
+            </div>
+          )}
           <ToolBtn ariaLabel="缩小" onClick={() => zoomBy(0.8)}>
             <Minus className="h-4 w-4" />
           </ToolBtn>
+          <div className="h-px w-5 bg-border/60 my-0.5" />
           <ToolBtn ariaLabel="复位" onClick={reset}>
             <RotateCcw className="h-3.5 w-3.5" />
           </ToolBtn>
         </div>
       </div>
 
-      <div className="text-[10px] text-muted-foreground text-center">
-        {rowCount} 行 × {columnCount} 列
-        {scale !== 1 && <span className="ml-2">· 缩放 {Math.round(scale * 100)}%</span>}
+      <div className="text-[10px] text-muted-foreground text-center inline-flex items-center justify-center gap-1.5 w-full">
+        <span>{rowCount} 行 × {columnCount} 列</span>
+        <span className="text-muted-foreground/50">·</span>
+        <span>两指捏合可缩放</span>
       </div>
     </div>
   );
@@ -335,23 +357,28 @@ function Row({
         const isSold = col.status === SeatStatus.Sold;
         const areaColor = priceColorMap.get(normalizeAreaId(col.areaId)) ?? 'bg-muted';
         const cls = isSelected
-          ? 'bg-brand text-brand-foreground ring-2 ring-brand shadow-sm'
+          ? 'bg-gradient-brand text-brand-foreground ring-2 ring-brand/40 shadow-[0_2px_8px_-1px_hsl(var(--brand)/0.5)]'
           : isSold
-            // 已售：深色实底 + 细微斜线纹路，明显区别于可售/锁定
-            ? 'bg-foreground/30 text-background/50 cursor-not-allowed ring-1 ring-foreground/10'
+            ? 'bg-foreground/25 text-background/50 cursor-not-allowed ring-1 ring-foreground/10'
             : isLocked
               ? 'bg-warning/40 text-warning-foreground/70 cursor-not-allowed'
-              : `${areaColor} text-white hover:brightness-110`;
+              : `${areaColor} text-white hover:brightness-110 active:brightness-95`;
         return (
           <motion.button
             type="button"
             key={`s-${col.colId}-${ci}`}
             onClick={() => onClick(col)}
             disabled={isSold || isLocked}
-            whileTap={isSold || isLocked ? undefined : { scale: 0.85 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+            // 选中态加微微跳动;点击瞬间 scale 0.8 回弹
+            animate={isSelected ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+            whileTap={isSold || isLocked ? undefined : { scale: 0.8 }}
+            transition={
+              isSelected
+                ? { duration: 0.32, ease: [0.32, 0.72, 0, 1] }
+                : { type: 'spring', stiffness: 420, damping: 22 }
+            }
             className={cn(
-              'rounded-md text-[10px] font-medium leading-none flex items-center justify-center',
+              'rounded-md text-[10px] font-medium leading-none flex items-center justify-center transition-colors',
               cls,
             )}
             style={{ height: SEAT_SIZE, width: SEAT_SIZE }}

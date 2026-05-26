@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Sparkles, MapPin, ChevronDown, Check } from 'lucide-react';
@@ -205,20 +206,48 @@ function CityPicker({
 }) {
   const { t } = useTranslation(['city']);
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+
+  // 计算下拉位置:跟随 trigger 按钮在 viewport 的位置
+  const updatePos = () => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPos({
+      top: rect.bottom + 6,
+      right: Math.max(8, window.innerWidth - rect.right),
+    });
+  };
+
+  useLayoutEffect(() => {
+    if (open) updatePos();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (triggerRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setOpen(false);
     };
+    const onScroll = () => updatePos();
+    const onResize = () => updatePos();
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onResize);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onResize);
+    };
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-1 px-2.5 h-8 rounded-full text-xs font-medium bg-card border border-border/60 hover:border-brand/40 transition-colors max-w-[140px]"
@@ -227,43 +256,51 @@ function CityPicker({
         <span className="truncate">{label}</span>
         <ChevronDown className={cn('h-3 w-3 shrink-0 transition-transform', open && 'rotate-180')} />
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute right-0 top-full mt-1.5 z-30 w-44 max-h-72 overflow-auto rounded-xl border border-border/60 bg-card shadow-lg shadow-black/5 py-1"
-          >
-            <CityOption
-              active={value === undefined}
-              onClick={() => {
-                onChange(undefined);
-                setOpen(false);
-              }}
-            >
-              {t('city:picker.allCities')}
-            </CityOption>
-            {cities.map((c) => (
-              <CityOption
-                key={c.code}
-                active={value === c.code}
-                onClick={() => {
-                  onChange(c.code);
-                  setOpen(false);
-                }}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                ref={dropdownRef}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.14 }}
+                style={{ top: pos.top, right: pos.right }}
+                className="fixed z-50 w-44 max-h-72 overflow-auto rounded-xl border border-border/60 bg-card shadow-xl shadow-black/10 py-1"
               >
-                {c.name}
-              </CityOption>
-            ))}
-            {cities.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-3">{t('city:picker.empty')}</p>
+                <CityOption
+                  active={value === undefined}
+                  onClick={() => {
+                    onChange(undefined);
+                    setOpen(false);
+                  }}
+                >
+                  {t('city:picker.allCities')}
+                </CityOption>
+                {cities.map((c) => (
+                  <CityOption
+                    key={c.code}
+                    active={value === c.code}
+                    onClick={() => {
+                      onChange(c.code);
+                      setOpen(false);
+                    }}
+                  >
+                    {c.name}
+                  </CityOption>
+                ))}
+                {cities.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-3">
+                    {t('city:picker.empty')}
+                  </p>
+                )}
+              </motion.div>
             )}
-          </motion.div>
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
-    </div>
+    </>
   );
 }
 
