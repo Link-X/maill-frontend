@@ -69,6 +69,16 @@ export interface SeatSectionVO {
   seatRows: SeatRowVO[];
 }
 
+// 用户端 /api/session/{id}/myLimit — 当前用户在场次的限购状态
+export interface SessionPurchaseLimit {
+  /** 场次配置的每用户限购张数 */
+  limitPerUser: number;
+  /** 当前已购张数(含未支付锁定 + 已支付) */
+  purchased: number;
+  /** 剩余可购张数 = max(0, limitPerUser - purchased) */
+  remaining: number;
+}
+
 // 用户端 AreaPriceVO — 新增售卖模式字段(用户端按此决定渲染选座图或派座卡片)
 export interface AreaPriceVO {
   areaId: string;

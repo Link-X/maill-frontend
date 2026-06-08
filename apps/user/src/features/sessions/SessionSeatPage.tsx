@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MapPin, Info, Clock, Calendar, ChevronDown, Timer, CalendarX } from 'lucide-react';
@@ -14,11 +14,12 @@ import {
 } from '@maill/shared';
 import { Skeleton } from '@/components/Skeleton';
 import { formatDateTime, formatMoney } from '@/lib/format';
-import { useGetSessionDetailQuery } from './sessionsApi';
+import { useGetSessionDetailQuery, useGetMyPurchaseLimitQuery } from './sessionsApi';
 import { SeatGrid, buildPriceColorMap } from './SeatGrid';
 import { SelectionBar } from './SelectionBar';
 import { AllocateAreaSection } from './AllocateAreaSection';
 import { setSessionContext } from './cartSlice';
+import { selectIsAuthenticated } from '@/features/auth/authSlice';
 
 export default function SessionSeatPage() {
   const { t } = useTranslation(['session', 'common']);
@@ -30,6 +31,13 @@ export default function SessionSeatPage() {
   // 每次进入页面强制重新拉取，避免命中 RTK Query 缓存而看到陈旧的座位状态（已售/已锁未更新）
   const { data, isLoading, error } = useGetSessionDetailQuery(sessionId, {
     skip: !sessionId,
+    refetchOnMountOrArgChange: true,
+  });
+
+  // 我的剩余可购张数(仅登录态有效;每次进入页面强制刷新一次)
+  const isAuthed = useSelector(selectIsAuthenticated);
+  const { data: myLimit } = useGetMyPurchaseLimitQuery(sessionId, {
+    skip: !sessionId || !isAuthed,
     refetchOnMountOrArgChange: true,
   });
 
@@ -54,6 +62,20 @@ export default function SessionSeatPage() {
       ),
     [data?.areaPriceList],
   );
+  // 是否存在任何选座区 — 用于决定要不要渲染整张座位图
+  // 极端场景:全场都是派座 → 座位图毫无意义,直接隐藏,让派座卡片成为主视觉
+  const hasPickModeAreas = useMemo(
+    () => (data?.areaPriceList ?? []).some((a) => (a.saleMode ?? 1) === 1),
+    [data?.areaPriceList],
+  );
+
+  // 计算用户在本场次的"剩余可购张数"作为下单上限。
+  //  - 已登录:用后端 myLimit.remaining(扣过已锁定+已支付)
+  //  - 未登录:回退到场次的 limitPerUser(下单时后端会再校验,登录后这里会更准)
+  const sessionLimitPerUser = data?.session.limitPerUser ?? 4;
+  const effectiveLimit = isAuthed
+    ? Math.max(0, myLimit?.remaining ?? sessionLimitPerUser)
+    : sessionLimitPerUser;
 
   const [noticeExpanded, setNoticeExpanded] = useState(false);
 
@@ -200,6 +222,7 @@ export default function SessionSeatPage() {
                 key={p.areaId}
                 color={priceColorMap.get(p.areaId) ?? '#94a3b8'}
                 price={formatMoney(p.price)}
+                isAllocate={p.saleMode === 2}
               />
             ))}
           </div>
@@ -222,28 +245,39 @@ export default function SessionSeatPage() {
         areaPriceList={areaPriceList}
         priceColorMap={priceColorMap}
         onSale={sessionStatus === SessionStatus.Published}
+        remainingLimit={effectiveLimit}
       />
 
-      {/* ===== 座位栅格(选座区可点;派座区灰显不可点)===== */}
+      {/* ===== 座位栅格 — 仅渲染选座区,派座区在 SeatGrid 内已过滤掉 ===== */}
+      {/* 全场无选座区时整图隐藏,避免空座位图占地方 */}
+      {hasPickModeAreas && (
       <div className="px-4">
         <SeatGrid
           rows={seatSection.seatRows}
           rowCount={seatSection.rowCount}
           columnCount={seatSection.columnCount}
           areaPriceList={areaPriceList}
-          limitPerUser={session.limitPerUser ?? 4}
+          limitPerUser={effectiveLimit}
           onLimitExceed={() =>
-            notify.warn(t('session:userSeat.limitToast', { n: session.limitPerUser ?? 4 }))
+            notify.warn(
+              effectiveLimit === 0
+                ? '已达到本场次限购上限,无法再选'
+                : t('session:userSeat.limitToast', { n: effectiveLimit }),
+            )
           }
           allocateAreaIds={allocateAreaIds}
         />
       </div>
+      )}
 
-      <SelectionBar
-        sessionId={sessionId}
-        limitPerUser={session.limitPerUser ?? 4}
-        sessionStatus={sessionStatus}
-      />
+      {/* 全场全派座时:SelectionBar 也无意义(没人挑座位),隐藏 */}
+      {hasPickModeAreas && (
+        <SelectionBar
+          sessionId={sessionId}
+          limitPerUser={effectiveLimit}
+          sessionStatus={sessionStatus}
+        />
+      )}
     </div>
   );
 }
@@ -348,12 +382,15 @@ function InfoRow({
   );
 }
 
-function PriceLegendChip({ color, price }: { color: string; price: string }) {
+function PriceLegendChip({ color, price, isAllocate }: { color: string; price: string; isAllocate?: boolean }) {
   return (
     <span className="inline-flex items-center gap-1 pl-1 pr-2 h-5 rounded-full
                      bg-muted/60 border border-border/40 text-[11px] font-medium tabular-nums">
       <span className="inline-block h-3 w-3 rounded-sm" style={{ background: color }} />
       {price}
+      {isAllocate && (
+        <span className="text-[9px] text-muted-foreground/80 font-normal ml-0.5">派座</span>
+      )}
     </span>
   );
 }

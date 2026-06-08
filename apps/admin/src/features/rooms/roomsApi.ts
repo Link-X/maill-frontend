@@ -35,6 +35,10 @@ export const roomsApi = createApi({
       query: (body) => ({ url: '/api/admin/room/update', method: 'PUT', body }),
       invalidatesTags: (_r, _e, arg) => [{ type: 'Room', id: arg.id }, 'Room'],
     }),
+    deleteRoom: build.mutation<void, number | string>({
+      query: (id) => ({ url: `/api/admin/room/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Room'],
+    }),
 
     listRoomSeats: build.query<RoomSeat[], number | string>({
       query: (roomId) => ({ url: '/api/admin/room/seat/list', params: { roomId } }),
@@ -62,6 +66,7 @@ export const {
   useGetRoomTemplateQuery,
   useCreateRoomMutation,
   useUpdateRoomMutation,
+  useDeleteRoomMutation,
   useListRoomSeatsQuery,
   useSaveRoomSeatsMutation,
   useListRoomAreasQuery,

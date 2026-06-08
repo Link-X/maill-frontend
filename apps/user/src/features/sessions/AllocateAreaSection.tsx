@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Minus, Plus, Sparkles, Loader2, Users } from 'lucide-react';
@@ -26,6 +26,11 @@ interface Props {
   priceColorMap: Map<string, string>;
   /** 不在销售中时禁用提交 */
   onSale: boolean;
+  /**
+   * 用户在该场次的剩余可购"张数"上限。
+   * 单座下单时数量 ≤ remainingLimit;情侣对下单时对数 ≤ floor(remainingLimit / 2)(每对 2 张)。
+   */
+  remainingLimit: number;
 }
 
 /**
@@ -36,7 +41,13 @@ interface Props {
  *  - 区域内自带单座/情侣对两个 tab(只显示存在的票种)
  *  - 提交后轮询 /createStatus,与选座共用 OrderConfirmPage 的流程
  */
-export function AllocateAreaSection({ sessionId, areaPriceList, priceColorMap, onSale }: Props) {
+export function AllocateAreaSection({
+  sessionId,
+  areaPriceList,
+  priceColorMap,
+  onSale,
+  remainingLimit,
+}: Props) {
   const allocateAreas = useMemo(
     () => areaPriceList.filter((a) => a.saleMode === 2),
     [areaPriceList],
@@ -46,12 +57,21 @@ export function AllocateAreaSection({ sessionId, areaPriceList, priceColorMap, o
 
   return (
     <section className="px-4 mb-3">
-      <div className="flex items-center gap-1.5 mb-2">
-        <Sparkles className="h-3.5 w-3.5 text-brand" />
-        <h3 className="text-sm font-semibold">系统派座区</h3>
-        <span className="text-[10px] text-muted-foreground">
-          · 选区域 + 张数即可,系统自动派出最佳座位
-        </span>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-brand" />
+          <h3 className="text-sm font-semibold">系统派座区</h3>
+          <span className="text-[10px] text-muted-foreground">
+            · 选区域 + 张数即可,系统自动派出最佳座位
+          </span>
+        </div>
+        {remainingLimit > 0 ? (
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            本场剩余可购 <span className="text-brand font-semibold">{remainingLimit}</span> 张
+          </span>
+        ) : (
+          <span className="text-[10px] text-warning font-medium">已达本场限购上限</span>
+        )}
       </div>
       <div className="space-y-2.5">
         {allocateAreas.map((a) => (
@@ -61,6 +81,7 @@ export function AllocateAreaSection({ sessionId, areaPriceList, priceColorMap, o
             area={a}
             color={priceColorMap.get(a.areaId) ?? '#94a3b8'}
             onSale={onSale}
+            remainingLimit={remainingLimit}
           />
         ))}
       </div>
@@ -73,11 +94,13 @@ function AllocateAreaCard({
   area,
   color,
   onSale,
+  remainingLimit,
 }: {
   sessionId: number | string;
   area: AreaPriceVO;
   color: string;
   onSale: boolean;
+  remainingLimit: number;
 }) {
   const navigate = useNavigate();
   const hasSingle = (area.singleTotal ?? 0) > 0;
@@ -98,8 +121,21 @@ function AllocateAreaCard({
       ? area.singleStock ?? area.singleTotal ?? 0
       : area.coupleStock ?? area.coupleTotal ?? 0;
 
+  // 数量上限 = 三者取最小:库存、限购、卡片自定义 MAX_QTY
+  //   - 单座:remainingLimit 直接作为"张数"上限
+  //   - 情侣对:remainingLimit 是"张数",每对 = 2 张,所以"对数"上限 = floor(remainingLimit / 2)
+  const limitByPurchase =
+    ticketType === 2 ? Math.floor(remainingLimit / 2) : remainingLimit;
+  const maxQty = Math.min(MAX_QTY, stockForType, Math.max(0, limitByPurchase));
+
+  // 切换票种或上限变化时,夹紧当前数量(放 useEffect 里避免 render 期 setState)
+  useEffect(() => {
+    if (maxQty > 0 && quantity > maxQty) setQuantity(maxQty);
+  }, [maxQty, quantity]);
+
   const unitPrice = Number(area.price || 0);
   const totalPrice = unitPrice * quantity * (ticketType === 2 ? 2 : 1);
+  const overLimit = maxQty === 0;
 
   const handleSubmit = async () => {
     if (!onSale) {
@@ -192,8 +228,13 @@ function AllocateAreaCard({
       {/* 数量 + 总价 + 提交 */}
       <div className="px-3.5 py-3 flex items-end gap-3">
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] text-muted-foreground leading-none">
-            {ticketType === 2 ? '对数' : '张数'}
+          <div className="text-[10px] text-muted-foreground leading-none flex items-center gap-1.5">
+            <span>{ticketType === 2 ? '对数' : '张数'}</span>
+            {maxQty > 0 && (
+              <span className="text-muted-foreground/60 tabular-nums">
+                · 上限 {maxQty}
+              </span>
+            )}
           </div>
           <div className="mt-1.5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-1 h-9">
             <StepBtn
@@ -208,8 +249,8 @@ function AllocateAreaCard({
             </span>
             <StepBtn
               ariaLabel="增加"
-              disabled={quantity >= MAX_QTY || quantity >= stockForType || busy}
-              onClick={() => setQuantity((q) => Math.min(MAX_QTY, q + 1))}
+              disabled={quantity >= maxQty || busy}
+              onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
             >
               <Plus className="h-3.5 w-3.5" />
             </StepBtn>
@@ -225,18 +266,24 @@ function AllocateAreaCard({
 
         <motion.button
           type="button"
-          disabled={busy || !onSale || stockForType < quantity}
+          disabled={busy || !onSale || overLimit || quantity > maxQty}
           onClick={handleSubmit}
-          whileTap={!busy && onSale ? { scale: 0.96 } : undefined}
+          whileTap={!busy && onSale && !overLimit ? { scale: 0.96 } : undefined}
           className={cn(
             'inline-flex items-center gap-1 h-9 px-4 rounded-full text-sm font-semibold shrink-0 transition',
-            busy || !onSale || stockForType < quantity
+            busy || !onSale || overLimit || quantity > maxQty
               ? 'bg-muted text-muted-foreground/60'
               : 'bg-gradient-brand text-brand-foreground shadow-md shadow-brand/30',
           )}
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-          {polling ? '派座中...' : submitting ? '提交中...' : '立即下单'}
+          {polling
+            ? '派座中...'
+            : submitting
+              ? '提交中...'
+              : overLimit
+                ? '已达上限'
+                : '立即下单'}
         </motion.button>
       </div>
     </div>

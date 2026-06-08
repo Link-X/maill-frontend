@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import type { ShowSession, SessionSeatResponseVO } from '@maill/shared';
+import type { ShowSession, SessionSeatResponseVO, SessionPurchaseLimit } from '@maill/shared';
 import { userBaseQuery } from '@/api/userBase';
 
 interface SessionListRequest {
@@ -19,7 +19,7 @@ interface SessionListResponse {
 export const sessionsApi = createApi({
   reducerPath: 'sessionsApi',
   baseQuery: userBaseQuery,
-  tagTypes: ['Session', 'SessionSeats'],
+  tagTypes: ['Session', 'SessionSeats', 'PurchaseLimit'],
   endpoints: (build) => ({
     listSessions: build.query<SessionListResponse, SessionListRequest>({
       query: (body) => ({ url: '/api/session/list', method: 'POST', body }),
@@ -36,7 +36,18 @@ export const sessionsApi = createApi({
       }),
       providesTags: (_r, _e, sessionId) => [{ type: 'SessionSeats', id: sessionId }],
     }),
+    /**
+     * 当前用户在该场次的剩余可购张数。下单成功后应失效以拉最新。
+     */
+    getMyPurchaseLimit: build.query<SessionPurchaseLimit, number | string>({
+      query: (sessionId) => `/api/session/${sessionId}/myLimit`,
+      providesTags: (_r, _e, sessionId) => [{ type: 'PurchaseLimit', id: sessionId }],
+    }),
   }),
 });
 
-export const { useListSessionsQuery, useGetSessionDetailQuery } = sessionsApi;
+export const {
+  useListSessionsQuery,
+  useGetSessionDetailQuery,
+  useGetMyPurchaseLimitQuery,
+} = sessionsApi;

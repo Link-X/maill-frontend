@@ -56,7 +56,12 @@ export function ConfirmDialog({
               <motion.div
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.96 }}
-                transition={spring.snappy}
+                // boxShadow 的 3 关键帧呼吸效果必须走 tween;spring/inertia 只支持 2 关键帧。
+                // 其他属性(y / scale)继续走 spring.snappy
+                transition={{
+                  ...spring.snappy,
+                  boxShadow: { duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
+                }}
                 animate={destructive ? { boxShadow: ['0 0 0 0 hsl(var(--destructive) / 0.0)', '0 0 0 4px hsl(var(--destructive) / 0.15)', '0 0 0 0 hsl(var(--destructive) / 0.0)'] } : undefined}
                 style={{ borderRadius: 6 }}
               >

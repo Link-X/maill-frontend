@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, Plus, Edit2, Grid3x3 } from 'lucide-react';
-import { Button, type Room } from '@maill/shared';
+import { Building2, Plus, Edit2, Grid3x3, Trash2 } from 'lucide-react';
+import { Button, extractErrorMessage, notify, type Room } from '@maill/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column } from '@/components/DataTable';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { formatDateTime } from '@/lib/format';
-import { useListRoomsQuery } from './roomsApi';
+import { useListRoomsQuery, useDeleteRoomMutation } from './roomsApi';
 import { RoomFormDrawer } from './RoomFormDrawer';
 
 export default function RoomsPage() {
   const { t } = useTranslation(['room', 'common']);
   const navigate = useNavigate();
   const { data: rooms = [], isLoading } = useListRoomsQuery();
+  const [deleteRoom, { isLoading: deleting }] = useDeleteRoomMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Room | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Room | null>(null);
 
   const openCreate = () => {
     setEditing(null);
@@ -23,6 +26,18 @@ export default function RoomsPage() {
   const openEdit = (room: Room) => {
     setEditing(room);
     setDrawerOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!pendingDelete?.id) return;
+    try {
+      await deleteRoom(pendingDelete.id).unwrap();
+      notify.success(t('room:delete.successToast', { name: pendingDelete.name }));
+      setPendingDelete(null);
+    } catch (e) {
+      // 后端 1111 ROOM_IN_USE 会在 message 里返回"场地已被场次引用,无法删除"
+      notify.error(extractErrorMessage(e));
+    }
   };
 
   const columns: Column<Room>[] = [
@@ -42,7 +57,7 @@ export default function RoomsPage() {
     {
       key: 'actions',
       title: t('room:table.actions'),
-      width: '220px',
+      width: '300px',
       render: (r) => (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => openEdit(r)}>
@@ -52,6 +67,10 @@ export default function RoomsPage() {
           <Button size="sm" variant="outline" onClick={() => navigate(`/rooms/${r.id}`)}>
             <Grid3x3 className="h-3.5 w-3.5 mr-1" />
             {t('room:table.seatsAndPrice')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setPendingDelete(r)}>
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            {t('common:actions.delete')}
           </Button>
         </div>
       ),
@@ -82,6 +101,16 @@ export default function RoomsPage() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         initial={editing}
+      />
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title={t('room:delete.title')}
+        description={pendingDelete && t('room:delete.desc', { name: pendingDelete.name })}
+        destructive
+        confirmText={deleting ? t('room:delete.btnDeleting') : t('room:delete.btn')}
+        onConfirm={handleDelete}
+        onCancel={() => setPendingDelete(null)}
       />
     </div>
   );

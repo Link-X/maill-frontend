@@ -45,6 +45,13 @@
     "createBtn": "新建场地",
     "enterDetail": "编辑"
   },
+  "delete": {
+    "title": "删除场地",
+    "desc": "确认删除场地「{{name}}」?其座位模板与价格区域将一并删除。已基于此场地创建的场次不受影响(数据是独立副本)。",
+    "btn": "确认删除",
+    "btnDeleting": "删除中...",
+    "successToast": "场地「{{name}}」已删除"
+  },
   "seatEditor": {
     "noAreas": "请先在右上角「价格区域」中新增至少一个区域，再来放置座位。",
     "noAreasDisabledHint": "当前没有可用区域，单元格已禁用。",

@@ -45,6 +45,13 @@
     "createBtn": "New room",
     "enterDetail": "Edit"
   },
+  "delete": {
+    "title": "Delete room",
+    "desc": "Delete room \"{{name}}\"? Its seat template and price areas will be removed too. Sessions already created from this room are unaffected (their data is an independent copy).",
+    "btn": "Confirm delete",
+    "btnDeleting": "Deleting...",
+    "successToast": "Room \"{{name}}\" deleted"
+  },
   "seatEditor": {
     "noAreas": "Please add at least one area in \"Price areas\" before placing seats.",
     "noAreasDisabledHint": "No available area, cells are disabled.",

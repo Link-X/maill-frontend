@@ -70,17 +70,20 @@ export function SeatGrid({
   const cellCtxRef = useRef(new Map<string, { col: SeatColVO; row: SeatRowVO }>());
 
   // 把 SeatRowVO[] 拍平成 SeatCell[]
+  // 派座区的座位完全不进入 cells — 它们在用户视角下不可挑选,顶部已有独立"派座区"卡片下单,
+  // 不渲染能让座位图视觉聚焦在选座区,减少噪声(大场地几百个派座座位混在图里会让真正能选的座位淹没)。
   const cells = useMemo<SeatCell[]>(() => {
     const out: SeatCell[] = [];
     const ctx = new Map<string, { col: SeatColVO; row: SeatRowVO }>();
     rows.forEach((row, ri) => {
       row.columns.forEach((col, ci) => {
         if (col.type === 0) return; // 空位:不渲染
+        const normalizedArea = normalizeAreaId(col.areaId);
+        const isAllocateArea = !!allocateAreaIds && allocateAreaIds.has(normalizedArea);
+        if (isAllocateArea) return; // 派座区:不渲染,顶部 AllocateAreaSection 负责下单
         const key = String(col.colId);
         const status = col.status == null ? null : Number(col.status);
-        const normalizedArea = normalizeAreaId(col.areaId);
         const areaColor = priceColorMap.get(normalizedArea) ?? SEAT_STATE_COLORS.muted;
-        const isAllocateArea = !!allocateAreaIds && allocateAreaIds.has(normalizedArea);
         let fill = areaColor;
         let disabled = false;
         if (status === SeatStatus.Sold) {
@@ -92,10 +95,6 @@ export function SeatGrid({
         } else if (status === SeatStatus.NotOnSale) {
           fill = SEAT_STATE_COLORS.notOnSale;
           disabled = true;
-        } else if (isAllocateArea) {
-          // 派座区:用户不能直接挑;视觉上保留区域色但加透明,标记为禁用
-          fill = areaColor + '80'; // hex alpha ~50%
-          disabled = true;
         }
         out.push({ key, r: ri, c: ci, fill, disabled, label: col.colNum });
         ctx.set(key, { col, row });
@@ -104,6 +103,19 @@ export function SeatGrid({
     cellCtxRef.current = ctx;
     return out;
   }, [rows, priceColorMap, allocateAreaIds]);
+
+  // 自适应裁剪:画布大小取选座区实际占据的最大行/列(派座区已不渲染)
+  // 例如选座区只占前 2 排,画布就只画 2 排,而不是把整个 10x10 网格都画出来
+  const effectiveBounds = useMemo(() => {
+    if (cells.length === 0) return { rows: rowCount, cols: columnCount };
+    let maxR = 0;
+    let maxC = 0;
+    for (const c of cells) {
+      if (c.r > maxR) maxR = c.r;
+      if (c.c > maxC) maxC = c.c;
+    }
+    return { rows: maxR + 1, cols: maxC + 1 };
+  }, [cells, rowCount, columnCount]);
 
   // 缩放百分比显示
   const canvasRef = useRef<SeatCanvasHandle>(null);
@@ -159,8 +171,8 @@ export function SeatGrid({
         >
           <SeatCanvas
             ref={canvasRef}
-            rowCount={rowCount}
-            colCount={columnCount}
+            rowCount={effectiveBounds.rows}
+            colCount={effectiveBounds.cols}
             cells={cells}
             selectedKeys={selectedKeys}
             mode="click"
@@ -197,12 +209,18 @@ export function SeatGrid({
         </div>
       </div>
 
-      <div className="text-[10px] text-muted-foreground text-center inline-flex items-center justify-center gap-1.5 w-full">
+      <div className="text-[10px] text-muted-foreground text-center inline-flex items-center justify-center gap-1.5 w-full flex-wrap">
         <span>
-          {rowCount} 行 × {columnCount} 列
+          {effectiveBounds.rows} 行 × {effectiveBounds.cols} 列
         </span>
         <span className="text-muted-foreground/50">·</span>
         <span>两指捏合可缩放</span>
+        {allocateAreaIds && allocateAreaIds.size > 0 && (
+          <>
+            <span className="text-muted-foreground/50">·</span>
+            <span>派座区已收起,在上方卡片下单</span>
+          </>
+        )}
       </div>
     </div>
   );
