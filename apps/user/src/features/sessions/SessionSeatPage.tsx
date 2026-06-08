@@ -17,6 +17,7 @@ import { formatDateTime, formatMoney } from '@/lib/format';
 import { useGetSessionDetailQuery } from './sessionsApi';
 import { SeatGrid, buildPriceColorMap } from './SeatGrid';
 import { SelectionBar } from './SelectionBar';
+import { AllocateAreaSection } from './AllocateAreaSection';
 import { setSessionContext } from './cartSlice';
 
 export default function SessionSeatPage() {
@@ -42,6 +43,15 @@ export default function SessionSeatPage() {
 
   const priceColorMap = useMemo(
     () => buildPriceColorMap(data?.areaPriceList ?? []),
+    [data?.areaPriceList],
+  );
+  const allocateAreaIds = useMemo(
+    () =>
+      new Set(
+        (data?.areaPriceList ?? [])
+          .filter((a) => a.saleMode === 2)
+          .map((a) => a.areaId),
+      ),
     [data?.areaPriceList],
   );
 
@@ -206,7 +216,15 @@ export default function SessionSeatPage() {
         </div>
       </div>
 
-      {/* ===== 座位栅格 ===== */}
+      {/* ===== 派座区(saleMode=2)— 内联下单,不进购物车 ===== */}
+      <AllocateAreaSection
+        sessionId={sessionId}
+        areaPriceList={areaPriceList}
+        priceColorMap={priceColorMap}
+        onSale={sessionStatus === SessionStatus.Published}
+      />
+
+      {/* ===== 座位栅格(选座区可点;派座区灰显不可点)===== */}
       <div className="px-4">
         <SeatGrid
           rows={seatSection.seatRows}
@@ -217,6 +235,7 @@ export default function SessionSeatPage() {
           onLimitExceed={() =>
             notify.warn(t('session:userSeat.limitToast', { n: session.limitPerUser ?? 4 }))
           }
+          allocateAreaIds={allocateAreaIds}
         />
       </div>
 

@@ -14,13 +14,28 @@ export interface AdminSeat {
   createTime?: string;
 }
 
-// 商家端：场次内的价格区域 — Plan 2 已建
+// 售卖模式:1=用户选座, 2=系统派座
+export type AreaSaleMode = 1 | 2;
+// 派座策略(saleMode=2 生效):1=连坐优先, 2=分散, 3=任意
+export type AllocateStrategy = 1 | 2 | 3;
+// 派座票种:1=单座, 2=情侣对
+export type AllocateTicketType = 1 | 2;
+
+// 商家端:场次内的价格区域 — Plan 2 已建,新增售卖模式相关字段
 export interface SessionArea {
   id?: number | string;
   sessionId: number | string;
   areaId: string;
   price: string;
   originPrice?: string;
+  /** 售卖模式 — 1=用户选座, 2=系统派座;默认 1 */
+  saleMode?: AreaSaleMode;
+  /** 区域内单座总数(type=1),后端按 seat 表统计回写,前端只读 */
+  singleTotal?: number;
+  /** 区域内情侣对总数(type=2+3 成对),后端按 seat 表统计回写,前端只读 */
+  coupleTotal?: number;
+  /** 派座策略(saleMode=2 生效):1=连坐优先 2=分散 3=任意 */
+  allocateStrategy?: AllocateStrategy;
 }
 
 // 用户端 /api/session/detail 返回的 SeatColVO（一个座位单元格）
@@ -54,11 +69,21 @@ export interface SeatSectionVO {
   seatRows: SeatRowVO[];
 }
 
-// 用户端 AreaPriceVO
+// 用户端 AreaPriceVO — 新增售卖模式字段(用户端按此决定渲染选座图或派座卡片)
 export interface AreaPriceVO {
   areaId: string;
   price: string;
   originPrice?: string;
+  /** 售卖模式 — 1=用户选座 2=系统派座;前端按此分流 UI */
+  saleMode?: AreaSaleMode;
+  /** 单座剩余数(派座区前端展示用);后端走 Redis area:stock:single */
+  singleStock?: number;
+  /** 情侣对剩余数 */
+  coupleStock?: number;
+  /** 区域单座总数(派座区展示"剩余 X / Y" 用) */
+  singleTotal?: number;
+  /** 区域情侣对总数 */
+  coupleTotal?: number;
 }
 
 // /api/session/detail 整体响应

@@ -5,6 +5,7 @@ import type {
   OrderListRequest,
   OrderStatusResponse,
   RefundTicketRequest,
+  SubmitByAreaRequest,
   SubmitOrderRequest,
   SubmitOrderResponse,
 } from '@maill/shared';
@@ -20,8 +21,14 @@ export const orderApi = createApi({
   baseQuery: userBaseQuery,
   tagTypes: ['Order'],
   endpoints: (build) => ({
+    /** 选座模式 — 用户在座位图上挑具体座位 */
     submitOrder: build.mutation<SubmitOrderResponse, SubmitOrderRequest>({
-      query: (body) => ({ url: '/api/order/submit', method: 'POST', body }),
+      query: (body) => ({ url: '/api/order/submit/by-seats', method: 'POST', body }),
+      invalidatesTags: ['Order'],
+    }),
+    /** 派座模式 — 用户选区域+票种+数量,系统派座 */
+    submitByArea: build.mutation<SubmitOrderResponse, SubmitByAreaRequest>({
+      query: (body) => ({ url: '/api/order/submit/by-area', method: 'POST', body }),
       invalidatesTags: ['Order'],
     }),
     /**
@@ -55,6 +62,7 @@ export const orderApi = createApi({
 
 export const {
   useSubmitOrderMutation,
+  useSubmitByAreaMutation,
   useLazyGetOrderCreateStatusQuery,
   useCancelOrderMutation,
   useRefundTicketMutation,

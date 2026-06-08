@@ -55,6 +55,26 @@ export const sessionsApi = createApi({
       query: (body) => ({ url: '/api/admin/seat/area/save', method: 'POST', body }),
       invalidatesTags: (_r, _e, arg) => [{ type: 'SessionArea', id: arg.sessionId }],
     }),
+    /**
+     * 单独修改区域售卖模式与派座策略(不动价格)。
+     * 销售中场次会被后端拒绝,要求 admin 先停售再切换。
+     */
+    updateAreaSaleConfig: build.mutation<
+      unknown,
+      {
+        sessionId: number | string;
+        areaId: string;
+        saleMode: 1 | 2;
+        allocateStrategy?: 1 | 2 | 3;
+      }
+    >({
+      query: ({ sessionId, areaId, saleMode, allocateStrategy }) => ({
+        url: '/api/admin/seat/area/saleConfig',
+        method: 'POST',
+        params: { sessionId, areaId, saleMode, allocateStrategy },
+      }),
+      invalidatesTags: (_r, _e, arg) => [{ type: 'SessionArea', id: arg.sessionId }],
+    }),
   }),
 });
 
@@ -67,4 +87,5 @@ export const {
   useSaveSessionSeatsMutation,
   useListSessionAreasQuery,
   useSaveSessionAreasMutation,
+  useUpdateAreaSaleConfigMutation,
 } = sessionsApi;

@@ -39,6 +39,8 @@ interface Props {
   areaPriceList: AreaPriceVO[];
   limitPerUser: number;
   onLimitExceed: () => void;
+  /** saleMode=2 的派座区域 areaId 集合 — 这些区域的座位不可点击,视觉降级 */
+  allocateAreaIds?: Set<string>;
 }
 
 export function SeatGrid({
@@ -48,6 +50,7 @@ export function SeatGrid({
   areaPriceList,
   limitPerUser,
   onLimitExceed,
+  allocateAreaIds,
 }: Props) {
   const dispatch = useDispatch();
   const selected = useSelector(selectCartSeats);
@@ -75,7 +78,9 @@ export function SeatGrid({
         if (col.type === 0) return; // 空位:不渲染
         const key = String(col.colId);
         const status = col.status == null ? null : Number(col.status);
-        const areaColor = priceColorMap.get(normalizeAreaId(col.areaId)) ?? SEAT_STATE_COLORS.muted;
+        const normalizedArea = normalizeAreaId(col.areaId);
+        const areaColor = priceColorMap.get(normalizedArea) ?? SEAT_STATE_COLORS.muted;
+        const isAllocateArea = !!allocateAreaIds && allocateAreaIds.has(normalizedArea);
         let fill = areaColor;
         let disabled = false;
         if (status === SeatStatus.Sold) {
@@ -87,6 +92,10 @@ export function SeatGrid({
         } else if (status === SeatStatus.NotOnSale) {
           fill = SEAT_STATE_COLORS.notOnSale;
           disabled = true;
+        } else if (isAllocateArea) {
+          // 派座区:用户不能直接挑;视觉上保留区域色但加透明,标记为禁用
+          fill = areaColor + '80'; // hex alpha ~50%
+          disabled = true;
         }
         out.push({ key, r: ri, c: ci, fill, disabled, label: col.colNum });
         ctx.set(key, { col, row });
@@ -94,7 +103,7 @@ export function SeatGrid({
     });
     cellCtxRef.current = ctx;
     return out;
-  }, [rows, priceColorMap]);
+  }, [rows, priceColorMap, allocateAreaIds]);
 
   // 缩放百分比显示
   const canvasRef = useRef<SeatCanvasHandle>(null);

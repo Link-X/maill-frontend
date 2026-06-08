@@ -53,6 +53,19 @@ export interface SubmitOrderRequest {
   seatIds: Array<number | string>;
 }
 
+/**
+ * 派座模式下单请求 — POST /api/order/submit/by-area
+ * 用户选「区域 + 票种 + 数量」,后端从池中派座。
+ */
+export interface SubmitByAreaRequest {
+  sessionId: number | string;
+  areaId: string;
+  /** 票种:1=单座, 2=情侣对 */
+  ticketType: 1 | 2;
+  /** ticketType=1 时为张数, =2 时为对数;单次最多 4 */
+  quantity: number;
+}
+
 /** /api/order/submit 锁座成功的同步响应。前端拿到 orderNo 后轮询 /api/order/createStatus */
 export interface SubmitOrderResponse {
   orderNo: string;
