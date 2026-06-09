@@ -176,7 +176,7 @@ export function SeatGrid({
             cells={cells}
             selectedKeys={selectedKeys}
             mode="click"
-            height="min(60vh, 480px)"
+            height="min(66vh, 560px)"
             onCellClick={handleCellClick}
             onScaleChange={setScale}
             rowLabel={(r) => rows[r]?.rowsNum ?? String(r + 1)}

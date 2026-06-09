@@ -57,21 +57,23 @@ export function AllocateAreaSection({
 
   return (
     <section className="px-4 mb-3">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-brand" />
-          <h3 className="text-sm font-semibold">系统派座区</h3>
-          <span className="text-[10px] text-muted-foreground">
-            · 选区域 + 张数即可,系统自动派出最佳座位
-          </span>
+      <div className="mb-2">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold inline-flex items-center gap-1.5 shrink-0">
+            <Sparkles className="h-3.5 w-3.5 text-brand" />
+            系统派座区
+          </h3>
+          {remainingLimit > 0 ? (
+            <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+              剩余可购 <span className="text-brand font-semibold">{remainingLimit}</span> 张
+            </span>
+          ) : (
+            <span className="text-[10px] text-warning font-medium shrink-0">已达本场限购上限</span>
+          )}
         </div>
-        {remainingLimit > 0 ? (
-          <span className="text-[10px] text-muted-foreground tabular-nums">
-            本场剩余可购 <span className="text-brand font-semibold">{remainingLimit}</span> 张
-          </span>
-        ) : (
-          <span className="text-[10px] text-warning font-medium">已达本场限购上限</span>
-        )}
+        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+          选区域 + 张数即可,系统自动派出最佳座位
+        </p>
       </div>
       <div className="space-y-2.5">
         {allocateAreas.map((a) => (

@@ -85,18 +85,19 @@ export default function SeatSelectPage() {
   return (
     <div className="pb-36">
       <SessionPageHeader
+        compact
         title={showName ?? session.name ?? `场次 #${session.id}`}
         startTime={session.startTime}
         sessionName={session.name}
         showName={showName}
       />
 
-      <div className="px-4 mb-3">
-        <PriceLegendCard areaPriceList={areaPriceList} priceColorMap={priceColorMap} />
-      </div>
-
       {hasPickModeAreas ? (
         <>
+          {/* 价位 chip 一行,紧贴座位图,把垂直空间让给选座组件 */}
+          <div className="px-4 mt-1 mb-2">
+            <PriceLegendCard compact areaPriceList={areaPriceList} priceColorMap={priceColorMap} />
+          </div>
           <div className="px-4">
             <SeatGrid
               rows={seatSection.seatRows}
