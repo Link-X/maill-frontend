@@ -75,7 +75,11 @@
     "days": "天",
     "hours": "小时",
     "minutes": "分钟",
-    "seconds": "秒"
+    "seconds": "秒",
+    "goPick": "去选座",
+    "pickAreaSub": "点击进入座位图选座",
+    "selectSeatTitle": "选择座位",
+    "noPickArea": "本场次暂无可选座区域"
   },
   "selectionBar": {
     "selectedCount": "已选 {{n}} 个座位",

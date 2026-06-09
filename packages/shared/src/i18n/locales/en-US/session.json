@@ -75,7 +75,11 @@
     "days": "d",
     "hours": "h",
     "minutes": "m",
-    "seconds": "s"
+    "seconds": "s",
+    "goPick": "Pick seats",
+    "pickAreaSub": "Tap to open the seat map",
+    "selectSeatTitle": "Select seats",
+    "noPickArea": "No seat-selection area for this session"
   },
   "selectionBar": {
     "selectedCount": "{{n}} seats selected",

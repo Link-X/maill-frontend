@@ -10,6 +10,7 @@ const OrdersPage = lazy(() => import('@/features/orders/OrdersPage'));
 const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
 const ShowDetailPage = lazy(() => import('@/features/shows/ShowDetailPage'));
 const SessionSeatPage = lazy(() => import('@/features/sessions/SessionSeatPage'));
+const SeatSelectPage = lazy(() => import('@/features/sessions/SeatSelectPage'));
 const OrderConfirmPage = lazy(() => import('@/features/order/OrderConfirmPage'));
 const OrderPayPage = lazy(() => import('@/features/order/OrderPayPage'));
 const VerifyPage = lazy(() => import('@/features/verify/VerifyPage'));
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'profile', element: withSuspense(<ProfilePage />) },
       { path: 'show/:id', element: withSuspense(<ShowDetailPage />) },
       { path: 'session/:id', element: withSuspense(<SessionSeatPage />) },
+      { path: 'session/:id/seat', element: withSuspense(<SeatSelectPage />) },
       { path: 'order/confirm', element: withSuspense(<OrderConfirmPage />) },
       { path: 'order/:orderNo/pay', element: withSuspense(<OrderPayPage />) },
       { path: 'verify', element: withSuspense(<VerifyPage />) },
